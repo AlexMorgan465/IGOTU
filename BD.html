@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire ExcelData.js - Format Sample-Data</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: var(--light);
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .section-selector {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .file-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            color: var(--primary);
+            font-weight: bold;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            margin-left: auto;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            padding: 20px;
+            min-height: 700px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .form-section {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-section h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+
+        .counter {
+            font-size: 12px;
+            color: var(--secondary);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .counter.warning {
+            color: var(--warning);
+        }
+
+        .counter.danger {
+            color: var(--danger);
+        }
+
+        .data-display {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .data-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .data-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            padding: 8px 12px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 250px;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .data-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 600px;
+            padding: 15px;
+        }
+
+        .data-item {
+            background: var(--light);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .data-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .data-item-type {
+            background: var(--primary);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-item-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .data-item-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .data-item:hover .data-item-actions {
+            opacity: 1;
+        }
+
+        .icon-btn {
+            background: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-btn.edit {
+            color: var(--primary);
+        }
+
+        .icon-btn.edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .icon-btn.delete {
+            color: var(--danger);
+        }
+
+        .icon-btn.delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .synonym-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .synonym-tag {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            border: 1px solid #93c5fd;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: var(--secondary);
+            font-style: italic;
+            font-size: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+        }
+
+        .notification.info {
+            background: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .help-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #0369a1;
+        }
+
+        .help-box strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .help-box ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .help-box li {
+            margin-bottom: 8px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: var(--light);
+            border-color: var(--primary);
+        }
+
+        .export-options {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            color: var(--primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .extensions-groups {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .extension-group {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .extension-group h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .extension-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .extensions-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <i class="fas fa-database"></i>
+                Gestionnaire ExcelData.js - Format Sample-Data
+            </h1>
+            <p>Interface pour gérer votre fichier javascript selon la structure exacte de sample-data.js - Chargez, modifiez et téléchargez vos données</p>
+        </header>
+
+        <div class="controls">
+            <div class="section-selector">
+                <select id="sectionSelector">
+                    <option value="DataSet">📋 DataSet (Questions/Réponses)</option>
+                    <option value="Synonyms">🔤 Synonyms (Synonymes)</option>
+                    <option value="Extensions">🔗 Extensions (3 groupes)</option>
+                </select>
+            </div>
+            
+            <div class="file-controls">
+                <button class="btn btn-outline" onclick="loadFromFile()">
+                    <i class="fas fa-file-import"></i> Charger JS
+                </button>
+                <button class="btn btn-primary" onclick="downloadFile()">
+                    <i class="fas fa-file-export"></i> Télécharger sample-data.js
+                </button>
+                <button class="btn btn-danger" onclick="showResetModal()">
+                    <i class="fas fa-trash"></i> Réinitialiser
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="dataSetCount">0</div>
+                    <div class="stat-label">DataSet</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="synonymsCount">0</div>
+                    <div class="stat-label">Synonyms</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="extensionsCount">0</div>
+                    <div class="stat-label">Extensions</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Formulaire Section -->
+            <div class="form-section">
+                <h2 id="formTitle">
+                    <i class="fas fa-plus-circle"></i>
+                    <span id="formTitleText">Ajouter au DataSet</span>
+                </h2>
+                
+                <!-- FORMULAIRES -->
+                <div id="dataSetForm" class="form-content">
+                    <div class="form-group">
+                        <label for="question">Question principale</label>
+                        <input type="text" id="question" placeholder="Ex: hey">
+                        <div class="counter" id="questionCounter">0/200 caractères</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="answer">Réponse (peut contenir \n pour les sauts de ligne)</label>
+                        <textarea id="answer" placeholder="Ex: 👋 Hey ! Je suis Pixels..."></textarea>
+                        <div class="counter" id="answerCounter">0/2000 caractères</div>
+                    </div>
+                </div>
+
+                <div id="synonymsForm" class="form-content" style="display: none;">
+                    <div class="form-group">
+                        <label for="mainQuestion">Question principale (référence)</label>
+                        <input type="text" id="mainQuestion" placeholder="Ex: hey">
+                    </div>
+                    <div class="form-group">
+                        <label for="synonyms">Synonymes (un par ligne)</label>
+                        <textarea id="synonyms" placeholder="Ex: yo&#10;coucou&#10;wesh&#10;hello there"></textarea>
+                        <div class="counter" id="synonymsCounter">0/1000 caractères</div>
+                    </div>
+                    <div class="help-box" style="margin-top: 10px;">
+                        <strong><i class="fas fa-info-circle"></i> Format:</strong>
+                        <p>Un synonyme par ligne. Le premier élément est la question principale, les suivants sont les synonymes.</p>
+                    </div>
+                </div>
+
+                <div id="extensionsForm" class="form-content" style="display: none;">
+                    <div class="extensions-groups">
+                        <div class="extension-group">
+                            <h4>Groupe 1: Préfixes</h4>
+                            <input type="text" id="extensionPrefix" class="extension-input" placeholder="Ex: (laisser vide)">
+                            <div class="extensions-controls">
+                                <button class="quick-btn" onclick="addToExtensionGroup(0)">Ajouter</button>
+                            </div>
+                        </div>
+                        <div class="extension-group">
+                            <h4>Groupe 2: Ponctuation</h4>
+                            <input type="text" id="extensionPunctuation" class="extension-input" placeholder="Ex: .">
+                            <div class="extensions-controls">
+                                <button class="quick-btn" onclick="addToExtensionGroup(1)">Ajouter</button>
+                            </div>
+                        </div>
+                        <div class="extension-group">
+                            <h4>Groupe 3: Suffixes</h4>
+                            <input type="text" id="extensionSuffix" class="extension-input" placeholder="Ex: (laisser vide)">
+                            <div class="extensions-controls">
+                                <button class="quick-btn" onclick="addToExtensionGroup(2)">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="help-box" style="margin-top: 15px;">
+                        <strong><i class="fas fa-info-circle"></i> Structure Extensions:</strong>
+                        <p>Format exact: <code>Extensions: [[], [], []]</code> avec 3 groupes.</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-success" id="submitBtn" onclick="addItem()">
+                        <i class="fas fa-save"></i> Ajouter
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-eraser"></i> Effacer
+                    </button>
+                    <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit()" style="display: none;">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                </div>
+
+                <div class="help-box">
+                    <strong><i class="fas fa-lightbulb"></i> Structure du fichier:</strong>
+                    <pre style="background: #1e293b; color: #f8fafc; padding: 10px; border-radius: 5px; font-size: 12px; margin-top: 10px;">
+const sampleData = {
+    "DataSet": [],
+    "Synonyms": [],
+    "Extensions": [[], [], []],
+    "Temp": []
+};</pre>
+                    <ul style="margin-top: 10px;">
+                        <li><span class="highlight">DataSet</span>: Tableau de tableaux [question, réponse]</li>
+                        <li><span class="highlight">Synonyms</span>: Tableau de tableaux [question, synonyme1, synonyme2...]</li>
+                        <li><span class="highlight">Extensions</span>: Tableau de 3 groupes [[], [], []]</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Affichage des données -->
+            <div class="data-display">
+                <div class="data-header">
+                    <h2 id="displayTitle">
+                        <i class="fas fa-list"></i>
+                        <span id="displayTitleText">DataSet (0 éléments)</span>
+                    </h2>
+                    <input type="text" id="searchInput" class="search-box" placeholder="Rechercher..." onkeyup="filterData()">
+                </div>
+                <div class="data-list" id="dataList">
+                    <div class="no-data">
+                        <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                        <p>Aucune donnée à afficher</p>
+                        <p style="font-size: 14px; margin-top: 10px;">
+                            Chargez un fichier ou ajoutez des données
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-exclamation-triangle"></i> Réinitialiser toutes les données</h3>
+            <p>Cette action va supprimer toutes les données et ne peut pas être annulée. Êtes-vous sûr de vouloir continuer ?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('resetModal')">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="btn btn-danger" onclick="resetData()">
+                    <i class="fas fa-trash"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-code"></i> Code JavaScript généré</h3>
+            <textarea id="codePreview" style="width: 100%; height: 300px; font-family: monospace; font-size: 12px;" readonly></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('codeModal')">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+                <button class="btn btn-primary" onclick="copyCode()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input file caché -->
+    <input type="file" id="fileInput" class="file-input" accept=".js" onchange="handleFileSelect(event)">
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Opération réussie !</span>
+    </div>
+
+    <script>
+        // ============ STRUCTURE DE DONNÉES ============
+        let sampleData = {
+            DataSet: [],
+            Synonyms: [],
+            Extensions: [[], [], []],
+            Temp: []
+        };
+
+        // Variables d'état
+        let currentSection = 'DataSet';
+        let editingIndex = -1;
+        let editingType = '';
+        let filteredData = [];
+
+        // ============ INITIALISATION ============
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+            updateCounters();
+            updateFormDisplay();
+            updateDisplay();
+            setupEventListeners();
+        });
+
+        // ============ GESTION DES ÉVÉNEMENTS ============
+        function setupEventListeners() {
+            document.getElementById('sectionSelector').addEventListener('change', function() {
+                currentSection = this.value;
+                updateFormDisplay();
+            });
+
+            ['question', 'answer', 'synonyms'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateCharacterCounters);
+                }
+            });
+
+            document.getElementById('searchInput').addEventListener('input', filterData);
+        }
+
+        // ============ AFFICHAGE DU FORMULAIRE ============
+        function updateFormDisplay() {
+            const forms = ['dataSetForm', 'synonymsForm', 'extensionsForm'];
+            forms.forEach(formId => {
+                document.getElementById(formId).style.display = 'none';
+            });
+            
+            const currentForm = currentSection === 'DataSet' ? 'dataSetForm' : 
+                               currentSection === 'Synonyms' ? 'synonymsForm' : 
+                               'extensionsForm';
+            document.getElementById(currentForm).style.display = 'block';
+
+            const titles = {
+                'DataSet': 'Ajouter au DataSet',
+                'Synonyms': 'Ajouter aux Synonyms',
+                'Extensions': 'Gérer les Extensions'
+            };
+            
+            const actionText = editingIndex >= 0 ? 'Modifier' : 'Ajouter';
+            document.getElementById('formTitleText').textContent = `${actionText} ${titles[currentSection]}`;
+            document.getElementById('displayTitleText').textContent = `${currentSection} (${getSectionCount(currentSection)} éléments)`;
+            
+            if (currentSection !== 'Extensions') {
+                document.getElementById('submitBtn').innerHTML = `<i class="fas fa-save"></i> ${actionText}`;
+                document.getElementById('submitBtn').onclick = addItem;
+            } else {
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+
+            updateDisplay();
+            updateCharacterCounters();
+        }
+
+        // ============ COMPTEURS ============
+        function updateCounters() {
+            document.getElementById('dataSetCount').textContent = sampleData.DataSet.length;
+            document.getElementById('synonymsCount').textContent = sampleData.Synonyms.length;
+            document.getElementById('extensionsCount').textContent = sampleData.Extensions.flat().length;
+        }
+
+        function updateCharacterCounters() {
+            const updateCounter = (elementId, max) => {
+                const element = document.getElementById(elementId);
+                const counter = document.getElementById(elementId + 'Counter');
+                if (element && counter) {
+                    const length = element.value.length;
+                    counter.textContent = `${length}/${max} caractères`;
+                    counter.className = 'counter' + (
+                        length > max * 0.9 ? ' danger' : 
+                        length > max * 0.75 ? ' warning' : ''
+                    );
+                }
+            };
+
+            updateCounter('question', 200);
+            updateCounter('answer', 2000);
+            updateCounter('synonyms', 1000);
+        }
+
+        function getSectionCount(section) {
+            switch(section) {
+                case 'DataSet': return sampleData.DataSet.length;
+                case 'Synonyms': return sampleData.Synonyms.length;
+                case 'Extensions': return sampleData.Extensions.flat().length;
+                default: return 0;
+            }
+        }
+
+        // ============ AJOUT/MODIFICATION ============
+        function addItem() {
+            switch(currentSection) {
+                case 'DataSet': addToDataSet(); break;
+                case 'Synonyms': addToSynonyms(); break;
+                case 'Extensions': break; // Géré séparément
+            }
+        }
+
+        function addToDataSet() {
+            const question = document.getElementById('question').value.trim();
+            const answer = document.getElementById('answer').value.trim();
+
+            if (!question || !answer) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+
+            const answerWithBreaks = answer.replace(/\\n/g, '\n');
+
+            if (editingIndex >= 0) {
+                sampleData.DataSet[editingIndex] = [question, answerWithBreaks];
+                showNotification('Question modifiée avec succès !');
+                cancelEdit();
+            } else {
+                sampleData.DataSet.push([question, answerWithBreaks]);
+                showNotification('Question ajoutée au DataSet !');
+            }
+
+            saveData();
+            clearForm();
+        }
+
+        function addToSynonyms() {
+            const mainQuestion = document.getElementById('mainQuestion').value.trim();
+            const synonymsText = document.getElementById('synonyms').value.trim();
+
+            if (!mainQuestion || !synonymsText) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+
+            const synonymsArray = synonymsText.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            const synonymEntry = [mainQuestion, ...synonymsArray];
+
+            if (editingIndex >= 0) {
+                sampleData.Synonyms[editingIndex] = synonymEntry;
+                showNotification('Synonymes modifiés avec succès !');
+                cancelEdit();
+            } else {
+                sampleData.Synonyms.push(synonymEntry);
+                showNotification('Synonymes ajoutés !');
+            }
+
+            saveData();
+            clearForm();
+        }
+
+        function addToExtensionGroup(groupIndex) {
+            let inputId;
+            switch(groupIndex) {
+                case 0: inputId = 'extensionPrefix'; break;
+                case 1: inputId = 'extensionPunctuation'; break;
+                case 2: inputId = 'extensionSuffix'; break;
+                default: return;
+            }
+
+            const text = document.getElementById(inputId).value.trim();
+            if (!text && text !== '') {
+                showNotification('Veuillez entrer un texte', 'error');
+                return;
+            }
+
+            sampleData.Extensions[groupIndex].push(text);
+            document.getElementById(inputId).value = '';
+            saveData();
+            showNotification(`Ajouté au groupe ${groupIndex + 1}`);
+            updateDisplay();
+        }
+
+        // ============ ÉDITION ============
+        function editItem(section, index, groupIndex = null) {
+            editingIndex = index;
+            
+            if (section === 'Extensions' && groupIndex !== null) {
+                const item = sampleData.Extensions[groupIndex][index];
+                let inputId;
+                switch(groupIndex) {
+                    case 0: inputId = 'extensionPrefix'; break;
+                    case 1: inputId = 'extensionPunctuation'; break;
+                    case 2: inputId = 'extensionSuffix'; break;
+                }
+                document.getElementById(inputId).value = item;
+                editingType = `ext-${groupIndex}`;
+            } else {
+                switch(section) {
+                    case 'DataSet':
+                        const dataSetItem = sampleData.DataSet[index];
+                        document.getElementById('question').value = dataSetItem[0] || '';
+                        document.getElementById('answer').value = dataSetItem[1] ? dataSetItem[1].replace(/\n/g, '\\n') : '';
+                        break;
+                        
+                    case 'Synonyms':
+                        const synonymsItem = sampleData.Synonyms[index];
+                        document.getElementById('mainQuestion').value = synonymsItem[0] || '';
+                        document.getElementById('synonyms').value = synonymsItem.slice(1).join('\n');
+                        break;
+                }
+                
+                document.getElementById('sectionSelector').value = section;
+                currentSection = section;
+            }
+            
+            document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+            
+            updateFormDisplay();
+            showNotification('Mode édition activé', 'info');
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            editingType = '';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            clearForm();
+        }
+
+        // ============ SUPPRESSION ============
+        function deleteItem(section, index, groupIndex = null) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
+
+            try {
+                if (section === 'Extensions' && groupIndex !== null) {
+                    sampleData.Extensions[groupIndex].splice(index, 1);
+                } else {
+                    switch(section) {
+                        case 'DataSet':
+                            sampleData.DataSet.splice(index, 1);
+                            break;
+                        case 'Synonyms':
+                            sampleData.Synonyms.splice(index, 1);
+                            break;
+                    }
+                }
+                
+                saveData();
+                showNotification('Élément supprimé avec succès !');
+            } catch (error) {
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        }
+
+        // ============ AFFICHAGE DES DONNÉES ============
+        function updateDisplay() {
+            const dataList = document.getElementById('dataList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            dataList.innerHTML = '';
+
+            switch(currentSection) {
+                case 'DataSet':
+                    displayDataSet(searchTerm);
+                    break;
+                case 'Synonyms':
+                    displaySynonyms(searchTerm);
+                    break;
+                case 'Extensions':
+                    displayExtensions(searchTerm);
+                    break;
+            }
+
+            if (dataList.children.length === 0) {
+                dataList.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                        <p>Aucune donnée trouvée</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDataSet(searchTerm) {
+            filteredData = sampleData.DataSet.filter(item => 
+                item && item[0] && item[1] && (
+                    item[0].toLowerCase().includes(searchTerm) || 
+                    item[1].toLowerCase().includes(searchTerm)
+                )
+            );
+
+            filteredData.forEach((item, index) => {
+                const originalIndex = sampleData.DataSet.indexOf(item);
+                const displayAnswer = escapeHtml(item[1]).replace(/\n/g, '<br>');
+                
+                const div = document.createElement('div');
+                div.className = 'data-item';
+                div.innerHTML = `
+                    <div class="data-item-actions">
+                        <button class="icon-btn edit" onclick="editItem('DataSet', ${originalIndex})" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn delete" onclick="deleteItem('DataSet', ${originalIndex})" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="data-item-header">
+                        <span class="data-item-type">Question #${index + 1}</span>
+                    </div>
+                    <div class="data-item-content">
+                        <strong><i class="fas fa-question-circle"></i> Q:</strong> ${escapeHtml(item[0])}<br><br>
+                        <strong><i class="fas fa-comment-dots"></i> R:</strong> ${displayAnswer}
+                    </div>
+                `;
+                dataList.appendChild(div);
+            });
+        }
+
+        function displaySynonyms(searchTerm) {
+            filteredData = sampleData.Synonyms.filter(item => 
+                item && item[0] && (
+                    item[0].toLowerCase().includes(searchTerm) || 
+                    item.slice(1).some(s => s && s.toLowerCase().includes(searchTerm))
+                )
+            );
+
+            filteredData.forEach((item, index) => {
+                const originalIndex = sampleData.Synonyms.indexOf(item);
+                const synonymsHTML = item.slice(1).filter(s => s).map(syn => 
+                    `<span class="synonym-tag">${escapeHtml(syn)}</span>`
+                ).join('');
+                
+                const div = document.createElement('div');
+                div.className = 'data-item';
+                div.innerHTML = `
+                    <div class="data-item-actions">
+                        <button class="icon-btn edit" onclick="editItem('Synonyms', ${originalIndex})" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn delete" onclick="deleteItem('Synonyms', ${originalIndex})" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="data-item-header">
+                        <span class="data-item-type">Synonymes #${index + 1}</span>
+                    </div>
+                    <div class="data-item-content">
+                        <strong><i class="fas fa-link"></i> Question principale:</strong><br>
+                        ${escapeHtml(item[0])}<br><br>
+                        <strong><i class="fas fa-synonyms"></i> Synonymes (${item.length - 1}):</strong>
+                        <div class="synonym-tags">${synonymsHTML}</div>
+                    </div>
+                `;
+                dataList.appendChild(div);
+            });
+        }
+
+        function displayExtensions(searchTerm) {
+            const groupTitles = ['Préfixes', 'Ponctuation', 'Suffixes'];
+            
+            sampleData.Extensions.forEach((group, groupIndex) => {
+                const filteredGroup = group.filter(item => 
+                    item !== null && item.toString().toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredGroup.length === 0 && searchTerm) return;
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'data-item';
+                groupDiv.innerHTML = `
+                    <div class="data-item-header">
+                        <span class="data-item-type">${groupTitles[groupIndex]}</span>
+                        <span style="font-size: 12px; color: var(--secondary);">${group.length} éléments</span>
+                    </div>
+                `;
+                
+                if (group.length > 0) {
+                    const listDiv = document.createElement('div');
+                    listDiv.style.marginTop = '15px';
+                    
+                    group.forEach((item, itemIndex) => {
+                        if (searchTerm && !item.toString().toLowerCase().includes(searchTerm)) return;
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.cssText = 'margin: 8px 0; padding: 10px; background: #f1f5f9; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;';
+                        itemDiv.innerHTML = `
+                            <span>${escapeHtml(item.toString()) || '(vide)'}</span>
+                            <div>
+                                <button class="icon-btn edit" onclick="editItem('Extensions', ${itemIndex}, ${groupIndex})" title="Modifier" style="margin-right: 5px;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="icon-btn delete" onclick="deleteItem('Extensions', ${itemIndex}, ${groupIndex})" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        listDiv.appendChild(itemDiv);
+                    });
+                    
+                    groupDiv.appendChild(listDiv);
+                } else {
+                    groupDiv.innerHTML += `<div style="padding: 20px; text-align: center; color: var(--secondary); font-style: italic;">Aucun élément</div>`;
+                }
+                
+                dataList.appendChild(groupDiv);
+            });
+        }
+
+        function filterData() {
+            updateDisplay();
+        }
+
+        // ============ GESTION DES FICHIERS ============
+        function loadFromFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let dataObj = extractSampleData(content);
+                    
+                    if (dataObj) {
+                        sampleData = dataObj;
+                        normalizeDataStructure();
+                        saveData();
+                        showNotification('Fichier chargé avec succès !');
+                        event.target.value = '';
+                    } else {
+                        showNotification('Format de fichier non reconnu', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showNotification('Erreur lors du chargement: ' + error.message, 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function extractSampleData(content) {
+            // Essayer plusieurs méthodes d'extraction
+            const regex1 = /(?:const\s+|let\s+|var\s+)?sampleData\s*=\s*({[\s\S]*?})\s*;/;
+            const match1 = content.match(regex1);
+            
+            if (match1) {
+                try {
+                    let jsonStr = match1[1]
+                        .replace(/'/g, '"')
+                        .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":')
+                        .replace(/\\n/g, '\\\\n');
+                    
+                    return JSON.parse(jsonStr);
+                } catch (e) {
+                    console.log('Méthode 1 échouée:', e);
+                }
+            }
+            
+            // Méthode 2: Évaluation sécurisée
+            try {
+                const sandbox = { sampleData: null };
+                const code = content + '; return sampleData;';
+                const fn = new Function('sandbox', `
+                    with(sandbox) {
+                        ${code}
+                    }
+                    return sampleData;
+                `);
+                
+                const result = fn(sandbox);
+                if (result && typeof result === 'object') {
+                    return result;
+                }
+            } catch (e) {
+                console.log('Méthode 2 échouée:', e);
+            }
+            
+            return null;
+        }
+
+        function normalizeDataStructure() {
+            if (!sampleData.DataSet || !Array.isArray(sampleData.DataSet)) {
+                sampleData.DataSet = [];
+            }
+            if (!sampleData.Synonyms || !Array.isArray(sampleData.Synonyms)) {
+                sampleData.Synonyms = [];
+            }
+            if (!sampleData.Extensions || !Array.isArray(sampleData.Extensions)) {
+                sampleData.Extensions = [[], [], []];
+            } else if (sampleData.Extensions.length !== 3) {
+                sampleData.Extensions = [[], [], []];
+            }
+            if (!sampleData.Temp || !Array.isArray(sampleData.Temp)) {
+                sampleData.Temp = [];
+            }
+        }
+
+        function downloadFile() {
+            const jsContent = `// sample-data.js - MUST be in same folder as index.html
+const sampleData = ${JSON.stringify(sampleData, null, 4)};
+
+console.log("✅ sample-data.js loaded successfully!");
+console.log("DataSet items:", sampleData.DataSet.length);
+console.log("Synonyms items:", sampleData.Synonyms.length);
+console.log("Extensions: Préfixes=" + sampleData.Extensions[0].length + 
+           ", Ponctuation=" + sampleData.Extensions[1].length + 
+           ", Suffixes=" + sampleData.Extensions[2].length);`;
+            
+            const blob = new Blob([jsContent], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sample-data.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification('Fichier sample-data.js téléchargé !');
+        }
+
+        // ============ EXPORT ============
+        function showExportOptions() {
+            document.getElementById('codePreview').value = `const sampleData = ${JSON.stringify(sampleData, null, 4)};`;
+            showModal('codeModal');
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codePreview');
+            code.select();
+            document.execCommand('copy');
+            showNotification('Code copié dans le presse-papier !');
+        }
+
+        // ============ RÉINITIALISATION ============
+        function showResetModal() {
+            showModal('resetModal');
+        }
+
+        function resetData() {
+            sampleData = {
+                DataSet: [],
+                Synonyms: [],
+                Extensions: [[], [], []],
+                Temp: []
+            };
+            saveData();
+            hideModal('resetModal');
+            showNotification('Données réinitialisées !');
+        }
+
+        // ============ UTILITAIRES ============
+        function clearForm() {
+            ['question', 'answer', 'mainQuestion', 'synonyms', 'extensionPrefix', 'extensionPunctuation', 'extensionSuffix'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = '';
+            });
+            
+            if (editingIndex >= 0) {
+                cancelEdit();
+            }
+            
+            updateCharacterCounters();
+        }
+
+        function saveData() {
+            localStorage.setItem('sampleData', JSON.stringify(sampleData));
+            updateCounters();
+            updateDisplay();
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('sampleData');
+            if (saved) {
+                try {
+                    sampleData = JSON.parse(saved);
+                    normalizeDataStructure();
+                } catch (e) {
+                    console.error('Erreur de chargement localStorage:', e);
+                }
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            const icon = notification.querySelector('i');
+            
+            text.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            icon.className = {
+                'success': 'fas fa-check-circle',
+                'error': 'fas fa-exclamation-circle',
+                'warning': 'fas fa-exclamation-triangle',
+                'info': 'fas fa-info-circle'
+            }[type] || 'fas fa-check-circle';
+            
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = text.toString();
+            return div.innerHTML;
+        }
+
+        // ============ INIT ============
+        updateFormDisplay();
+    </script>
+</body>
+</html>
