@@ -1,0 +1,1070 @@
+// sample-data.js - MUST be in same folder as index.html
+const sampleData = {
+    "DataSet": [
+        // ==================== CONVERSATIONS CASUAL ====================
+        [
+            "hey",
+            "👋 Hey ! Je suis Pixels, ton assistant en accessibilité PDF. Prêt à répondre à tes questions sur le balisage PDF ou les infos pros !"
+        ],
+        [
+            "yo",
+            "😎 Yo ! C'est Pixels à l'appareil. Tu cherches des infos sur les PDF accessibles, M.Anello Iannuzzi ou Mme.Olfa Karamosly ?"
+        ],
+        [
+            "coucou",
+            "👋 Coucou ! Bienvenue dans l'assistant Pixels. Je peux t'aider avec :\n• Le balisage PDF\n• Les infos sur M.Anello Iannuzzi\n• Tout sur Mme.Olfa Karamosly et EIDS"
+        ],
+        [
+            "bon matin",
+            "🌞 Bon matin ! Excellente journée pour apprendre sur l'accessibilité PDF. Que puis-je faire pour toi aujourd'hui ?"
+        ],
+        [
+            "bonsoir",
+            "🌙 Bonsoir ! Même le soir, je suis là pour répondre à tes questions sur le balisage PDF et les infos professionnelles."
+        ],
+        [
+            "hey pixel",
+            "🤖 Hey ! Pixels présent et prêt. Demande-moi n'importe quoi sur :\n✅ Accessibilité PDF (concepts pédagogiques)\n✅ M.Anello Iannuzzi\n✅ Mme.Olfa Karamosly\n✅ Normes et bonnes pratiques"
+        ],
+        [
+            "salut l'ami",
+            "👋 Salut l'ami ! Content de te voir. Je suis ton pote Pixels, spécialiste PDF et infos pros. Comment puis-je t'aider ?"
+        ],
+        [
+            "hello there",
+            "🌟 Hello there ! Pixels à ton service. Je parle français et accessibilité PDF. Quelle est ta question ?"
+        ],
+        [
+            "wesh",
+            "😄 Wesh ! Pixels dans la place. Tu veux des infos sur l'accessibilité PDF ou sur les dirigeants d'entreprise ?"
+        ],
+        [
+            "ça gaze",
+            "🔥 Ça gaze ! Tout roule de mon côté. Et toi, tu as besoin d'infos sur l'accessibilité PDF ou les pros ?"
+        ],
+        [
+            "quoi de neuf",
+            "🚀 Quoi de neuf ? De mon côté, je suis prêt à répondre à toutes tes questions sur :\n• Accessibilité PDF (concepts clés)\n• M.Anello Iannuzzi\n• Mme.Olfa Karamosly\n• Normes d'accessibilité"
+        ],
+        [
+            "comment tu vas",
+            "😊 Je vais super bien, merci ! Toujours motivé pour aider avec l'accessibilité PDF. Et toi, tu as une question précise ?"
+        ],
+        [
+            "tu bosses sur quoi",
+            "💼 Je bosse sur l'accessibilité PDF et les infos pros ! Spécialisé en :\n🔸 Concepts pédagogiques d'accessibilité\n🔸 Profils d'entrepreneurs\n🔸 Conformité aux normes\n🔸 Infos entreprises"
+        ],
+        [
+            "t'es qui",
+            "🤖 Je suis Pixels, ton assistant IA spécialisé en :\n🎯 Accessibilité PDF (approche pédagogique)\n🎯 Infos sur M.Anello Iannuzzi\n🎯 Données sur Mme.Olfa Karamosly\n🎯 Tout ce qui concerne EIDS"
+        ],
+        [
+            "présente-toi",
+            "🌟 Enchanté ! Je suis Pixels, ton assistant dédié à :\n📄 L'accessibilité PDF (concepts fondamentaux)\n👔 Les profils professionnels (M.Anello Iannuzzi, Mme.Olfa Karamosly)\n🏢 Les infos entreprises (EIDS, EURO TELE SERVICES)\n🔍 La conformité aux normes"
+        ],
+        [
+            "tu fais quoi",
+            "⚙️ Je fais de l'assistance intelligente ! Concrètement :\n• Je réponds aux questions sur l'accessibilité PDF (approche pédagogique)\n• Je donne des infos sur les dirigeants d'entreprise\n• J'explique les normes d'accessibilité\n• Je partage des bonnes pratiques"
+        ],
+        [
+            "merci",
+            "🙏 De rien ! C'était un plaisir de t'aider. N'hésite pas si tu as d'autres questions sur l'accessibilité PDF, M.Anello Iannuzzi ou autre chose !"
+        ],
+        [
+            "merci beaucoup",
+            "💖 Merci beaucoup à toi ! Ravie d'avoir pu t'aider. Reviens quand tu veux pour plus d'infos sur l'accessibilité PDF ou les profils pros !"
+        ],
+        [
+            "thanks",
+            "👍 You're welcome ! Happy to help with PDF accessibility or professional info. Don't hesitate to ask more!"
+        ],
+        [
+            "ok",
+            "👌 OK ! Si tu as d'autres questions plus tard, je suis là. N'oublie pas : je connais bien les concepts d'accessibilité PDF et les infos sur M.Anello Iannuzzi !"
+        ],
+        [
+            "d'accord",
+            "✅ D'accord ! Au cas où : je suis expert en accessibilité PDF (concepts clés) et infos sur les dirigeants d'EIDS. À bientôt !"
+        ],
+        [
+            "a plus",
+            "👋 À plus ! Passe une bonne journée. Reviens pour plus de conseils sur l'accessibilité PDF !"
+        ],
+        [
+            "bye",
+            "😊 Bye ! Bonne continuation. Rappelle : je sais tout sur l'accessibilité PDF et M.Anello Iannuzzi !"
+        ],
+        [
+            "au revoir",
+            "🌟 Au revoir ! Ce fut un plaisir de t'assister. Pour rappel, je suis spécialisé en accessibilité PDF et infos professionnelles."
+        ],
+        [
+            "ciao",
+            "🇮🇹 Ciao ! À la prochaine. N'oublie pas que je peux t'aider avec l'accessibilité PDF et les infos sur EIDS !"
+        ],
+
+        // ==================== QUESTIONS PÉDAGOGIQUES ACCESSIBILITÉ PDF ====================
+        // NOTE: Seulement les questions importantes, ordre logique d'apprentissage
+
+        // 1️⃣ HISTORIQUE & CONTEXTE
+        [
+            "Pourquoi l'accessibilité numérique est-elle devenue un enjeu majeur ?",
+            "L'accessibilité numérique est devenue un enjeu majeur car :\n• Législation croissante (RGAA, Directive européenne, loi pour une République numérique)\n• Inclusion sociale et non-discrimination\n• Marché potentiel (1,5 milliard de personnes en situation de handicap dans le monde)\n• Vieillissement de la population\n• Contexte numérique omniprésent (télétravail, démarches en ligne, éducation)"
+        ],
+        [
+            "Quels types de handicaps sont concernés par l'accessibilité numérique ?",
+            "Tous les types de handicaps :\n• Handicaps visuels (cécité, malvoyance, daltonisme)\n• Handicaps auditifs (surdité, malentendance)\n• Handicaps moteurs (difficultés de manipulation)\n• Handicaps cognitifs (troubles DYS, TSA, troubles de l'attention)\n• Handicaps psychiques\n• Situations temporaires (bras cassé, fatigue oculaire, environnement bruyant)"
+        ],
+        [
+            "Quels problèmes rencontrent les personnes aveugles ou malvoyantes avec des documents non accessibles ?",
+            "Les problèmes principaux sont :\n• Impossibilité de lire le contenu sans balisage\n• Structure incompréhensible (pas de navigation par titres)\n• Images sans descriptions\n• Tableaux non structurés\n• Mauvais ordre de lecture\n• Documents scannés comme des images"
+        ],
+        [
+            "Pourquoi le PDF est historiquement problématique pour l'accessibilité ?",
+            "Le PDF est historiquement problématique car :\n• Format conçu pour la préservation visuelle, pas pour l'accessibilité\n• Beaucoup de PDF sont des scans non OCRisés\n• Structure souvent absente ou incorrecte\n• Complexité technique du format\n• Outils de création peu accessibles"
+        ],
+        [
+            "Quelle différence entre accessibilité papier et accessibilité numérique ?",
+            "Différences principales :\n• Papier : adaptations spécifiques (braille, gros caractères) - une version par besoin\n• Numérique : UN seul document accessible à TOUS grâce aux technologies d'assistance\n• Numérique : possibilité de personnalisation (taille police, contraste)\n• Numérique : navigation facilitée par la structure"
+        ],
+
+        // 2️⃣ PRINCIPES GÉNÉRAUX DE L'ACCESSIBILITÉ
+        [
+            "Qu'est-ce que l'accessibilité numérique ?",
+            "L'accessibilité numérique désigne la capacité d'un service numérique à être utilisé, sans difficulté, par tout individu, quels que soient son matériel, ses logiciels, son infrastructure réseau, sa culture, sa localisation géographique, ou ses aptitudes physiques ou mentales."
+        ],
+        [
+            "À qui profite l'accessibilité (au-delà du handicap) ?",
+            "L'accessibilité profite à :\n• Personnes en situation de handicap permanent\n• Personnes avec des limitations temporaires (bras cassé, opération des yeux)\n• Personnes âgées\n• Situations contextuelles (lumière vive, environnement bruyant)\n• Mobilité (consultation sur mobile)\n• Référencement SEO (meilleur indexation)\n• Tous les utilisateurs (meilleure expérience globale)"
+        ],
+        [
+            "Quelle est la différence entre accessibilité et ergonomie ?",
+            "• Accessibilité : capacité à être utilisé par TOUS, indépendamment des capacités\n• Ergonomie : facilité d'utilisation et efficacité pour l'utilisateur moyen\n• L'accessibilité est une condition nécessaire mais non suffisante pour l'ergonomie\n• Un document peut être accessible mais peu ergonomique"
+        ],
+        [
+            "Qu'est-ce qu'une technologie d'assistance ?",
+            "Une technologie d'assistance est un dispositif ou logiciel qui compense ou pallie un handicap :\n• Lecteurs d'écran (NVDA, JAWS, VoiceOver)\n• Loupes logicielles\n• Claviers adaptés\n• Reconnaissance vocale\n• Affichages braille\n• Outils de synthèse vocale"
+        ],
+        [
+            "Quels sont les principes fondamentaux de l'accessibilité (perceptible, utilisable, compréhensible, robuste) ?",
+            "Les 4 principes WCAG :\n1. Perceptible : présentable de différentes manières\n2. Utilisable : interface navigable et utilisable\n3. Compréhensible : information et interface compréhensibles\n4. Robuste : compatible avec les technologies actuelles et futures"
+        ],
+        [
+            "Pourquoi l'information doit-elle être compréhensible par programme ?",
+            "Parce que :\n• Les technologies d'assistance analysent la structure logicielle\n• Le visuel seul est insuffisant (lecteur d'écran \"aveugle\")\n• Permet l'extraction et la transformation du contenu\n• Condition essentielle pour l'interopérabilité"
+        ],
+
+        // 3️⃣ NORMES, LOIS ET RÉFÉRENTIELS
+        [
+            "Qu'est-ce que les WCAG ?",
+            "WCAG (Web Content Accessibility Guidelines) = Recommandations pour l'accessibilité des contenus Web. Standard international du W3C, applicable aussi aux PDF."
+        ],
+        [
+            "À quoi servent les WCAG ?",
+            "Les WCAG servent à :\n• Fournir un référentiel technique commun\n• Donner des critères de conformité objectifs\n• Guider les développeurs et rédacteurs\n• Servir de base aux réglementations nationales"
+        ],
+        [
+            "Quelle est la différence entre WCAG A, AA et AAA ?",
+            "Niveaux de conformité :\n• Niveau A : exigences minimales, impact majeur\n• Niveau AA : exigences moyennes, recommandé pour la conformité légale\n• Niveau AAA : exigences élevées, pas toujours applicable à 100%"
+        ],
+        [
+            "Qu'est-ce que la norme PDF/UA ?",
+            "PDF/UA (Universal Accessibility) = Norme ISO 14289 spécifique aux PDF. Elle définit les exigences techniques pour des PDF véritablement accessibles."
+        ],
+        [
+            "Quelle est la différence entre WCAG et PDF/UA ?",
+            "• WCAG : principes généraux pour tout contenu Web/numérique\n• PDF/UA : application concrète de ces principes AU FORMAT PDF\n• PDF/UA est plus spécifique et contraignante pour les PDF"
+        ],
+        [
+            "Pourquoi PDF/UA est-elle essentielle pour les PDF accessibles ?",
+            "Parce qu'elle :\n• Fournit des exigences techniques précises\n• Garantit l'interopérabilité avec les technologies d'assistance\n• Sert de référence pour les audits et la certification\n• Est reconnue internationalement"
+        ],
+        [
+            "Quelle est l'exigence fondamentale de PDF/UA concernant le contenu ?",
+            "TOUT le contenu significatif doit être contenu dans l'arborescence de balises, et TOUT le contenu de l'arborescence doit être significatif."
+        ],
+        [
+            "Qu'est-ce que le RGAA et à quoi sert-il ?",
+            "RGAA (Référentiel Général d'Amélioration de l'Accessibilité) = Application française des WCAG. Obligatoire pour les organismes publics et certaines entreprises privées."
+        ],
+        [
+            "Les normes d'accessibilité sont-elles obligatoires ?",
+            "Oui, selon les contextes :\n• En France : obligation légale pour le secteur public (RGAA)\n• En Europe : Directive européenne sur l'accessibilité\n• Pour certaines entreprises : obligation contractuelle ou sectorielle"
+        ],
+
+        // 4️⃣ TECHNOLOGIES D'ASSISTANCE
+        [
+            "Qu'est-ce qu'un lecteur d'écran ?",
+            "Logiciel qui restitue par synthèse vocale et/ou affichage braille ce qui est affiché à l'écran. Il lit la structure logicielle, pas l'apparence visuelle."
+        ],
+        [
+            "Comment un lecteur d'écran lit-il un document PDF ?",
+            "Il parcourt l'arborescence de balises dans l'ordre de lecture défini. Il annonce la structure (titres, paragraphes, listes) et le contenu textuel."
+        ],
+        [
+            "Pourquoi un lecteur d'écran ne \"voit\" pas la mise en page ?",
+            "Car il n'analyse pas les pixels mais la structure logicielle (balises, attributs). La mise en page visuelle est perdue pour un utilisateur non-voyant."
+        ],
+        [
+            "Quelle est la différence entre lecture visuelle et lecture logique ?",
+            "• Visuelle : suivre la disposition (colonnes, encadrés, position)\n• Logique : suivre la séquence sémantique (ordre des balises)\n• Elles peuvent différer radicalement dans des mises en page complexes"
+        ],
+        [
+            "Pourquoi le copier-coller est-il un bon indicateur d'accessibilité ?",
+            "Si le texte copié-collé garde un ordre logique et la structure, c'est bon signe. Si l'ordre est incohérent, l'accessibilité est probablement défaillante."
+        ],
+        [
+            "Pourquoi faut-il tester avec de vrais lecteurs d'écran ?",
+            "Car les vérificateurs automatiques ne détectent pas tous les problèmes d'expérience utilisateur (navigation, compréhension, fluidité de lecture)."
+        ],
+
+        // 5️⃣ STRUCTURE D'UN PDF ACCESSIBLE
+        [
+            "Qu'est-ce qu'un PDF balisé ?",
+            "PDF dont le contenu est structuré par une arborescence de balises sémantiques (titres, paragraphes, listes, tableaux) compréhensible par programme."
+        ],
+        [
+            "Quelle est la différence entre un PDF balisé et non balisé ?",
+            "• Non balisé : ensemble d'images/textes positionnés, pas de structure logique\n• Balisé : hiérarchie sémantique explicite, navigation possible, contenu extractible"
+        ],
+        [
+            "Qu'est-ce que l'arborescence de balises ?",
+            "Structure hiérarchique (arbre) contenant toutes les balises du document. C'est la représentation logique du contenu pour les technologies d'assistance."
+        ],
+        [
+            "Qu'est-ce que la racine de balises ?",
+            "Élément racine (conteneur principal) de l'arborescence. Tout le contenu balisé doit en descendre. À créer manuellement dans Acrobat si absente."
+        ],
+        [
+            "Pourquoi tout le contenu significatif doit-il être dans les balises ?",
+            "Car hors des balises = invisible pour les lecteurs d'écran. PDF/UA exige que tout contenu significatif soit balisé."
+        ],
+        [
+            "Que se passe-t-il si du contenu n'est pas balisé ?",
+            "• Pour l'utilisateur visuel : visible normalement\n• Pour le lecteur d'écran : INEXISTANT\n• Erreur PDF/UA : \"contenu non inclus dans la structure\""
+        ],
+
+        // 6️⃣ ORDRE DE LECTURE (CONCEPT CLÉ)
+        [
+            "Qu'est-ce que l'ordre de lecture logique ?",
+            "Séquence dans laquelle un lecteur d'écran parcourt le contenu. Défini par l'ordre des balises dans l'arborescence, pas par la disposition visuelle."
+        ],
+        [
+            "Pourquoi l'ordre visuel n'est-il pas fiable ?",
+            "Car l'ordre visuel (z-order, superposition) ne correspond pas nécessairement à l'ordre logique de lecture, surtout dans des mises en page complexes."
+        ],
+        [
+            "Comment un lecteur d'écran suit-il l'ordre de lecture ?",
+            "Il suit scrupuleusement l'ordre des balises dans l'arborescence, de haut en bas. Il ignore totalement la position visuelle des éléments."
+        ],
+        [
+            "Quel est l'impact d'un mauvais ordre de lecture ?",
+            "• Contenu rendu incompréhensible\n• Perte du sens logique\n• Expérience utilisateur catastrophique\n• Non-conformité PDF/UA"
+        ],
+        [
+            "Quelle est la relation entre ordre de lecture et redistribution (reflow) ?",
+            "Un bon ordre de lecture garantit une redistribution cohérente. Le contenu doit être balisé dans l'ordre logique pour que la redistribution sur mobile ou au zoom soit lisible."
+        ],
+        [
+            "Pourquoi l'ordre de lecture est une exigence PDF/UA ?",
+            "PDF/UA exige que l'ordre de lecture logique dans l'arborescence de balises représente correctement la séquence de lecture prévue du document."
+        ],
+
+        // 7️⃣ BALISAGE : CONCEPTS ESSENTIELS
+        [
+            "Qu'est-ce que le balisage d'un PDF ?",
+            "Action d'ajouter des balises sémantiques à chaque élément pour créer une structure logique compréhensible par les technologies d'assistance."
+        ],
+        [
+            "Le balisage modifie-t-il l'apparence visuelle du document ?",
+            "NON. Les balises sont des métadonnées invisibles. L'apparence visuelle reste strictement identique."
+        ],
+        [
+            "À quoi servent les balises sémantiques ?",
+            "À indiquer la NATURE et la FONCTION de chaque élément (titre, paragraphe, liste, tableau), permettant une navigation et une compréhension structurée."
+        ],
+        [
+            "Quelle est la différence entre contenu informatif et décoratif ?",
+            "• Informatif : doit être balisé (apporte du sens)\n• Décoratif : doit être mis en artefact (à ignorer par les lecteurs d'écran)"
+        ],
+        [
+            "Qu'est-ce qu'un artefact ?",
+            "Élément décoratif ou non-porteur d'information (fond, ornement, répétition) qui doit être exclus du flux de lecture."
+        ],
+        [
+            "Pourquoi faut-il exclure les artefacts du flux de lecture ?",
+            "Pour éviter la pollution sonore et cognitive. Les éléments décoratifs n'apportent rien à la compréhension et gênent la navigation."
+        ],
+
+        // 8️⃣ BALISAGE DES ÉLÉMENTS PRINCIPAUX
+        [
+            "Pourquoi les titres doivent-ils être hiérarchisés ?",
+            "Pour permettre une navigation structurée et comprendre les relations entre les sections. La hiérarchie reflète l'organisation logique du contenu."
+        ],
+        [
+            "Peut-on sauter des niveaux de titres ?",
+            "NON. Il faut respecter la hiérarchie logique (pas de H1 → H3 sans H2). Les sauts perturbent la navigation et la compréhension de la structure."
+        ],
+        [
+            "Pourquoi les titres sont essentiels à la navigation ?",
+            "Ils permettent aux utilisateurs de lecteurs d'écran de :\n• Comprendre la structure globale\n• Naviguer rapidement entre sections\n• Se repérer dans le document\n• Ignorer les parties non pertinentes"
+        ],
+        [
+            "Quelle est la différence entre image informative et décorative ?",
+            "• Informative : apporte de l'information, doit être balisée en <Figure> avec texte alternatif\n• Décorative : ornementale, doit être mise en artefact"
+        ],
+        [
+            "Pourquoi les images doivent-elles avoir un texte de remplacement ?",
+            "Pour transmettre l'information visuelle aux utilisateurs non-voyants. Sans texte alternatif, l'image est muette pour un lecteur d'écran."
+        ],
+        [
+            "Que doit décrire un bon texte de remplacement ?",
+            "Le CONTENU ou la FONCTION de l'image, de manière concise et pertinente. Pas besoin de préciser \"image de...\", directement la description."
+        ],
+        [
+            "Une image décorative doit-elle être lue ?",
+            "NON. Elle doit être marquée comme artefact pour être ignorée par les lecteurs d'écran."
+        ],
+        [
+            "Pourquoi une liste doit-elle être balisée comme une liste ?",
+            "Pour indiquer la relation entre les items et permettre une navigation efficace. Une fausse liste (visuelle) est inexploitable par un lecteur d'écran."
+        ],
+        [
+            "Quel est le problème des fausses listes (puces visuelles) ?",
+            "Visuellement c'est une liste, mais logiquement ce sont des paragraphes séparés. Le lecteur d'écran ne perçoit pas la relation entre les items."
+        ],
+        [
+            "Pourquoi un lien doit-il être compréhensible hors contexte ?",
+            "Car les utilisateurs de lecteurs d'écran peuvent naviguer par liste de liens. \"Cliquez ici\" seul ne donne aucune information sur la destination."
+        ],
+        [
+            "Pourquoi \"cliquez ici\" pose problème ?",
+            "C'est vide de sens hors contexte. Il faut décrire la destination ou l'action (ex: \"Télécharger le rapport annuel 2023\")."
+        ],
+
+        // 9️⃣ TABLEAUX (PÉDAGOGIQUEMENT MAJEUR)
+        [
+            "Qu'est-ce qu'un tableau de données ?",
+            "Structure présentant des informations en relation logique (lignes et colonnes). Doit être balisé avec <Table>, <TR>, <TH>, <TD>."
+        ],
+        [
+            "Pourquoi les tableaux sont-ils difficiles à rendre accessibles ?",
+            "Car ils impliquent :\n• Structure complexe à baliser\n• Association en-têtes/données\n• Gestion des fusions de cellules\n• Compréhension de la relation spatiale convertie en linéaire"
+        ],
+        [
+            "Quelle est la différence entre tableau simple et tableau complexe ?",
+            "• Simple : en-têtes sur première ligne/colonne seulement\n• Complexe : en-têtes multiples, fusionnés, imbriqués (nécessite association par ID)"
+        ],
+        [
+            "Pourquoi les en-têtes doivent-ils être associés aux cellules ?",
+            "Pour que le lecteur d'écran annonce le contexte lors de la navigation. Sans association, les données sont dénuées de sens."
+        ],
+        [
+            "Comment un lecteur d'écran lit-il un tableau ?",
+            "Il annonce les en-têtes correspondants à chaque cellule de données, permettant de comprendre les relations entre les informations."
+        ],
+        [
+            "Que se passe-t-il si les en-têtes ne sont pas associés ?",
+            "Le lecteur d'écran lit les données sans contexte, rendant le tableau INCOMPRÉHENSIBLE. Ex: \"1250\" sans savoir si c'est des ventes, des unités, une date..."
+        ],
+
+        // 🔟 FORMULAIRES
+        [
+            "Qu'est-ce qu'un formulaire accessible ?",
+            "Formulaire dont tous les champs sont :\n• Identifiables (libellé ou info-bulle)\n• Utilisables au clavier\n• Avec messages d'erreur compréhensibles\n• Avec ordre de tabulation logique"
+        ],
+        [
+            "Pourquoi chaque champ doit-il avoir un nom accessible ?",
+            "Pour que l'utilisateur sache quelle information fournir. Un champ sans nom est une énigme pour un utilisateur non-voyant."
+        ],
+        [
+            "Qu'est-ce qu'une info-bulle (tooltip) ?",
+            "Propriété accessible d'un champ de formulaire PDF, lue par les lecteurs d'écran. Obligatoire pour chaque champ interactif."
+        ],
+        [
+            "Pourquoi l'ordre de tabulation est-il important ?",
+            "Car certains utilisateurs naviguent uniquement au clavier. Un ordre illogique rend le formulaire inutilisable."
+        ],
+        [
+            "Quels problèmes rencontrent les utilisateurs clavier ?",
+            "• Impossible de cliquer (souris inutilisable)\n• Dépendance totale à l'ordre de tabulation\n• Difficulté avec les interactions complexes"
+        ],
+        [
+            "Pourquoi les formulaires PDF sont plus complexes que le HTML ?",
+            "Car le PDF :\n• Gère moins bien les états et validations\n• A des outils de création limités\n• Requiert un balisage manuel souvent lourd\n• Moins d'outils d'audit spécialisés"
+        ],
+
+        // 1️⃣1️⃣ TRAITEMENT / REMÉDIATION
+        [
+            "Qu'est-ce que la remédiation PDF ?",
+            "Processus de correction d'un PDF existant pour le rendre accessible. Différent de la création accessible dès l'origine."
+        ],
+        [
+            "Quelle est la différence entre créer accessible et corriger après coup ?",
+            "• Créer accessible : moins cher, plus efficace, meilleure qualité\n• Corriger après : souvent plus long, plus cher, résultats limités"
+        ],
+        [
+            "Quelles sont les grandes étapes de la remédiation PDF ?",
+            "1. Diagnostic initial (scan? balisé?)\n2. OCR si nécessaire\n3. Définition titre et langue\n4. Création/validation structure\n5. Balisage contenu\n6. Vérification ordre lecture\n7. Tests lecteur d'écran\n8. Validation finale"
+        ],
+        [
+            "Pourquoi l'OCR est-il indispensable pour un PDF scanné ?",
+            "Car un scan = IMAGE, pas de texte extractible. L'OCR extrait le texte pour le rendre balisable. Sans OCR, pas d'accessibilité possible."
+        ],
+        [
+            "Que faut-il vérifier après un OCR ?",
+            "• Qualité de reconnaissance (fautes de lecture)\n• Mise en page préservée\n• Ordre de lecture\n• Images correctement détectées"
+        ],
+        [
+            "Pourquoi le balisage automatique n'est-il pas suffisant ?",
+            "Il fait des erreurs fréquentes :\n• Mauvais ordre de lecture\n• Fausses détections (tableaux, listes)\n• Hiérarchie titres incorrecte\n• Contenu décoratif non exclu\n• Tableaux mal structurés"
+        ],
+        [
+            "Pourquoi faut-il enregistrer fréquemment pendant la remédiation ?",
+            "Car Acrobat peut planter, surtout avec des documents complexes. Perdre des heures de travail est fréquent."
+        ],
+
+        // 1️⃣2️⃣ CONTRÔLE & VALIDATION
+        [
+            "Qu'est-ce qu'un audit d'accessibilité ?",
+            "Évaluation systématique de la conformité aux normes, combinant vérifications automatiques, manuelles et tests utilisateurs."
+        ],
+        [
+            "À quoi sert le vérificateur d'accessibilité d'Acrobat ?",
+            "À détecter les erreurs techniques évidentes (balises manquantes, ordre lecture). Utile mais INSUFFISANT seul."
+        ],
+        [
+            "Pourquoi utiliser PAC 3 ?",
+            "PAC 3 (PDF Accessibility Checker) est plus strict qu'Acrobat, fournit un rapport détaillé conforme PDF/UA, et détecte plus d'erreurs."
+        ],
+        [
+            "Quelle est la différence entre erreurs et avertissements ?",
+            "• Erreurs : problèmes bloquants (non-conformité)\n• Avertissements : problèmes potentiels à vérifier manuellement"
+        ],
+        [
+            "Pourquoi un document peut-il passer Acrobat mais échouer PAC ?",
+            "Car Acrobat est moins strict sur certains critères PDF/UA. PAC vérifie plus en profondeur la conformité à la norme."
+        ],
+        [
+            "Pourquoi les tests humains restent indispensables ?",
+            "Aucun outil automatique ne peut évaluer :\n• Compréhensibilité réelle\n• Fluidité de la navigation\n• Expérience utilisateur globale\n• Contexte sémantique"
+        ],
+
+        // 🎯 QUESTION CLÉ DE SYNTHÈSE
+        [
+            "Pourquoi le balisage est-il la colonne vertébrale de l'accessibilité PDF ?",
+            "Le balisage est la colonne vertébrale car :\n1. Il fournit la STRUCTURE LOGIQUE indispensable\n2. Sans balisage, pas de navigation possible\n3. Il rend le contenu compréhensible par programme\n4. Il permet l'adaptation aux différentes technologies d'assistance\n5. C'est le fondement technique de TOUTES les autres exigences d'accessibilité (ordre lecture, tableaux, formulaires...)"
+        ],
+
+        // ==================== M.Anello IANNUZZI (DÉTAILLÉ) ====================
+        // (Gardé tel quel de votre fichier original)
+        [
+            "Qui est M.Anello Iannuzzi ?",
+            "M.Anello Iannuzzi est un entrepreneur et dirigeant d'entreprise français, né en avril 1969 (55 ans en 2024). Il est actuellement président de deux sociétés de services : EURO INFORMATION DIRECT SERVICES (EIDS) et EURO TELE SERVICES. Il évolue principalement dans les secteurs des services administratifs, du soutien aux entreprises et des services financiers."
+        ],
+        [
+            "D'où vient M.Anello Iannuzzi ?",
+            "M.Anello Iannuzzi est français. Ses principales sociétés sont basées à Strasbourg, mais il a également été actif à Annecy dans le passé."
+        ],
+        [
+            "Quel est le parcours professionnel d'M.Anello Iannuzzi ?",
+            "Son parcours montre une évolution du secteur financier vers les services administratifs :\n• 2016-2020 : Dirigeant de GENEVE COURTAGES SARL (services financiers et assurance)\n• Depuis 2016 : Président d'EIDS (services administratifs)\n• Depuis 2024 : Président d'EURO TELE SERVICES (services administratifs)"
+        ],
+        [
+            "Quelle est la date de naissance d'M.Anello Iannuzzi ?",
+            "M.Anello Iannuzzi est né en avril 1969."
+        ],
+        [
+            "Quelle est la profession principale d'M.Anello Iannuzzi ?",
+            "Il est dirigeant d'entreprise, spécialisé dans les activités administratives, le soutien aux entreprises et les services financiers."
+        ],
+        [
+            "Dans quelles sociétés M.Anello Iannuzzi est-il actuellement président ?",
+            "Il est président de EURO INFORMATION DIRECT SERVICES (SAS) depuis le 22 novembre 2016 et de EURO TELE SERVICES (SAS) depuis le 2 octobre 2024."
+        ],
+        [
+            "Quelle société a été dirigée par M.Anello Iannuzzi dans le passé ?",
+            "Il a été dirigeant de GENEVE COURTAGES SARL entre 2016 et 2020, une société active dans les services financiers et l'assurance."
+        ],
+        [
+            "Quelle est l'activité principale d'EURO INFORMATION DIRECT SERVICES (EIDS) ?",
+            "EIDS opère dans le soutien administratif aux entreprises. C'est une société de Business Process Outsourcing (BPO) qui fournit des services externalisés, principalement pour le groupe Crédit Mutuel Alliance Fédérale."
+        ],
+        [
+            "Quel est l'effectif d'EIDS en 2022 ?",
+            "L'effectif était compris entre 50 et 99 salariés en 2022."
+        ],
+        [
+            "Quel a été le chiffre d'affaires d'EIDS en 2023 ?",
+            "Le chiffre d'affaires s'élevait à environ 21,3 millions d'euros en 2023."
+        ],
+        [
+            "Quel a été le résultat net d'EIDS en 2023 ?",
+            "Le résultat net était d'environ 1,09 million d'euros en 2023."
+        ],
+        [
+            "Quelle est l'activité d'EURO TELE SERVICES ?",
+            "EURO TELE SERVICES est active dans le soutien administratif aux entreprises, similaire à EIDS."
+        ],
+        [
+            "Quel est l'effectif d'EURO TELE SERVICES en 2022 ?",
+            "L'effectif était compris entre 250 et 499 salariés en 2022."
+        ],
+        [
+            "Quel a été le chiffre d'affaires d'EURO TELE SERVICES en 2023 ?",
+            "Le chiffre d'affaires s'élevait à environ 25,3 millions d'euros en 2023."
+        ],
+        [
+            "Quel a été le résultat net d'EURO TELE SERVICES en 2023 ?",
+            "Le résultat net était d'environ 849 000 euros en 2023."
+        ],
+        [
+            "Quel est le profil professionnel général d'M.Anello Iannuzzi ?",
+            "C'est un entrepreneur et dirigeant français actif principalement dans les services administratifs, le support aux entreprises et le secteur financier. Il occupe des postes de président dans plusieurs sociétés basées à Strasbourg."
+        ],
+        [
+            "À quel grand groupe bancaire appartient EIDS ?",
+            "EIDS appartient au groupe Crédit Mutuel Alliance Fédérale."
+        ],
+        [
+            "Où se trouvent les sociétés dont M.Anello Iannuzzi est président ?",
+            "Ses principales sociétés sont basées à Strasbourg. Il a également été actif à Annecy par le passé."
+        ],
+        [
+            "M.Anello Iannuzzi est-il plutôt un dirigeant salarié ou un entrepreneur ?",
+            "Il est décrit à la fois comme un dirigeant et un entrepreneur, ce qui suggère qu'il est impliqué dans la création et/ou la propriété de ses entreprises."
+        ],
+        [
+            "Depuis quand M.Anello Iannuzzi est-il président d'EIDS ?",
+            "Il est président d'EURO INFORMATION DIRECT SERVICES (SAS) depuis le 22 novembre 2016."
+        ],
+        [
+            "La présidence d'M.Anello Iannuzzi chez EURO TELE SERVICES est-elle récente ?",
+            "Oui, il est président depuis le 2 octobre 2024, ce qui est une nomination très récente."
+        ],
+        [
+            "Les entreprises d'M.Anello Iannuzzi sont-elles rentables ?",
+            "Oui, les deux principales sociétés (EIDS et EURO TELE SERVICES) affichent des résultats nets positifs en 2023, indiquant une rentabilité."
+        ],
+        [
+            "M.Anello Iannuzzi a-t-il une dimension internationale ?",
+            "Oui, indirectement à travers les activités d'EIDS en Tunisie et au Maroc via ses filiales, et par l'ancienne société GENEVE COURTAGES qui opérait dans les services financiers souvent transfrontaliers."
+        ],
+
+        // ==================== Mme.Olfa KARAMOSLY ====================
+        // (Gardé tel quel de votre fichier original)
+        [
+            "Qui est Mme.Olfa Karamosly ?",
+            "Mme.Olfa Karamosly est la Directrice d'Euro Information Direct Services (EIDS)."
+        ],
+        [
+            "Quel est le rôle d'Mme.Olfa Karamosly au sein d'EIDS ?",
+            "Elle occupe un rôle de direction ou de management, avec des responsabilités d'encadrement et de coordination des équipes d'EIDS en Tunisie et au Maroc."
+        ],
+        [
+            "Pourquoi Mme.Olfa Karamosly a-t-elle été mentionnée publiquement ?",
+            "Elle a été citée et remerciée dans un post LinkedIn pour son engagement envers les équipes d'EIDS Tunisie et Maroc lors d'une visite du président du groupe, M.Anello Iannuzzi."
+        ],
+        [
+            "Que suggère le post LinkedIn concernant les compétences d'Mme.Olfa Karamosly ?",
+            "Il suggère qu'elle a un rôle managérial et opérationnel, avec un accompagnement constant des équipes."
+        ],
+        [
+            "Quelles informations manquent sur Mme.Olfa Karamosly ?",
+            "Il n'y a pas de biographie publique détaillée (parcours académique, expériences antérieures) ni d'articles de presse ou de profil LinkedIn accessible sans compte confirmant son historique."
+        ],
+        
+        // ==================== GREETINGS STANDARD ====================
+        // (Gardé tel quel de votre fichier original)
+        [
+            "bonjour",
+            "👋 Bonjour ! Je suis Pixels, votre assistant spécialisé en accessibilité PDF et informations professionnelles.\n\n📄 Je peux répondre sur :\n• Accessibilité PDF (concepts pédagogiques)\n• M.Anello Iannuzzi et ses sociétés\n• Mme.Olfa Karamosly chez EIDS\n\nComment puis-je vous aider ?"
+        ],
+        [
+            "hello",
+            "👋 Hello ! Je suis votre assistant intelligent.\n\nPosez-moi vos questions sur :\n• L'accessibilité PDF (approche structurée)\n• Les profils professionnels\n• Les normes d'accessibilité numérique"
+        ],
+        [
+            "salut",
+            "👋 Salut ! Bienvenue dans l'assistant Pixels.\n\nEssayer :\n• \"Pourquoi l'accessibilité numérique est importante ?\"\n• \"Qui est M.Anello Iannuzzi ?\"\n• \"Qu'est-ce que PDF/UA ?\""
+        ],
+        [
+            "cava",
+            "😊 Je vais très bien, merci ! Prêt à répondre à vos questions."
+        ],
+        [
+            "comment ça va",
+            "✨ Tout va bien, merci ! Je suis là pour vous aider."
+        ]
+    ],
+
+    "Synonyms": [
+        // ==================== CONVERSATIONS CASUAL ====================
+        [
+            "hey",
+            "yo",
+            "coucou",
+            "wesh",
+            "hello there",
+            "salut l'ami",
+            "hey pixel",
+            "hello buddy",
+            "what's up",
+            "hi there"
+        ],
+        [
+            "bon matin",
+            "bonjour matin",
+            "good morning",
+            "matin",
+            "salut matinal",
+            "bon début de journée",
+            "hello le matin"
+        ],
+        [
+            "bonsoir",
+            "bonne soirée",
+            "good evening",
+            "soir",
+            "salut soir",
+            "bonne nuit",
+            "hello le soir"
+        ],
+        [
+            "quoi de neuf",
+            "quoi de beau",
+            "what's new",
+            "des nouvelles",
+            "quoi de neuf aujourd'hui",
+            "des infos",
+            "quoi de frais"
+        ],
+        [
+            "tu bosses sur quoi",
+            "tu travailles sur quoi",
+            "what do you work on",
+            "ton travail",
+            "tes spécialités",
+            "tu fais quoi comme travail",
+            "tes domaines"
+        ],
+        [
+            "t'es qui",
+            "qui es-tu",
+            "who are you",
+            "présente toi",
+            "ton identité",
+            "c'est qui pixels",
+            "tu t'appelles comment"
+        ],
+        [
+            "présente-toi",
+            "qui es tu",
+            "introduce yourself",
+            "parle-moi de toi",
+            "ton profil",
+            "décris-toi",
+            "raconte-moi qui tu es"
+        ],
+        [
+            "tu fais quoi",
+            "que fais-tu",
+            "what do you do",
+            "tes activités",
+            "ton rôle",
+            "quelle est ta fonction",
+            "tes compétences"
+        ],
+        [
+            "merci",
+            "merci beaucoup",
+            "thanks",
+            "thank you",
+            "gracias",
+            "danke",
+            "grazie",
+            "merci bien",
+            "c'est gentil"
+        ],
+        [
+            "ok",
+            "d'accord",
+            "okay",
+            "entendu",
+            "compris",
+            "roger that",
+            "ça marche",
+            "pas de souci"
+        ],
+        [
+            "a plus",
+            "à plus tard",
+            "see you",
+            "à bientôt",
+            "ciao",
+            "à la prochaine",
+            "salut",
+            "bye"
+        ],
+        [
+            "bye",
+            "au revoir",
+            "goodbye",
+            "à plus",
+            "salut",
+            "take care",
+            "à demain",
+            "bye bye"
+        ],
+
+        // ==================== QUESTIONS PÉDAGOGIQUES ACCESSIBILITÉ PDF ====================
+        // 1️⃣ HISTORIQUE & CONTEXTE
+        [
+            "Pourquoi l'accessibilité numérique est-elle devenue un enjeu majeur ?",
+            "importance accessibilité numérique",
+            "enjeu accessibilité",
+            "pourquoi l'accessibilité est importante",
+            "accessibilité numérique enjeu majeur",
+            "signification accessibilité numérique",
+            "raisons accessibilité numérique"
+        ],
+        [
+            "Quels types de handicaps sont concernés par l'accessibilité numérique ?",
+            "handicaps concernés accessibilité",
+            "types de handicaps accessibilité numérique",
+            "quels handicps accessibilité",
+            "accessibilité pour quels handicaps",
+            "handicaps visés accessibilité"
+        ],
+        [
+            "Pourquoi le PDF est historiquement problématique pour l'accessibilité ?",
+            "pdf problème accessibilité",
+            "historique pdf inaccessible",
+            "pourquoi pdf problématique",
+            "pdf et accessibilité historique",
+            "problèmes historiques pdf"
+        ],
+
+        // 2️⃣ PRINCIPES GÉNÉRAUX DE L'ACCESSIBILITÉ
+        [
+            "Qu'est-ce que l'accessibilité numérique ?",
+            "définition accessibilité numérique",
+            "accessibilité numérique définition",
+            "c'est quoi accessibilité numérique",
+            "définir accessibilité numérique",
+            "accessibilité numérique explication"
+        ],
+        [
+            "À qui profite l'accessibilité (au-delà du handicap) ?",
+            "bénéficiaires accessibilité",
+            "qui profite accessibilité",
+            "accessibilité bénéfices larges",
+            "avantages accessibilité tous",
+            "accessibilité au-delà handicap"
+        ],
+        [
+            "Quelle est la différence entre accessibilité et ergonomie ?",
+            "différence accessibilité ergonomie",
+            "accessibilité vs ergonomie",
+            "ergonomie et accessibilité différence",
+            "comparaison accessibilité ergonomie"
+        ],
+
+        // 3️⃣ NORMES, LOIS ET RÉFÉRENTIELS
+        [
+            "Qu'est-ce que les WCAG ?",
+            "wcag définition",
+            "définition wcag",
+            "c'est quoi wcag",
+            "wcag explication",
+            "web content accessibility guidelines"
+        ],
+        [
+            "Qu'est-ce que la norme PDF/UA ?",
+            "pdf/ua définition",
+            "norme pdf/ua",
+            "c'est quoi pdf/ua",
+            "pdf/ua explication",
+            "iso 14289"
+        ],
+        [
+            "Quelle est la différence entre WCAG et PDF/UA ?",
+            "différence wcag pdf/ua",
+            "wcag vs pdf/ua",
+            "comparaison wcag pdf/ua",
+            "wcag et pdf/ua différence"
+        ],
+        [
+            "Qu'est-ce que le RGAA et à quoi sert-il ?",
+            "rgaa définition",
+            "référentiel général accessibilité",
+            "c'est quoi rgaa",
+            "rgaa explication",
+            "à quoi sert rgaa"
+        ],
+
+        // 4️⃣ TECHNOLOGIES D'ASSISTANCE
+        [
+            "Qu'est-ce qu'un lecteur d'écran ?",
+            "lecteur d'écran définition",
+            "définition lecteur écran",
+            "c'est quoi lecteur écran",
+            "screen reader définition",
+            "lecteur écran explication"
+        ],
+        [
+            "Pourquoi le copier-coller est-il un bon indicateur d'accessibilité ?",
+            "copier-coller indicateur accessibilité",
+            "test copier-coller accessibilité",
+            "copier coller pdf accessible",
+            "indicateur copier-coller"
+        ],
+
+        // 5️⃣ STRUCTURE D'UN PDF ACCESSIBLE
+        [
+            "Qu'est-ce qu'un PDF balisé ?",
+            "pdf balisé définition",
+            "définition pdf balisé",
+            "c'est quoi pdf balisé",
+            "pdf balisé explication",
+            "pdf tagué définition"
+        ],
+        [
+            "Qu'est-ce que l'arborescence de balises ?",
+            "arborescence balises définition",
+            "tags tree pdf",
+            "structure balises pdf",
+            "arbre balises pdf",
+            "organisation balises"
+        ],
+
+        // 6️⃣ ORDRE DE LECTURE (CONCEPT CLÉ)
+        [
+            "Qu'est-ce que l'ordre de lecture logique ?",
+            "ordre lecture logique définition",
+            "logical reading order",
+            "flux lecture pdf",
+            "séquence lecture logique",
+            "ordre lecture accessibilité"
+        ],
+        [
+            "Pourquoi l'ordre visuel n'est-il pas fiable ?",
+            "ordre visuel problème",
+            "ordre visuel vs logique",
+            "z-order problème accessibilité",
+            "ordre visuel non fiable"
+        ],
+
+        // 7️⃣ BALISAGE : CONCEPTS ESSENTIELS
+        [
+            "Le balisage modifie-t-il l'apparence visuelle du document ?",
+            "balisage change apparence",
+            "balisage visuel impact",
+            "balises visibles ou non",
+            "apparence et balisage"
+        ],
+        [
+            "Qu'est-ce qu'un artefact ?",
+            "artefact définition",
+            "c'est quoi artefact pdf",
+            "artefact accessibilité",
+            "éléments décoratifs pdf"
+        ],
+
+        // 8️⃣ BALISAGE DES ÉLÉMENTS PRINCIPAUX
+        [
+            "Pourquoi les titres doivent-ils être hiérarchisés ?",
+            "hiérarchie titres importance",
+            "titres hiérarchisés pourquoi",
+            "importance hiérarchie titres",
+            "structure titres accessibilité"
+        ],
+        [
+            "Pourquoi les images doivent-elles avoir un texte de remplacement ?",
+            "texte remplacement importance",
+            "pourquoi alt text",
+            "texte alternatif nécessaire",
+            "images description obligatoire"
+        ],
+
+        // 9️⃣ TABLEAUX (PÉDAGOGIQUEMENT MAJEUR)
+        [
+            "Pourquoi les tableaux sont-ils difficiles à rendre accessibles ?",
+            "tableaux difficiles accessibilité",
+            "complexité tableaux accessibles",
+            "tableaux problèmes accessibilité",
+            "tableaux défis accessibilité"
+        ],
+        [
+            "Pourquoi les en-têtes doivent-ils être associés aux cellules ?",
+            "association en-têtes tableaux",
+            "pourquoi associer en-têtes",
+            "en-têtes tableaux association",
+            "association th td"
+        ],
+
+        // 🔟 FORMULAIRES
+        [
+            "Qu'est-ce qu'une info-bulle (tooltip) ?",
+            "info-bulle définition",
+            "c'est quoi tooltip pdf",
+            "info-bulle accessibilité",
+            "tooltip formulaire pdf"
+        ],
+
+        // 1️⃣1️⃣ TRAITEMENT / REMÉDIATION
+        [
+            "Pourquoi l'OCR est-il indispensable pour un PDF scanné ?",
+            "ocr nécessaire pdf scan",
+            "pourquoi ocr pdf scan",
+            "ocr indispensable accessibilité",
+            "ocr pdf scan obligatoire"
+        ],
+        [
+            "Pourquoi le balisage automatique n'est-il pas suffisant ?",
+            "limites balisage automatique",
+            "balisage auto insuffisant",
+            "pourquoi corriger balisage auto",
+            "balisage automatique problèmes"
+        ],
+
+        // 1️⃣2️⃣ CONTRÔLE & VALIDATION
+        [
+            "Pourquoi utiliser PAC 3 ?",
+            "utilité pac 3",
+            "pourquoi pac 3",
+            "pac 3 avantages",
+            "pdf accessibility checker pourquoi"
+        ],
+        [
+            "Pourquoi les tests humains restent indispensables ?",
+            "tests humains nécessaires",
+            "pourquoi tests humains",
+            "validation humaine accessibilité",
+            "tests utilisateurs indispensables"
+        ],
+
+        // 🎯 QUESTION CLÉ DE SYNTHÈSE
+        [
+            "Pourquoi le balisage est-il la colonne vertébrale de l'accessibilité PDF ?",
+            "balisage colonne vertébrale",
+            "importance fondamentale balisage",
+            "balisage essentiel pourquoi",
+            "balisage base accessibilité"
+        ],
+
+        // ==================== M.Anello IANNUZZI ====================
+        // (Synonymes gardés de votre fichier original)
+        [
+            "Qui est M.Anello Iannuzzi ?",
+            "M.Anello Iannuzzi qui est-ce",
+            "présentation M.Anello Iannuzzi",
+            "c'est qui M.Anello Iannuzzi",
+            "biographie M.Anello Iannuzzi",
+            "profil M.Anello Iannuzzi",
+            "M.Anello Iannuzzi dirigeant",
+            "M.Anello Iannuzzi entrepreneur",
+            "qui est Monsieur Iannuzzi",
+            "M.Anello Iannuzzi info",
+            "qui est M.Anello",
+            "Iannuzzi qui",
+            "président EIDS qui",
+            "dirigeant français Iannuzzi"
+        ],
+        [
+            "Quelle est la date de naissance d'M.Anello Iannuzzi ?",
+            "naissance M.Anello Iannuzzi",
+            "M.Anello Iannuzzi date naissance",
+            "année naissance M.Anello Iannuzzi",
+            "M.Anello Iannuzzi né quand",
+            "âge M.Anello Iannuzzi",
+            "M.Anello Iannuzzi année naissance",
+            "date anniversaire M.Anello Iannuzzi",
+            "M.Anello Iannuzzi 1969",
+            "M.Anello Iannuzzi né en",
+            "date naissance Iannuzzi",
+            "anniversaire M.Anello",
+            "M.Anello né avril 1969",
+            "Iannuzzi date naissance"
+        ],
+
+        // ==================== GREETINGS STANDARD ====================
+        // (Synonymes gardés de votre fichier original)
+        [
+            "bonjour",
+            "hello",
+            "salut",
+            "bonsoir",
+            "coucou",
+            "hey",
+            "hi",
+            "bon matin",
+            "bon après-midi",
+            "salutations",
+            "hola",
+            "ciao",
+            "good day",
+            "welcome",
+            "greetings"
+        ],
+        [
+            "cava",
+            "comment ça va",
+            "ça va",
+            "comment vas-tu",
+            "tu vas bien",
+            "comment allez-vous",
+            "cv",
+            "ça roule",
+            "how are you",
+            "how's it going",
+            "tout va bien",
+            "ça marche",
+            "you good",
+            "what's up"
+        ]
+    ],
+
+    "Extensions": [
+        // Préfixes user-friendly
+        [
+            ""
+        ],
+        
+        // Ponctuation variée
+        [
+            "",
+            ".",
+            "!",
+            "...",
+            " ?",
+            " !",
+            "!!",
+            "?!",
+            ".",
+            " 👌",
+            " ✅",
+            " 🎯",
+            " 💪",
+            " 😊",
+            " 👍",
+            " 🤓",
+            " 🚀",
+            " 🌟"
+        ],
+        
+        // Suffixes user-friendly
+        [
+            ""
+        ]
+    ],
+
+    "Temp": []
+};
+
+console.log("✅ sample-data.js loaded successfully!");
+console.log("DataSet items:", sampleData.DataSet.length);
+console.log("Synonyms items:", sampleData.Synonyms.length);
+console.log("Extensions: Préfixes=" + sampleData.Extensions[0].length + 
+           ", Ponctuation=" + sampleData.Extensions[1].length + 
+           ", Suffixes=" + sampleData.Extensions[2].length);
