@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofidis Style Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --cofidis-red: #E2001A;
+            --cofidis-dark: #2D2D2D;
+            --bg-gray: #F8F9FA;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gray);
+            margin: 0;
+            padding: 0;
+            color: var(--cofidis-dark);
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--cofidis-red);
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--cofidis-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* File Input Styling */
+        .file-upload-wrapper {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 90%;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* KPI Section */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--cofidis-red);
+        }
+
+        .kpi-card h4 { margin: 0; font-size: 0.9rem; color: #666; }
+        .kpi-card .value { font-size: 2rem; font-weight: bold; color: var(--cofidis-red); }
+
+        /* Main Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            color: var(--cofidis-dark);
+        }
+
+        canvas {
+            max-height: 320px !important;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Cofidis Analytics</div>
+    <div id="dateDisplay"></div>
+</header>
+
+<div class="file-upload-wrapper">
+    <p>Upload your Excel report to generate insights</p>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+</div>
+
+<div class="kpi-container" id="kpi-section" style="display:none;">
+    <div class="kpi-card">
+        <h4>Total Dossiers</h4>
+        <div class="value" id="totalDossiers">0</div>
+    </div>
+    <div class="kpi-card">
+        <h4>Taux d'Acceptation</h4>
+        <div class="value" id="acceptRate">0%</div>
+    </div>
+    <div class="kpi-card">
+        <h4>Signature Electronique</h4>
+        <div class="value" id="eSignRate">0%</div>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="card">
+        <h3>Répartition par Produit</h3>
+        <canvas id="productChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Statut des Décisions</h3>
+        <canvas id="decisionChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Méthode de Signature</h3>
+        <canvas id="signatureChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Volume par Canal (Top 5)</h3>
+        <canvas id="canalChart"></canvas>
+    </div>
+</div>
+
+<script>
+const COLORS = ['#E2001A', '#2D2D2D', '#FFB400', '#009688', '#5C6BC0', '#8D6E63'];
+
+fileInput.addEventListener('change', handleFile);
+
+function handleFile(e){
+    const reader = new FileReader();
+    reader.onload = function(event){
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        
+        document.getElementById('kpi-section').style.display = 'grid';
+        buildDashboard(json);
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
+}
+
+function countByKey(data, key){
+    const result = {};
+    data.forEach(row => {
+        const value = row[key] || "Non défini";
+        result[value] = (result[value] || 0) + 1;
+    });
+    return result;
+}
+
+function buildDashboard(data) {
+    // 1. KPI Calculations
+    const total = data.length;
+    const decisions = countByKey(data, "Decision");
+    const signatures = countByKey(data, "Type de signature");
+    const products = countByKey(data, "Type de produit");
+    const canals = countByKey(data, "Canal") || {}; // Assuming a 'Canal' column exists
+
+    const accepted = decisions["Accord"] || decisions["Approuvé"] || 0;
+    const eSign = signatures["Electronique"] || signatures["E-signature"] || 0;
+
+    document.getElementById('totalDossiers').innerText = total;
+    document.getElementById('acceptRate').innerText = ((accepted / total) * 100).toFixed(1) + "%";
+    document.getElementById('eSignRate').innerText = ((eSign / total) * 100).toFixed(1) + "%";
+
+    // 2. Charts
+    
+    // Product - Doughnut
+    createChart("productChart", 'doughnut', Object.keys(products), Object.values(products));
+
+    // Decision - Pie
+    createChart("decisionChart", 'pie', Object.keys(decisions), Object.values(decisions));
+
+    // Signature - Bar (Horizontal)
+    createChart("signatureChart", 'bar', Object.keys(signatures), Object.values(signatures), true);
+
+    // Canal - Bar
+    createChart("canalChart", 'bar', Object.keys(canals).slice(0,5), Object.values(canals).slice(0,5));
+}
+
+function createChart(id, type, labels, values, horizontal = false) {
+    const ctx = document.getElementById(id).getContext('2d');
+    
+    // Destroy existing chart if it exists to avoid overlap on new file upload
+    const existingChart = Chart.getChart(id);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(ctx, {
+        type: type,
+        data: {
+            labels,
+            datasets: [{
+                backgroundColor: COLORS,
+                hoverOffset: 10,
+                borderRadius: 6,
+                data: values
+            }]
+        },
+        options: {
+            indexAxis: horizontal ? 'y' : 'x',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { usePointStyle: true, padding: 20 }
+                }
+            }
+        }
+    });
+}
+
+// Simple Date Display
+document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString();
+</script>
+
+</body>
+</html>
