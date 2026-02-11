@@ -1,0 +1,45 @@
+Private Sub btnAffecter_Click()
+
+    Dim wbCentrale As Workbook
+    Dim wsDest As Worksheet
+    Dim wsSource As Worksheet
+    Dim i As Long
+    Dim nextRow As Long
+    
+    Set wsSource = ThisWorkbook.Sheets("dic")
+
+    ' récupérer centrale.xlsx
+    On Error Resume Next
+    Set wbCentrale = Workbooks("centrale.xlsx")
+    On Error GoTo 0
+    
+    If wbCentrale Is Nothing Then
+        MsgBox "Le fichier centrale.xlsx doit être ouvert !", vbExclamation
+        Exit Sub
+    End If
+    
+    Set wsDest = wbCentrale.Sheets("dic centrale")
+    
+    
+    ' ===== boucle à l'envers IMPORTANT =====
+    For i = ListBox1.ListCount - 1 To 0 Step -1
+    
+        If ListBox1.Selected(i) Then
+        
+            ' copier vers centrale
+            nextRow = wsDest.Cells(wsDest.Rows.Count, 1).End(xlUp).Row + 1
+            wsDest.Cells(nextRow, 1).Value = ListBox1.List(i)
+            
+            ' supprimer de la feuille source
+            wsSource.Rows(i + 1).Delete
+            
+            ' supprimer de la listbox
+            ListBox1.RemoveItem i
+        
+        End If
+        
+    Next i
+
+    MsgBox "Affectation + suppression terminée !", vbInformation
+
+End Sub
