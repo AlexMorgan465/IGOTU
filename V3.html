@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofidis Performance Portal</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --cofidis-red: #E2001A;
+            --cofidis-dark: #1A1A1A;
+            --sidebar-width: 260px;
+            --bg-gray: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gray);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--cofidis-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 0;
+            flex-shrink: 0;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-logo {
+            padding: 0 30px 40px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--cofidis-red);
+            letter-spacing: -1px;
+        }
+
+        .nav-item {
+            padding: 18px 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            opacity: 0.7;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.05); opacity: 1; }
+        .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-right: 4px solid var(--cofidis-red);
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h2 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+
+        /* File Input Wrapper */
+        .file-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .content-container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover { transform: translateY(-5px); }
+        .kpi-card small { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-card .val { display: block; font-size: 2.5rem; font-weight: 800; color: var(--cofidis-red); margin-top: 10px; }
+
+        /* Dashboard Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            min-height: 450px; /* Prevents compression */
+        }
+
+        .card h3 { 
+            margin: 0 0 25px; 
+            font-size: 1.2rem; 
+            color: var(--cofidis-dark); 
+            display: flex;
+            align-items: center;
+        }
+
+        .card h3::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: var(--cofidis-red);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        /* Page Handling */
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.4s ease forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        canvas { width: 100% !important; height: 350px !important; }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="nav-logo">COFIDIS</div>
+    <div class="nav-item active" onclick="showPage('general')">Vue Générale</div>
+    <div class="nav-item" onclick="showPage('agents')">Performance Agents</div>
+</aside>
+
+<main>
+    <header>
+        <h2 id="pageTitle">Vue Générale</h2>
+        <div class="file-box">
+            <input type="file" id="fileInput" accept=".xlsx,.xls" />
+        </div>
+    </header>
+
+    <div class="content-container">
+        <div id="general" class="page active">
+            <div class="kpi-grid">
+                <div class="kpi-card"><small>Total Dossiers</small><span class="val" id="kpiTotal">0</span></div>
+                <div class="kpi-card"><small>Acceptation</small><span class="val" id="kpiAccept">0%</span></div>
+                <div class="kpi-card"><small>Signature Elec.</small><span class="val" id="kpiSign">0%</span></div>
+            </div>
+            <div class="chart-grid">
+                <div class="card"><h3>Volumes par Produit</h3><canvas id="prodChart"></canvas></div>
+                <div class="card"><h3>Décisions Finales</h3><canvas id="decChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="agents" class="page">
+            <div class="kpi-grid">
+                <div class="kpi-card"><small>Gestionnaires Actifs</small><span class="val" id="kpiAgents">0</span></div>
+                <div class="kpi-card"><small>Moyenne par Agent</small><span class="val" id="kpiAvgAgent">0</span></div>
+                <div class="kpi-card"><small>Top Performance</small><span class="val" id="kpiTopVal">0</span></div>
+            </div>
+            <div class="chart-grid">
+                <div class="card"><h3>Productivité : Top 10 Agents</h3><canvas id="agentBarChart"></canvas></div>
+                <div class="card"><h3>Répartition de la Charge</h3><canvas id="agentPieChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+let globalData = [];
+const COLORS = ['#E2001A', '#2D2D2D', '#FFB400', '#009688', '#5C6BC0', '#8D6E63', '#EC407A', '#26C6DA', '#78909C'];
+
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
+    document.getElementById(pageId).classList.add('active');
+    event.currentTarget.classList.add('active');
+    document.getElementById('pageTitle').innerText = event.currentTarget.innerText;
+}
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
+        globalData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        processData();
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
+});
+
+function processData() {
+    if (!globalData.length) return;
+
+    const counts = {
+        products: countAttr(globalData, "Type de produit"),
+        decisions: countAttr(globalData, "Decision"),
+        signatures: countAttr(globalData, "Type de signature"),
+        agents: countAttr(globalData, "Agent") || countAttr(globalData, "Gestionnaire")
+    };
+
+    // UI Updates - Page 1
+    document.getElementById('kpiTotal').innerText = globalData.length;
+    const acceptCount = counts.decisions["Accord"] || counts.decisions["Approuvé"] || 0;
+    document.getElementById('kpiAccept').innerText = ((acceptCount / globalData.length) * 100).toFixed(1) + "%";
+    
+    const eSign = counts.signatures["Electronique"] || counts.signatures["E-signature"] || 0;
+    document.getElementById('kpiSign').innerText = ((eSign / globalData.length) * 100).toFixed(1) + "%";
+
+    updateChart("prodChart", 'bar', counts.products);
+    updateChart("decChart", 'doughnut', counts.decisions);
+
+    // UI Updates - Page 2
+    const agentNames = Object.keys(counts.agents);
+    document.getElementById('kpiAgents').innerText = agentNames.length;
+    document.getElementById('kpiAvgAgent').innerText = (globalData.length / agentNames.length).toFixed(1);
+
+    const sortedAgents = Object.entries(counts.agents).sort((a,b) => b[1] - a[1]);
+    document.getElementById('kpiTopVal').innerText = sortedAgents[0][1];
+
+    updateChart("agentBarChart", 'bar', { 
+        labels: sortedAgents.slice(0, 10).map(x => x[0]), 
+        values: sortedAgents.slice(0, 10).map(x => x[1]) 
+    }, true);
+    updateChart("agentPieChart", 'pie', counts.agents);
+}
+
+function countAttr(data, key) {
+    return data.reduce((acc, row) => {
+        const val = row[key] || "Non défini";
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+    }, {});
+}
+
+function updateChart(id, type, source, isHorizontal = false) {
+    const ctx = document.getElementById(id).getContext('2d');
+    const labels = source.labels || Object.keys(source);
+    const values = source.values || Object.values(source);
+
+    const existingChart = Chart.getChart(id);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                backgroundColor: COLORS,
+                data: values,
+                borderRadius: 8,
+                barThickness: 25,
+            }]
+        },
+        options: {
+            indexAxis: isHorizontal ? 'y' : 'x',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { 
+                    position: 'bottom', 
+                    labels: { padding: 25, usePointStyle: true, font: { size: 12 } } 
+                } 
+            },
+            scales: type === 'bar' ? {
+                y: { grid: { display: false } },
+                x: { grid: { display: false } }
+            } : {}
+        }
+    });
+}
+</script>
+
+</body>
+</html>
