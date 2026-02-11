@@ -1,0 +1,57 @@
+Option Explicit
+
+' ===== Chargement automatique de la liste =====
+Private Sub UserForm_Initialize()
+
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    
+    Set ws = ThisWorkbook.Sheets("dic")
+    
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    ListBox1.Clear
+    
+    For i = 1 To lastRow
+        ListBox1.AddItem ws.Cells(i, 1).Value
+    Next i
+
+End Sub
+
+
+' ===== Bouton Affecter =====
+Private Sub btnAffecter_Click()
+
+    Dim wbCentrale As Workbook
+    Dim wsDest As Worksheet
+    Dim i As Long
+    Dim nextRow As Long
+    
+    ' Ouvrir ou récupérer le workbook centrale
+    On Error Resume Next
+    Set wbCentrale = Workbooks("centrale.xlsx")
+    On Error GoTo 0
+    
+    If wbCentrale Is Nothing Then
+        MsgBox "Le fichier centrale.xlsx doit être ouvert !", vbExclamation
+        Exit Sub
+    End If
+    
+    Set wsDest = wbCentrale.Sheets("dic centrale")
+    
+    For i = 0 To ListBox1.ListCount - 1
+    
+        If ListBox1.Selected(i) Then
+        
+            nextRow = wsDest.Cells(wsDest.Rows.Count, 1).End(xlUp).Row + 1
+            
+            wsDest.Cells(nextRow, 1).Value = ListBox1.List(i)
+        
+        End If
+        
+    Next i
+    
+    MsgBox "Affectation terminée !", vbInformation
+
+End Sub
