@@ -1,2522 +1,777 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EIDS | Banking Data Intelligence Console</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="sample-data.js"></script>
+    <title>Universal Excel Data Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Reset & Base */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --secondary: #3b82f6;
-            --accent: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --gray: #64748b;
-            --border: #e2e8f0;
-            --sidebar-width: 380px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--light);
-            color: var(--dark);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        body.dark-mode {
-            background: #0f172a;
-            color: #e2e8f0;
-            --light: #1e293b;
-            --dark: #f1f5f9;
-            --border: #334155;
-            --gray: #94a3b8;
-        }
-
-        /* Main Container */
-        .app-container {
-            display: flex;
-            width: 100%;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* ===== SIDEBAR ===== */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dark-mode .sidebar {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-        }
-
-        /* Header */
-        .sidebar-header {
-            padding: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            flex-shrink: 0;
-        }
-
-        .bank-brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .bank-logo {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .bank-info h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .bank-info .tagline {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .theme-toggle {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 8px 15px;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .security-banner {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        /* Data Panel */
-        .data-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: 0;
-        }
-
-        .panel-content {
-            padding: 25px;
-            overflow-y: auto;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .panel-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
             padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            flex-shrink: 0;
         }
 
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.95);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
-        .section-title i {
-            font-size: 1.1rem;
-            color: #60a5fa;
-        }
-
-        /* File Upload */
-        .upload-zone {
-            border: 2px dashed rgba(96, 165, 250, 0.4);
-            border-radius: 10px;
-            padding: 25px;
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(96, 165, 250, 0.05);
         }
 
-        .upload-zone:hover {
-            border-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            background: #f8f9ff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: #eef1ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            background: #e3e7ff;
+            border-color: #764ba2;
         }
 
         .upload-icon {
-            font-size: 2.5rem;
-            color: #60a5fa;
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-
-        .upload-hint {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            line-height: 1.4;
-        }
-
-        .btn-primary {
-            width: 100%;
-            background: linear-gradient(135deg, var(--secondary) 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 14px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Status Grid */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        .status-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-
-        .status-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
-        }
-
-        .status-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--danger);
-            flex-shrink: 0;
-        }
-
-        .status-dot.ready {
-            background: var(--accent);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-
-        .status-dot.warning {
-            background: var(--warning);
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-        }
-
-        .status-name {
-            font-size: 0.85rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        .status-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .status-value.ready {
-            color: var(--accent);
-        }
-
-        .status-value.warning {
-            color: var(--warning);
-        }
-
-        .status-value.missing {
-            color: var(--danger);
-        }
-
-        /* Category Badge */
-        .category-badge {
-            display: inline-block;
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-left: 8px;
-            vertical-align: middle;
-            border: 1px solid rgba(96, 165, 250, 0.3);
-        }
-
-        /* History */
-        .history-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 200px;
-            max-height: 300px;
-        }
-
-        .history-list {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .history-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 3px solid var(--secondary);
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-
-        .history-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .history-time {
-            color: #60a5fa;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .history-category {
-            font-size: 0.7rem;
-            background: rgba(96, 165, 250, 0.1);
-            padding: 1px 6px;
-            border-radius: 3px;
-        }
-
-        .history-question {
-            margin-bottom: 3px;
-            opacity: 0.9;
-            word-break: break-word;
-        }
-
-        .history-answer {
-            opacity: 0.7;
-            font-size: 0.8rem;
-            word-break: break-word;
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Top Bar */
-        .top-bar {
-            padding: 20px 30px;
-            border-bottom: 1px solid var(--border);
-            background: var(--light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .page-title h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .page-title p {
-            color: var(--gray);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .session-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .session-badge {
-            background: #f0f9ff;
-            color: #0369a1;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #bae6fd;
-        }
-
-        .dark-mode .session-badge {
-            background: rgba(59, 130, 246, 0.2);
-            color: #93c5fd;
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .clear-btn {
-            background: #f1f5f9;
-            color: var(--gray);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dark-mode .clear-btn {
-            background: #334155;
-            color: #cbd5e1;
-            border-color: #475569;
-        }
-
-        .clear-btn:hover {
-            background: #e2e8f0;
-        }
-
-        .dark-mode .clear-btn:hover {
-            background: #475569;
-        }
-
-        /* Chat Container */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            padding: 0;
-        }
-
-        /* Chat Messages */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: relative;
-            min-height: 0;
-        }
-
-        /* Welcome Message */
-        .welcome-message {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-            border: 1px solid #bae6fd;
-            flex-shrink: 0;
-        }
-
-        .dark-mode .welcome-message {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .welcome-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--secondary) 0%, #1d4ed8 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
+            font-size: 60px;
+            color: #667eea;
             margin-bottom: 20px;
         }
 
-        .welcome-message h3 {
-            font-size: 1.3rem;
-            color: var(--dark);
-            margin-bottom: 10px;
-        }
-
-        .dark-mode .welcome-message h3 {
-            color: #f1f5f9;
-        }
-
-        .welcome-message p {
-            color: var(--gray);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .category-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
-        }
-
-        .dark-mode .category-item {
-            background: #334155;
-            border-color: #475569;
-        }
-
-        .category-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .category-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .category-item.conversation .category-icon {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .category-item.pdf .category-icon {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        }
-
-        .category-item.professional .category-icon {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .category-item h4 {
-            font-size: 0.95rem;
-            margin-bottom: 5px;
-            color: var(--dark);
-        }
-
-        .dark-mode .category-item h4 {
-            color: #f1f5f9;
-        }
-
-        .category-item p {
-            font-size: 0.8rem;
-            color: var(--gray);
-            line-height: 1.4;
-        }
-
-        /* Message Bubbles */
-        .message {
-            max-width: 75%;
-            animation: fadeIn 0.3s ease-out;
-            flex-shrink: 0;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-user {
-            align-self: flex-end;
-            margin-left: auto;
-        }
-
-        .message-bot {
-            align-self: flex-start;
-            margin-right: auto;
-        }
-
-        .message-bubble {
-            padding: 18px 20px;
-            border-radius: 18px;
-            position: relative;
-            line-height: 1.6;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            word-break: break-word;
-        }
-
-        .user-bubble {
-            background: linear-gradient(135deg, var(--secondary) 0%, #1d4ed8 100%);
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-
-        .bot-bubble {
-            background: white;
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 5px;
-        }
-
-        .dark-mode .bot-bubble {
-            background: #334155;
-            border-color: #475569;
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-        }
-
-        .message-sender {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .user-bubble .message-sender {
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        .bot-bubble .message-sender {
-            color: var(--secondary);
-        }
-
-        .message-category {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(96, 165, 250, 0.2);
-        }
-
-        .message-category.conversation {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .message-category.pdf {
-            background: rgba(139, 92, 246, 0.1);
-            color: #8b5cf6;
-            border-color: rgba(139, 92, 246, 0.2);
-        }
-
-        .message-category.professional {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-            border-color: rgba(245, 158, 11, 0.2);
-        }
-
-        .message-time {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-left: auto;
-        }
-
-        /* Typing Indicator */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 15px 20px;
-            background: white;
-            border-radius: 18px;
-            border: 1px solid var(--border);
-            width: fit-content;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            flex-shrink: 0;
-        }
-
-        .dark-mode .typing-indicator {
-            background: #334155;
-            border-color: #475569;
-        }
-
-        .typing-text {
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--secondary);
-            border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes typing {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Input Area */
-        .input-container {
-            background: var(--light);
-            border-top: 1px solid var(--border);
-            padding: 20px 30px;
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
-            flex-shrink: 0;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            background: #f8fafc;
-            padding: 8px;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            transition: all 0.3s;
-        }
-
-        .dark-mode .input-wrapper {
-            background: #334155;
-            border-color: #475569;
-        }
-
-        .input-wrapper:focus-within {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #user-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 15px;
-            font-size: 1rem;
-            color: var(--dark);
-            outline: none;
-            min-height: 24px;
-            max-height: 120px;
-            resize: none;
-            font-family: inherit;
-        }
-
-        .dark-mode #user-input {
-            color: #f1f5f9;
-        }
-
-        #user-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .input-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: flex-end;
-        }
-
-        .action-btn {
-            background: #f1f5f9;
-            color: var(--gray);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s;
-        }
-
-        .dark-mode .action-btn {
-            background: #334155;
-            color: #cbd5e1;
-            border-color: #475569;
-        }
-
-        .action-btn:hover {
-            background: #e2e8f0;
-        }
-
-        .dark-mode .action-btn:hover {
-            background: #475569;
-        }
-
-        #send-btn {
-            background: linear-gradient(135deg, var(--secondary) 0%, #1d4ed8 100%);
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-            flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-        }
-
-        #send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
-        }
-
-        /* File Input */
-        #file-input {
+        .file-input {
             display: none;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .file-label {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
+        .file-label:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .dark-mode ::-webkit-scrollbar-track {
-            background: #334155;
+        .info-box {
+            background: #e8f4ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 25px auto;
+            max-width: 600px;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+        .data-section {
+            padding: 30px;
+            display: none;
         }
 
-        .dark-mode ::-webkit-scrollbar-thumb {
-            background: #475569;
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.8rem;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            align-items: center;
         }
 
-        .dark-mode ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: 400px;
-            }
-            
-            .main-content {
-                height: calc(100vh - 400px);
-            }
-            
-            .categories-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .chat-messages {
-                padding: 20px;
-            }
-            
-            .input-container {
-                padding: 15px 20px;
-            }
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        select:focus, button:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .button-secondary {
+            background: #6c757d;
+        }
+
+        .button-secondary:hover {
+            background: #5a6268;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .chart-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .auto-suggestion {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .suggestion-icon {
+            font-size: 24px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+
+        .data-table tr:hover {
+            background: #eef1ff;
+        }
+
+        .column-type {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .type-numeric {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .type-text {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            min-width: 150px;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+
+        .hidden {
+            display: none;
         }
 
         @media (max-width: 768px) {
-            .categories-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .message {
-                max-width: 85%;
-            }
-            
-            .top-bar {
+            .controls {
                 flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+                align-items: stretch;
             }
             
-            .session-info {
+            .control-group {
                 width: 100%;
-                justify-content: space-between;
             }
-        }
-
-        /* Empty States */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--gray);
-            flex-shrink: 0;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            
+            .container {
+                border-radius: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="bank-brand">
-                    <div class="bank-logo">
-                        <i class="fas fa-university"></i>
-                    </div>
-                    <div class="bank-info">
-                        <h1>EIDS Banking</h1>
-                        <div class="tagline">Intelligent Categorized Assistant</div>
-                    </div>
-                </div>
-                <button class="theme-toggle" id="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <span>Dark Mode</span>
-                </button>
-                <div class="security-banner">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Secure Session • Conflict-Free Matching</span>
-                </div>
+    <div class="container">
+        <header>
+            <h1>📊 Universal Excel Data Analyzer</h1>
+            <p class="subtitle">Upload any Excel file • Auto-detect columns • Generate charts automatically</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="dropArea">
+                <div class="upload-icon">📁</div>
+                <h2>Drag & Drop Your Excel File Here</h2>
+                <p>or click to browse</p>
+                <p style="margin-top: 20px; color: #666;">Supports .xlsx, .xls, .csv files</p>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+                <label for="fileInput" class="file-label">Choose Excel File</label>
             </div>
-
-            <div class="data-panel">
-                <div class="panel-content">
-                    <!-- Data Import -->
-                    <div class="panel-section">
-                        <div class="section-title">
-                            <i class="fas fa-database"></i>
-                            Data Import
-                        </div>
-                        
-                        <div class="upload-zone" id="upload-zone">
-                            <div class="upload-icon">
-                                <i class="fas fa-file-excel"></i>
-                            </div>
-                            <div class="upload-text">
-                                Drag & Drop Excel File
-                            </div>
-                            <div class="upload-hint">
-                                Supports categorized or legacy formats
-                            </div>
-                        </div>
-                        
-                        <button class="btn-primary" id="upload-btn">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            Import Categorized Data
-                        </button>
-                        
-                        <button class="btn-secondary" id="sample-data-btn">
-                            <i class="fas fa-chart-line"></i>
-                            Use Sample Categorized Data
-                        </button>
-                        
-                        <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
-                    </div>
-
-                    <!-- Data Status -->
-                    <div class="panel-section">
-                        <div class="section-title">
-                            <i class="fas fa-clipboard-check"></i>
-                            Data Status
-                        </div>
-                        
-                        <div class="status-grid">
-                            <div class="status-card" id="dataset-card">
-                                <div class="status-header">
-                                    <div class="status-dot" id="dataset-dot"></div>
-                                    <div class="status-name">Categorized Data</div>
-                                </div>
-                                <div class="status-value" id="dataset-status">Not loaded</div>
-                            </div>
-                            
-                            <div class="status-card" id="synonyms-card">
-                                <div class="status-header">
-                                    <div class="status-dot" id="synonyms-dot"></div>
-                                    <div class="status-name">Synonyms</div>
-                                </div>
-                                <div class="status-value" id="synonyms-status">Not loaded</div>
-                            </div>
-                            
-                            <div class="status-card" id="extensions-card">
-                                <div class="status-header">
-                                    <div class="status-dot" id="extensions-dot"></div>
-                                    <div class="status-name">Extensions</div>
-                                </div>
-                                <div class="status-value" id="extensions-status">Not loaded</div>
-                            </div>
-                            
-                            <div class="status-card" id="temp-card">
-                                <div class="status-header">
-                                    <div class="status-dot" id="temp-dot"></div>
-                                    <div class="status-name">Session Log</div>
-                                </div>
-                                <div class="status-value" id="temp-status">Empty</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Session History -->
-                    <div class="panel-section history-section">
-                        <div class="section-title">
-                            <i class="fas fa-history"></i>
-                            Session History
-                        </div>
-                        
-                        <div class="history-list" id="conversation-history">
-                            <div class="history-item">
-                                <div class="history-time">
-                                    No data loaded
-                                    <span class="history-category">System</span>
-                                </div>
-                                <div class="history-question">Upload data to begin session</div>
-                                <div class="history-answer">Import Excel file or use sample data</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            
+            <div class="info-box">
+                <strong>How it works:</strong> Upload any Excel file. The app will automatically detect numeric and text columns, suggest chart types, and generate visualizations. No configuration needed!
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <div class="top-bar">
-                <div class="page-title">
-                    <h2>Intelligent Categorized Assistant</h2>
-                    <p>AI-powered with conflict-free category matching</p>
+        <div class="data-section" id="dataSection">
+            <h2 class="section-title">📈 Data Analysis Dashboard</h2>
+            
+            <div class="stats" id="statsContainer">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="chartType">Chart Type</label>
+                    <select id="chartType">
+                        <option value="auto">Auto-suggest (Recommended)</option>
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="doughnut">Doughnut Chart</option>
+                        <option value="radar">Radar Chart</option>
+                    </select>
                 </div>
                 
-                <div class="session-info">
-                    <div class="session-badge">
-                        <i class="fas fa-brain"></i>
-                        <span>Conflict-Free Matching Active</span>
-                    </div>
-                    <button class="clear-btn" id="clear-chat-btn">
-                        <i class="fas fa-eraser"></i>
-                        Clear Chat
-                    </button>
+                <div class="control-group">
+                    <label for="xAxis">X-Axis (Categories)</label>
+                    <select id="xAxis"></select>
                 </div>
+                
+                <div class="control-group">
+                    <label for="yAxis">Y-Axis (Values)</label>
+                    <select id="yAxis"></select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="color">Chart Color</label>
+                    <select id="color">
+                        <option value="#667eea">Purple Blue</option>
+                        <option value="#4CAF50">Green</option>
+                        <option value="#FF5722">Orange</option>
+                        <option value="#9C27B0">Purple</option>
+                        <option value="#2196F3">Blue</option>
+                        <option value="#FF9800">Amber</option>
+                    </select>
+                </div>
+                
+                <button id="updateChart">Update Chart</button>
+                <button id="resetFile" class="button-secondary">New File</button>
             </div>
 
-            <!-- Chat Container -->
-            <div class="chat-container">
-                <!-- Chat Messages -->
-                <div class="chat-messages" id="chat-history">
-                    <!-- Welcome Message -->
-                    <div class="welcome-message">
-                        <div class="welcome-icon">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <h3>Welcome to Conflict-Free Categorized Assistant</h3>
-                        <p>I understand questions in any format and automatically detect the right category without conflicts! Technical questions always get technical answers.</p>
-                        
-                        <div class="categories-grid">
-                            <div class="category-item conversation">
-                                <div class="category-icon">
-                                    <i class="fas fa-comments"></i>
-                                </div>
-                                <h4>Conversations</h4>
-                                <p>Greetings, casual chat, and farewells. Try "Bonjour!" or "Comment ça va?"</p>
-                            </div>
-                            <div class="category-item pdf">
-                                <div class="category-icon">
-                                    <i class="fas fa-file-pdf"></i>
-                                </div>
-                                <h4>PDF Accessibility</h4>
-                                <p>Standards, techniques, and best practices. Try "Qu'est-ce que PDF/UA?"</p>
-                            </div>
-                            <div class="category-item professional">
-                                <div class="category-icon">
-                                    <i class="fas fa-user-tie"></i>
-                                </div>
-                                <h4>Professional Profiles</h4>
-                                <p>Information about professionals and companies. Try "Qui est M.Anello Iannuzzi?"</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <textarea id="user-input" placeholder="Ask your question in any format... Technical questions get technical answers!" rows="1"></textarea>
-                        <button id="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="input-actions">
-                        <button class="action-btn" id="quick-help-btn">
-                            <i class="fas fa-question-circle"></i>
-                            Category Help
-                        </button>
-                        <button class="action-btn" id="export-history-btn">
-                            <i class="fas fa-download"></i>
-                            Export History
-                        </button>
-                    </div>
-                </div>
+            <div id="autoSuggestion" class="auto-suggestion hidden">
+                <span class="suggestion-icon">💡</span>
+                <span id="suggestionText"></span>
             </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title" id="chartTitle">Chart Preview</h3>
+                <canvas id="chartCanvas"></canvas>
+            </div>
+
+            <h3 class="section-title">📋 Data Preview</h3>
+            <div id="tableContainer"></div>
         </div>
+
+        <footer>
+            <p>Universal Excel Data Analyzer • Works with any Excel file • No setup required</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Drag & drop support • Auto column detection • Dynamic chart generation</p>
+        </footer>
     </div>
 
-    <!-- JavaScript -->
     <script>
-        // ============ CONFLICT-FREE CATEGORY-AWARE MATCHING SYSTEM ============
+        let currentData = [];
+        let numericCols = [];
+        let textCols = [];
+        let chartInstance = null;
 
         // DOM Elements
-        const chatHistory = document.getElementById('chat-history');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const fileInput = document.getElementById('file-input');
-        const uploadZone = document.getElementById('upload-zone');
-        const uploadBtn = document.getElementById('upload-btn');
-        const sampleDataBtn = document.getElementById('sample-data-btn');
-        const conversationHistory = document.getElementById('conversation-history');
-        const clearChatBtn = document.getElementById('clear-chat-btn');
-        const quickHelpBtn = document.getElementById('quick-help-btn');
-        const exportHistoryBtn = document.getElementById('export-history-btn');
-        const themeToggle = document.getElementById('theme-toggle');
+        const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('dropArea');
+        const dataSection = document.getElementById('dataSection');
+        const chartTypeSelect = document.getElementById('chartType');
+        const xAxisSelect = document.getElementById('xAxis');
+        const yAxisSelect = document.getElementById('yAxis');
+        const colorSelect = document.getElementById('color');
+        const updateChartBtn = document.getElementById('updateChart');
+        const resetFileBtn = document.getElementById('resetFile');
+        const autoSuggestion = document.getElementById('autoSuggestion');
+        const suggestionText = document.getElementById('suggestionText');
+        const chartTitle = document.getElementById('chartTitle');
+        const statsContainer = document.getElementById('statsContainer');
+        const tableContainer = document.getElementById('tableContainer');
 
-        // Status elements
-        const datasetStatus = document.getElementById('dataset-status');
-        const synonymsStatus = document.getElementById('synonyms-status');
-        const extensionsStatus = document.getElementById('extensions-status');
-        const tempStatus = document.getElementById('temp-status');
-        const datasetDot = document.getElementById('dataset-dot');
-        const synonymsDot = document.getElementById('synonyms-dot');
-        const extensionsDot = document.getElementById('extensions-dot');
-        const tempDot = document.getElementById('temp-dot');
-
-        // Categorized data storage
-        let categorizedData = {
-            Categories: {},
-            DataSet: {},
-            Synonyms: [],
-            Extensions: [],
-            Temp: []
-        };
-
-        // ============ ENHANCED TEXT NORMALIZATION ============
-
-        function normalizeText(text) {
-            if (!text || typeof text !== 'string') return '';
-            
-            let normalized = text.toLowerCase();
-            normalized = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            normalized = normalized.replace(/[^a-z0-9\s]/g, ' ');
-            normalized = normalized.replace(/\s+/g, ' ').trim();
-            
-            return normalized;
-        }
-
-        function normalizeTextAdvanced(text) {
-            const normalized = normalizeText(text);
-            
-            const stopWords = [
-                'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de',
-                'et', 'ou', 'mais', 'donc', 'or', 'ni', 'car',
-                'the', 'a', 'an', 'and', 'or', 'but', 'so', 'for', 'nor', 'yet',
-                'what', 'how', 'why', 'when', 'where', 'who', 'which',
-                'is', 'are', 'was', 'were', 'be', 'been', 'being',
-                'que', 'quoi', 'comment', 'pourquoi', 'quand', 'ou', 'qui',
-                'est', 'sont', 'cest', 'ca', 'ce', 'cela'
-            ];
-            
-            const words = normalized.split(' ');
-            const filteredWords = words.filter(word => 
-                word.length > 2 && !stopWords.includes(word)
-            );
-            
-            return filteredWords.join(' ') || normalized;
-        }
-
-        function calculateSimilarity(str1, str2) {
-            const s1 = normalizeText(str1);
-            const s2 = normalizeText(str2);
-            
-            if (s1 === s2) return 1;
-            if (s1.includes(s2) || s2.includes(s1)) return 0.9;
-            
-            const words1 = s1.split(' ');
-            const words2 = s2.split(' ');
-            const commonWords = words1.filter(word => 
-                words2.some(w2 => w2.includes(word) || word.includes(w2))
-            );
-            
-            const wordScore = commonWords.length / Math.max(words1.length, words2.length);
-            
-            let charMatches = 0;
-            for (let i = 0; i < Math.min(s1.length, s2.length); i++) {
-                if (s1[i] === s2[i]) charMatches++;
-            }
-            const charScore = charMatches / Math.max(s1.length, s2.length);
-            
-            return Math.max(wordScore, charScore * 0.5);
-        }
-
-        // ============ CONFLICT-FREE CATEGORY DETECTION ============
-
-        function analyzeQuestionType(question) {
-            const normalized = normalizeTextAdvanced(question);
-            
-            // Technical indicators
-            const technicalIndicators = {
-                questionWords: ['pourquoi', 'comment', 'qu\'est', 'quelle', 'que signifie', 'définition', 'explique'],
-                technicalTerms: ['pdf', 'accessibilité', 'balisage', 'image', 'tableau', 'titre', 'norme', 'standard', 'wcag', 'pdf/ua'],
-                professionalTerms: ['iannuzzi', 'karamosly', 'eids', 'entreprise', 'directeur', 'président', 'profil'],
-                length: normalized.length
-            };
-            
-            // Conversation indicators
-            const conversationIndicators = {
-                greetings: ['bonjour', 'hello', 'salut', 'hi', 'hey', 'coucou', 'bonsoir', 'bon matin'],
-                casual: ['ça va', 'comment vas', 'cava', 'quoi de neuf', 'tu bosses'],
-                farewells: ['merci', 'thanks', 'au revoir', 'bye', 'ciao', 'à plus', 'ok', 'd\'accord']
-            };
-            
-            return {
-                isTechnical: technicalIndicators.questionWords.some(w => normalized.includes(w)) ||
-                            technicalIndicators.technicalTerms.some(t => normalized.includes(t)) ||
-                            normalized.length > 25,
-                isProfessional: technicalIndicators.professionalTerms.some(t => normalized.includes(t)),
-                isConversation: conversationIndicators.greetings.some(g => normalized.includes(g)) ||
-                               conversationIndicators.casual.some(c => normalized.includes(c)) ||
-                               conversationIndicators.farewells.some(f => normalized.includes(f)),
-                isShort: normalized.length < 15
-            };
-        }
-
-        function detectCategoryWithConfidence(question) {
-            const analysis = analyzeQuestionType(question);
-            const normalized = normalizeTextAdvanced(question);
-            
-            // Category confidence scores
-            const confidenceScores = {
-                PDFAccessibility: 0,
-                ProfessionalProfiles: 0,
-                Conversations: 0
-            };
-            
-            // Strong rules to prevent conflicts
-            
-            // Rule 1: Technical questions go to PDFAccessibility or ProfessionalProfiles
-            if (analysis.isTechnical) {
-                if (normalized.includes('pdf') || normalized.includes('accessibilité') || 
-                    normalized.includes('image') || normalized.includes('tableau') ||
-                    normalized.includes('balisage') || normalized.includes('wcag')) {
-                    confidenceScores.PDFAccessibility += 2.0;
-                    confidenceScores.Conversations -= 1.5; // Strong penalty
-                } else if (analysis.isProfessional) {
-                    confidenceScores.ProfessionalProfiles += 2.0;
-                    confidenceScores.Conversations -= 1.5;
-                }
-            }
-            
-            // Rule 2: Professional keywords go to ProfessionalProfiles
-            if (analysis.isProfessional) {
-                confidenceScores.ProfessionalProfiles += 1.5;
-                confidenceScores.Conversations -= 1.0;
-            }
-            
-            // Rule 3: Conversation keywords go to Conversations (but only if not technical)
-            if (analysis.isConversation && !analysis.isTechnical && !analysis.isProfessional) {
-                confidenceScores.Conversations += 1.0;
-            }
-            
-            // Rule 4: Penalize Conversations for long questions
-            if (normalized.length > 20) {
-                confidenceScores.Conversations -= 0.8;
-                confidenceScores.PDFAccessibility += 0.3;
-            }
-            
-            // Rule 5: Boost specific category keywords
-            const pdfKeywords = ['pdf', 'accessibilité', 'balisage', 'wcag', 'lecture', 'écran', 'handicap'];
-            pdfKeywords.forEach(keyword => {
-                if (normalized.includes(keyword)) {
-                    confidenceScores.PDFAccessibility += 0.5;
-                    confidenceScores.Conversations -= 0.3;
-                }
-            });
-            
-            const professionalKeywords = ['iannuzzi', 'karamosly', 'eids', 'euro information', 'euro tele'];
-            professionalKeywords.forEach(keyword => {
-                if (normalized.includes(keyword)) {
-                    confidenceScores.ProfessionalProfiles += 0.5;
-                    confidenceScores.Conversations -= 0.3;
-                }
-            });
-            
-            // Find best category
-            let bestCategory = null;
-            let bestScore = 0;
-            
-            for (const [category, score] of Object.entries(confidenceScores)) {
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestCategory = category;
-                }
-            }
-            
-            // Only return if we have reasonable confidence
-            if (bestScore > 0.3) {
-                return bestCategory;
-            }
-            
-            return null;
-        }
-
-        // ============ CONFLICT-FREE MATCHING ============
-
-        function findBestMatchConflictFree(question) {
-            const analysis = analyzeQuestionType(question);
-            const normalized = normalizeTextAdvanced(question);
-            
-            let bestMatch = null;
-            let bestScore = 0;
-            let bestCategory = null;
-            let bestSubCategory = null;
-            
-            // Determine search order based on analysis
-            let searchOrder = [];
-            
-            if (analysis.isTechnical) {
-                if (normalized.includes('pdf') || normalized.includes('image') || normalized.includes('accessibilité')) {
-                    searchOrder = ['PDFAccessibility', 'ProfessionalProfiles', 'Conversations'];
-                } else if (analysis.isProfessional) {
-                    searchOrder = ['ProfessionalProfiles', 'PDFAccessibility', 'Conversations'];
-                } else {
-                    searchOrder = ['PDFAccessibility', 'ProfessionalProfiles', 'Conversations'];
-                }
-            } else if (analysis.isProfessional) {
-                searchOrder = ['ProfessionalProfiles', 'Conversations', 'PDFAccessibility'];
-            } else if (analysis.isConversation) {
-                searchOrder = ['Conversations', 'ProfessionalProfiles', 'PDFAccessibility'];
-            } else {
-                searchOrder = ['PDFAccessibility', 'ProfessionalProfiles', 'Conversations'];
-            }
-            
-            // Search in prioritized order
-            for (const category of searchOrder) {
-                if (!categorizedData.DataSet[category]) continue;
-                
-                // Category-specific boosts/penalties
-                let categoryBoost = 0;
-                let categoryPenalty = 0;
-                
-                if (analysis.isTechnical && category === 'Conversations') {
-                    categoryPenalty = 0.5; // Strong penalty for technical questions in Conversations
-                }
-                
-                if (analysis.isConversation && !analysis.isTechnical && category === 'Conversations') {
-                    categoryBoost = 0.3; // Boost for genuine conversations
-                }
-                
-                for (const [subCategory, questions] of Object.entries(categorizedData.DataSet[category])) {
-                    for (const questionPair of questions) {
-                        if (!questionPair || questionPair.length < 2 || !questionPair[0]) continue;
-                        
-                        const questionText = questionPair[0];
-                        let similarity = calculateSimilarity(normalized, questionText);
-                        
-                        // Apply category adjustments
-                        similarity += categoryBoost - categoryPenalty;
-                        
-                        // Additional boost for keyword matches in technical questions
-                        if (analysis.isTechnical && category !== 'Conversations') {
-                            const questionWords = normalized.split(' ');
-                            const targetWords = normalizeText(questionText).split(' ');
-                            
-                            let exactMatches = 0;
-                            for (const qWord of questionWords) {
-                                if (qWord.length < 3) continue;
-                                for (const tWord of targetWords) {
-                                    if (tWord === qWord) {
-                                        exactMatches++;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            similarity += (exactMatches * 0.1);
-                        }
-                        
-                        // Strong penalty if we're matching a conversation phrase in a technical question
-                        if (analysis.isTechnical && category === 'Conversations') {
-                            const conversationPhrases = ['à plus', 'bonne journée', 'merci', 'au revoir'];
-                            const isConversationPhrase = conversationPhrases.some(phrase => 
-                                normalizeText(questionText).includes(phrase)
-                            );
-                            
-                            if (isConversationPhrase) {
-                                similarity -= 0.8; // Very strong penalty
-                            }
-                        }
-                        
-                        if (similarity > bestScore && similarity > 0.3) {
-                            bestScore = similarity;
-                            bestMatch = questionPair;
-                            bestCategory = category;
-                            bestSubCategory = subCategory;
-                        }
-                    }
-                }
-            }
-            
-            // Final validation: if we found a match in Conversations for a technical question,
-            // search again in technical categories with lower threshold
-            if (bestCategory === 'Conversations' && analysis.isTechnical) {
-                for (const category of ['PDFAccessibility', 'ProfessionalProfiles']) {
-                    if (!categorizedData.DataSet[category]) continue;
-                    
-                    for (const [subCategory, questions] of Object.entries(categorizedData.DataSet[category])) {
-                        for (const questionPair of questions) {
-                            if (!questionPair || questionPair.length < 2 || !questionPair[0]) continue;
-                            
-                            const questionText = questionPair[0];
-                            const similarity = calculateSimilarity(normalized, questionText);
-                            
-                            // Accept lower similarity for technical categories when there's a conflict
-                            if (similarity > 0.2 && similarity > bestScore - 0.1) {
-                                bestScore = similarity;
-                                bestMatch = questionPair;
-                                bestCategory = category;
-                                bestSubCategory = subCategory;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            return {
-                match: bestMatch,
-                score: bestScore,
-                category: bestCategory,
-                subCategory: bestSubCategory
-            };
-        }
-
-        // ============ ENHANCED SYNONYM MATCHING ============
-
-        function findSmartSynonymMatch(question) {
-            const analysis = analyzeQuestionType(question);
-            const normalized = normalizeTextAdvanced(question);
-            
-            // Don't use synonym matching for technical questions
-            if (analysis.isTechnical || analysis.isProfessional || normalized.length > 20) {
-                return null;
-            }
-            
-            let bestMatch = null;
-            let bestScore = 0;
-            
-            for (const synonymGroup of categorizedData.Synonyms) {
-                if (!synonymGroup || synonymGroup.length === 0) continue;
-                
-                let groupScore = 0;
-                
-                for (const synonym of synonymGroup) {
-                    if (!synonym || typeof synonym !== 'string') continue;
-                    
-                    const normalizedSynonym = normalizeTextAdvanced(synonym);
-                    if (!normalizedSynonym) continue;
-                    
-                    const similarity = calculateSimilarity(normalized, normalizedSynonym);
-                    
-                    // Boost for exact matches in short questions
-                    if (normalized === normalizedSynonym && normalized.length < 10) {
-                        groupScore = Math.max(groupScore, similarity + 0.3);
-                    } else {
-                        groupScore = Math.max(groupScore, similarity);
-                    }
-                }
-                
-                if (groupScore > bestScore && groupScore > 0.4) {
-                    bestScore = groupScore;
-                    bestMatch = synonymGroup;
-                }
-            }
-            
-            return bestMatch;
-        }
-
-        // ============ CONFLICT-FREE RESPONSE GENERATION ============
-
-        function getConflictFreeResponse(userMessage) {
-            if (!categorizedData.DataSet || Object.keys(categorizedData.DataSet).length === 0) {
-                return "📊 Please load data first. Upload an Excel file or use sample data.";
-            }
-            
-            const trimmedMessage = userMessage.trim();
-            if (trimmedMessage.length < 2) {
-                return "Please ask a question with more details.";
-            }
-            
-            const analysis = analyzeQuestionType(trimmedMessage);
-            
-            // Step 1: Use smart synonym matching only for genuine conversations
-            let synonymTargetCategory = null;
-            if (analysis.isConversation && !analysis.isTechnical && !analysis.isProfessional) {
-                const matchedSynonym = findSmartSynonymMatch(trimmedMessage);
-                if (matchedSynonym && matchedSynonym[0]) {
-                    const firstSynonym = matchedSynonym[0].toLowerCase();
-                    if (firstSynonym.includes('bonjour') || firstSynonym.includes('hello') || firstSynonym.includes('salut')) {
-                        synonymTargetCategory = 'Conversations';
-                    }
-                }
-            }
-            
-            // Step 2: Detect category with conflict-free logic
-            const detectedCategory = detectCategoryWithConfidence(trimmedMessage);
-            
-            // Step 3: Find best match with conflict resolution
-            const targetCategory = detectedCategory || synonymTargetCategory;
-            const searchResult = findBestMatchConflictFree(trimmedMessage);
-            
-            // Debug logging
-            console.log('=== CONFLICT-FREE MATCHING ===');
-            console.log('Question:', trimmedMessage);
-            console.log('Analysis:', analysis);
-            console.log('Detected category:', detectedCategory);
-            console.log('Target category:', targetCategory);
-            console.log('Best match category:', searchResult.category);
-            console.log('Best match score:', searchResult.score);
-            console.log('Best match text:', searchResult.match ? searchResult.match[0] : 'None');
-            console.log('=============================');
-            
-            // Step 4: Return response if we have a good match
-            if (searchResult.match && searchResult.score > 0.35) {
-                // Final validation: don't return conversation responses for technical questions
-                if (analysis.isTechnical && searchResult.category === 'Conversations') {
-                    return getTechnicalFallbackResponse(trimmedMessage);
-                }
-                
-                const response = formatCategorizedResponse(searchResult.match[1], searchResult.category, searchResult.subCategory);
-                return response;
-            }
-            
-            // Step 5: Fallback responses
-            return getContextualFallbackResponse(trimmedMessage, analysis);
-        }
-
-        function getTechnicalFallbackResponse(question) {
-            const normalized = normalizeTextAdvanced(question);
-            
-            if (normalized.includes('pdf') || normalized.includes('image') || normalized.includes('accessibilité')) {
-                return "📄 Je suis spécialisé dans l'accessibilité PDF ! Pour des questions techniques comme celle-ci, essayez :\n\n" +
-                       "• \"Qu'est-ce que le balisage PDF ?\"\n" +
-                       "• \"Pourquoi les images doivent avoir un texte alternatif ?\"\n" +
-                       "• \"Comment rendre un PDF accessible ?\"\n\n" +
-                       "Je peux vous donner des réponses détaillées sur ces sujets techniques.";
-            } else if (normalized.includes('iannuzzi') || normalized.includes('karamosly')) {
-                return "👔 Pour des questions sur les profils professionnels, essayez :\n\n" +
-                       "• \"Qui est M.Anello Iannuzzi ?\"\n" +
-                       "• \"Quel est le rôle d'Mme.Olfa Karamosly ?\"\n" +
-                       "• \"Quelle est l'activité d'EIDS ?\"";
-            }
-            
-            return "Je ne trouve pas d'information précise sur ce sujet technique. Pourriez-vous reformuler votre question ou essayer un de ces exemples ?\n\n" +
-                   "• Questions PDF : \"Qu'est-ce que PDF/UA ?\"\n" +
-                   "• Questions professionnelles : \"Qui est M.Anello Iannuzzi ?\"\n" +
-                   "• Conversations : \"Bonjour, comment ça va ?\"";
-        }
-
-        function getContextualFallbackResponse(question, analysis) {
-            const normalized = normalizeTextAdvanced(question);
-            
-            if (analysis.isConversation) {
-                const greetings = ['bonjour', 'hello', 'salut', 'hi', 'hey', 'coucou'];
-                if (greetings.some(g => normalized.includes(g))) {
-                    return "👋 Bonjour ! Je suis votre assistant intelligent. Je peux vous aider avec :\n\n" +
-                           "• L'accessibilité PDF (questions techniques)\n" +
-                           "• Les profils professionnels\n" +
-                           "• Les conversations courantes\n\n" +
-                           "Comment puis-je vous aider aujourd'hui ?";
-                }
-                
-                const thanks = ['merci', 'thanks', 'thank you'];
-                if (thanks.some(t => normalized.includes(t))) {
-                    return "🙏 Je vous en prie ! N'hésitez pas si vous avez d'autres questions.";
-                }
-            }
-            
-            if (analysis.isTechnical) {
-                if (normalized.includes('pdf') || normalized.includes('image')) {
-                    return "Pour les questions sur les images dans les PDF, je peux vous expliquer :\n\n" +
-                           "• L'importance du texte alternatif pour l'accessibilité\n" +
-                           "• Comment baliser correctement les images\n" +
-                           "• Les exigences PDF/UA pour les images\n\n" +
-                           "Voulez-vous plus de détails sur un de ces aspects ?";
-                }
-            }
-            
-            return "Je ne suis pas sûr de comprendre votre question. Pourriez-vous la reformuler ?\n\n" +
-                   "**Conseil :** Je fonctionne mieux avec des questions claires comme :\n" +
-                   "• \"Qu'est-ce que l'accessibilité numérique ?\"\n" +
-                   "• \"Qui est M.Anello Iannuzzi ?\"\n" +
-                   "• \"Bonjour, comment allez-vous ?\"";
-        }
-
-        function formatCategorizedResponse(answer, category, subCategory) {
-            let response = answer;
-            
-            // Add category context (except for casual conversations)
-            if (category && categorizedData.Categories[category] && category !== 'Conversations') {
-                const categoryInfo = categorizedData.Categories[category];
-                const categoryName = categoryInfo.name || category;
-                const subCategoryName = categoryInfo.subCategories ? 
-                    categoryInfo.subCategories[subCategory] : subCategory;
-                
-                if (categoryName) {
-                    response = `📌 **${categoryName}**${subCategoryName ? ` • ${subCategoryName}` : ''}\n\n${response}`;
-                }
-            }
-            
-            // Add extensions (less frequently for technical answers)
-            response = addExtensions(response, category);
-            
-            return response;
-        }
-
-        function addExtensions(response, category) {
-            if (!categorizedData.Extensions || categorizedData.Extensions.length < 2) {
-                return response;
-            }
-            
-            let finalResponse = response;
-            
-            // Add beginning extension (only for non-technical responses)
-            if (category === 'Conversations' && Math.random() < 0.3 && categorizedData.Extensions[0]) {
-                const beginnings = categorizedData.Extensions[0].filter(ext => 
-                    ext && ext.toString().trim() && ext.toString().trim().length > 0
-                );
-                
-                if (beginnings.length > 0) {
-                    const beginning = beginnings[Math.floor(Math.random() * beginnings.length)];
-                    finalResponse = beginning.toString() + ' ' + finalResponse;
-                }
-            }
-            
-            // Add ending punctuation
-            if (categorizedData.Extensions[1] && categorizedData.Extensions[1].length > 0) {
-                const endings = categorizedData.Extensions[1].filter(ext => 
-                    ext && ext.toString().trim() && ext.toString().trim().length > 0
-                );
-                
-                if (endings.length > 0) {
-                    const ending = endings[Math.floor(Math.random() * endings.length)];
-                    
-                    if (!['.', '!', '?', ':', ';'].includes(finalResponse.slice(-1))) {
-                        finalResponse += '.';
-                    }
-                    
-                    // Only add emoji endings for conversations
-                    if (category === 'Conversations' || !ending.match(/[\u{1F600}-\u{1F64F}]/u)) {
-                        finalResponse += ' ' + ending.toString();
-                    }
-                }
-            }
-            
-            return finalResponse;
-        }
-
-        // ============ UI FUNCTIONS ============
-
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
-            
-            addMessageToChat("You", message, true);
-            
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            userInput.focus();
-            
-            if (Object.keys(categorizedData.DataSet).length === 0 && 
-                !message.toLowerCase().includes('upload') &&
-                !message.toLowerCase().includes('sample') &&
-                !message.toLowerCase().includes('data')) {
-                
-                addMessageToChat("Assistant", 
-                    "📊 Please load data first. Click 'Use Sample Categorized Data' or upload an Excel file.", 
-                    false
-                );
-                return;
-            }
-            
-            showTypingIndicator();
-            
-            setTimeout(() => {
-                removeTypingIndicator();
-                const response = getConflictFreeResponse(message);
-                
-                const detectedCategory = detectCategoryWithConfidence(message);
-                let categoryName = null;
-                let categoryClass = null;
-                
-                if (detectedCategory) {
-                    categoryName = categorizedData.Categories[detectedCategory] ? 
-                        categorizedData.Categories[detectedCategory].name : detectedCategory;
-                    
-                    // Map to CSS class
-                    if (detectedCategory === 'Conversations') categoryClass = 'conversation';
-                    else if (detectedCategory === 'PDFAccessibility') categoryClass = 'pdf';
-                    else if (detectedCategory === 'ProfessionalProfiles') categoryClass = 'professional';
-                }
-                
-                addMessageToChat("Assistant", response, false, categoryName, categoryClass);
-                saveToHistory(message, response, categoryName);
-                
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            }, 800 + Math.random() * 800);
-        }
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = 'typing-indicator';
-            typingDiv.innerHTML = `
-                <div class="typing-text">Analyzing question and selecting best category...</div>
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message message-bot';
-            messageDiv.appendChild(typingDiv);
-            
-            chatHistory.appendChild(messageDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator && indicator.parentElement) {
-                indicator.parentElement.remove();
-            }
-        }
-
-        function addMessageToChat(sender, message, isUser, category = null, categoryClass = null) {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = `message-bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`;
-            
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'message-header';
-            
-            let headerHTML = `<div class="message-sender">${sender}</div>`;
-            
-            if (category && !isUser) {
-                const cssClass = categoryClass || 'conversation';
-                headerHTML += `<div class="message-category ${cssClass}">${category}</div>`;
-            }
-            
-            headerHTML += `<div class="message-time">${time}</div>`;
-            headerDiv.innerHTML = headerHTML;
-            
-            const textDiv = document.createElement('div');
-            textDiv.textContent = message;
-            textDiv.style.whiteSpace = 'pre-wrap';
-            
-            bubbleDiv.appendChild(headerDiv);
-            bubbleDiv.appendChild(textDiv);
-            messageDiv.appendChild(bubbleDiv);
-            
-            chatHistory.appendChild(messageDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        // ============ DATA MANAGEMENT ============
-
-        function updateSheetStatus(sheetName, isLoaded) {
-            const statusEl = document.getElementById(`${sheetName.toLowerCase()}-status`);
-            const dotEl = document.getElementById(`${sheetName.toLowerCase()}-dot`);
-            const cardEl = document.getElementById(`${sheetName.toLowerCase()}-card`);
-            
-            if (isLoaded) {
-                let data = categorizedData[sheetName];
-                let count = 0;
-                
-                if (sheetName === 'DataSet') {
-                    for (const category in data) {
-                        for (const subCategory in data[category]) {
-                            count += data[category][subCategory].length;
-                        }
-                    }
-                } else if (Array.isArray(data)) {
-                    count = data.length;
-                } else if (data && typeof data === 'object') {
-                    count = Object.keys(data).length;
-                }
-                
-                statusEl.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
-                statusEl.className = 'status-value ready';
-                dotEl.className = 'status-dot ready';
-                cardEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-            } else {
-                if (sheetName === 'Temp') {
-                    statusEl.textContent = 'Empty';
-                } else {
-                    statusEl.textContent = 'Not loaded';
-                }
-                statusEl.className = 'status-value missing';
-                dotEl.className = 'status-dot';
-                cardEl.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-            }
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            uploadBtn.disabled = true;
-            uploadZone.innerHTML = `
-                <div class="upload-icon">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <div class="upload-text">
-                    Processing ${file.name}
-                </div>
-                <div class="upload-hint">
-                    Loading conflict-free categorized data...
-                </div>
-            `;
-            
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, { type: 'binary' });
-                    
-                    const sheetNames = workbook.SheetNames;
-                    
-                    if (sheetNames.includes('Categories')) {
-                        loadCategorizedStructure(workbook);
-                    } else {
-                        loadLegacyStructure(workbook);
-                    }
-                    
-                    loadConversationHistory();
-                    
-                    const categoryCount = Object.keys(categorizedData.Categories).length;
-                    let questionCount = 0;
-                    
-                    for (const category in categorizedData.DataSet) {
-                        for (const subCategory in categorizedData.DataSet[category]) {
-                            questionCount += categorizedData.DataSet[category][subCategory].length;
-                        }
-                    }
-                    
-                    addMessageToChat("Assistant", 
-                        `✅ Successfully loaded "${file.name}"\n` +
-                        `📂 ${categoryCount} main categories\n` +
-                        `📊 ${questionCount} conflict-free questions\n` +
-                        `🔤 ${categorizedData.Synonyms.length} synonym groups\n\n` +
-                        `**Conflict-free matching is active!**\n` +
-                        `• Technical questions → Technical answers\n` +
-                        `• Conversation questions → Friendly responses\n` +
-                        `• No more mixed categories!`, 
-                        false
-                    );
-                    
-                } catch (error) {
-                    console.error("Error parsing Excel:", error);
-                    addMessageToChat("Assistant", 
-                        `❌ Error: ${error.message}\n` +
-                        `Please ensure your Excel file has the correct structure.`, 
-                        false
-                    );
-                } finally {
-                    resetUploadUI();
-                }
-            };
-            
-            reader.onerror = function() {
-                addMessageToChat("Assistant", "❌ Failed to read file. Please try again.", false);
-                resetUploadUI();
-            };
-            
-            reader.readAsBinaryString(file);
-        }
-
-        function loadCategorizedStructure(workbook) {
-            const categoriesSheet = workbook.Sheets['Categories'];
-            if (categoriesSheet) {
-                const categoriesData = XLSX.utils.sheet_to_json(categoriesSheet, { header: 1 });
-                categorizedData.Categories = parseCategories(categoriesData);
-            }
-            
-            const dataSetSheet = workbook.Sheets['DataSet'];
-            if (dataSetSheet) {
-                const dataSetData = XLSX.utils.sheet_to_json(dataSetSheet, { header: 1 });
-                categorizedData.DataSet = parseCategorizedDataSet(dataSetData);
-            }
-            
-            const synonymsSheet = workbook.Sheets['Synonyms'];
-            if (synonymsSheet) {
-                const synonymsData = XLSX.utils.sheet_to_json(synonymsSheet, { header: 1 });
-                categorizedData.Synonyms = synonymsData.filter(row => 
-                    row.some(cell => cell && cell.toString().trim() !== '')
-                );
-            }
-            
-            const extensionsSheet = workbook.Sheets['Extensions'];
-            if (extensionsSheet) {
-                const extensionsData = XLSX.utils.sheet_to_json(extensionsSheet, { header: 1 });
-                categorizedData.Extensions = extensionsData.filter(row => 
-                    row.some(cell => cell !== null && cell !== undefined)
-                );
-            }
-            
-            const tempSheet = workbook.Sheets['Temp'];
-            if (tempSheet) {
-                const tempData = XLSX.utils.sheet_to_json(tempSheet, { header: 1 });
-                categorizedData.Temp = tempData.filter(row => 
-                    row.some(cell => cell && cell.toString().trim() !== '')
-                );
-            }
-            
-            updateSheetStatus('DataSet', Object.keys(categorizedData.DataSet).length > 0);
-            updateSheetStatus('Synonyms', categorizedData.Synonyms.length > 0);
-            updateSheetStatus('Extensions', categorizedData.Extensions.length > 0);
-            updateSheetStatus('Temp', categorizedData.Temp.length > 0);
-        }
-
-        function loadLegacyStructure(workbook) {
-            categorizedData = {
-                Categories: {},
-                DataSet: {},
-                Synonyms: extractSheetData(workbook, 'Synonyms'),
-                Extensions: extractSheetData(workbook, 'Extensions'),
-                Temp: extractSheetData(workbook, 'Temp') || []
-            };
-            
-            const flatDataSet = extractSheetData(workbook, 'DataSet');
-            
-            categorizedData.DataSet = autoCategorizeDataSet(flatDataSet);
-            categorizedData.Categories = createDefaultCategories(categorizedData.DataSet);
-            
-            updateSheetStatus('DataSet', flatDataSet.length > 0);
-            updateSheetStatus('Synonyms', categorizedData.Synonyms.length > 0);
-            updateSheetStatus('Extensions', categorizedData.Extensions.length > 0);
-            updateSheetStatus('Temp', categorizedData.Temp.length > 0);
-        }
-
-        function loadSampleData() {
-            sampleDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            sampleDataBtn.disabled = true;
-            
-            setTimeout(() => {
-                try {
-                    if (typeof sampleData === 'undefined') {
-                        throw new Error('Sample data not available');
-                    }
-                    
-                    categorizedData = {
-                        Categories: { ...sampleData.Categories },
-                        DataSet: { ...sampleData.DataSet },
-                        Synonyms: [...(sampleData.Synonyms || [])],
-                        Extensions: [...(sampleData.Extensions || [])],
-                        Temp: [...(sampleData.Temp || [])]
-                    };
-                    
-                    updateSheetStatus('DataSet', Object.keys(categorizedData.DataSet).length > 0);
-                    updateSheetStatus('Synonyms', categorizedData.Synonyms.length > 0);
-                    updateSheetStatus('Extensions', categorizedData.Extensions.length > 0);
-                    updateSheetStatus('Temp', categorizedData.Temp.length > 0);
-                    
-                    loadConversationHistory();
-                    
-                    addMessageToChat("Assistant", 
-                        "✨ **Conflict-Free Categorized Data Loaded!**\n\n" +
-                        "✅ **No more mixing between categories!**\n\n" +
-                        "**How it works:**\n" +
-                        "• Technical questions → Technical answers\n" +
-                        "• \"pourquoi les images...\" → PDF Accessibility answer\n" +
-                        "• \"à plus\" → Conversation answer\n" +
-                        "• No confusion between categories\n\n" +
-                        "**Try these examples:**\n" +
-                        "1. \"pourquoi les images doivent avoir un texte de remplacement\"\n" +
-                        "2. \"à plus tard\"\n" +
-                        "3. \"qui est m.iannuzzi\"\n\n" +
-                        "Each will get the CORRECT category answer! 🎯", 
-                        false
-                    );
-                    
-                } catch (error) {
-                    console.error('Error loading sample data:', error);
-                    addMessageToChat("Assistant", 
-                        "⚠️ Could not load sample data. Please check if sample-data.js is available.", 
-                        false
-                    );
-                } finally {
-                    sampleDataBtn.innerHTML = '<i class="fas fa-chart-line"></i> Use Sample Data';
-                    sampleDataBtn.disabled = false;
-                }
-            }, 1000);
-        }
-
-        // ============ HELPER FUNCTIONS ============
-
-        function parseCategories(categoriesData) {
-            const categories = {};
-            
-            let startRow = categoriesData[0] && categoriesData[0][0] === 'Categories' ? 1 : 0;
-            
-            for (let i = startRow; i < categoriesData.length; i++) {
-                const row = categoriesData[i];
-                if (row && row[0]) {
-                    const categoryKey = row[0];
-                    categories[categoryKey] = {
-                        name: row[1] || categoryKey,
-                        description: row[2] || '',
-                        subCategories: {}
-                    };
-                    
-                    for (let j = 3; j < row.length; j += 2) {
-                        if (row[j]) {
-                            categories[categoryKey].subCategories[row[j]] = row[j + 1] || row[j];
-                        }
-                    }
-                }
-            }
-            
-            return categories;
-        }
-
-        function parseCategorizedDataSet(dataSetData) {
-            const categorized = {};
-            
-            let currentCategory = null;
-            let currentSubCategory = null;
-            
-            for (const row of dataSetData) {
-                if (!row || row.length === 0) continue;
-                
-                if (row[0] && row[0].toString().startsWith('CATEGORY:')) {
-                    currentCategory = row[0].toString().replace('CATEGORY:', '').trim();
-                    categorized[currentCategory] = {};
-                    continue;
-                }
-                
-                if (row[0] && row[0].toString().startsWith('SUBCATEGORY:')) {
-                    currentSubCategory = row[0].toString().replace('SUBCATEGORY:', '').trim();
-                    if (currentCategory) {
-                        categorized[currentCategory][currentSubCategory] = [];
-                    }
-                    continue;
-                }
-                
-                if (currentCategory && currentSubCategory && row[0]) {
-                    if (!categorized[currentCategory][currentSubCategory]) {
-                        categorized[currentCategory][currentSubCategory] = [];
-                    }
-                    categorized[currentCategory][currentSubCategory].push([row[0], row[1] || '']);
-                }
-            }
-            
-            return categorized;
-        }
-
-        function autoCategorizeDataSet(flatDataSet) {
-            const categorized = {
-                Conversations: {
-                    Greetings: [],
-                    Casual: [],
-                    Farewell: []
-                },
-                PDFAccessibility: {
-                    Fundamentals: [],
-                    Standards: [],
-                    Structure: [],
-                    Elements: [],
-                    Validation: [],
-                    Remediation: []
-                },
-                ProfessionalProfiles: {
-                    AnelloIannuzzi: [],
-                    OlfaKaramosly: [],
-                    Companies: []
-                }
-            };
-            
-            for (const row of flatDataSet) {
-                if (!row || row.length < 2 || !row[0]) continue;
-                
-                const question = row[0].toString().toLowerCase();
-                const answer = row[1];
-                
-                if (question.includes('bonjour') || question.includes('hello') || question.includes('salut') || 
-                    question.includes('merci') || question.includes('thanks') || question.includes('bye') ||
-                    question.includes('coucou') || question.includes('hey') || question.includes('yo')) {
-                    
-                    if (question.includes('bonjour') || question.includes('hello') || question.includes('salut')) {
-                        categorized.Conversations.Greetings.push([row[0], answer]);
-                    } else if (question.includes('merci') || question.includes('thanks') || question.includes('bye')) {
-                        categorized.Conversations.Farewell.push([row[0], answer]);
-                    } else {
-                        categorized.Conversations.Casual.push([row[0], answer]);
-                    }
-                    
-                } else if (question.includes('pdf') || question.includes('accessibil') || 
-                          question.includes('wcag') || question.includes('balisage') ||
-                          question.includes('image') || question.includes('tableau')) {
-                    
-                    if (question.includes('fondament') || question.includes('principle') || question.includes('basics')) {
-                        categorized.PDFAccessibility.Fundamentals.push([row[0], answer]);
-                    } else if (question.includes('standard') || question.includes('norme') || question.includes('w3c')) {
-                        categorized.PDFAccessibility.Standards.push([row[0], answer]);
-                    } else if (question.includes('structure') || question.includes('arborescence') || question.includes('balisage')) {
-                        categorized.PDFAccessibility.Structure.push([row[0], answer]);
-                    } else if (question.includes('tableau') || question.includes('image') || question.includes('titre')) {
-                        categorized.PDFAccessibility.Elements.push([row[0], answer]);
-                    } else if (question.includes('audit') || question.includes('validation') || question.includes('test')) {
-                        categorized.PDFAccessibility.Validation.push([row[0], answer]);
-                    } else if (question.includes('remediation') || question.includes('correction') || question.includes('ocr')) {
-                        categorized.PDFAccessibility.Remediation.push([row[0], answer]);
-                    } else {
-                        categorized.PDFAccessibility.Fundamentals.push([row[0], answer]);
-                    }
-                    
-                } else if (question.includes('iannuzzi') || question.includes('karamosly') || 
-                          question.includes('eids') || question.includes('euro information')) {
-                    
-                    if (question.includes('iannuzzi')) {
-                        categorized.ProfessionalProfiles.AnelloIannuzzi.push([row[0], answer]);
-                    } else if (question.includes('karamosly')) {
-                        categorized.ProfessionalProfiles.OlfaKaramosly.push([row[0], answer]);
-                    } else {
-                        categorized.ProfessionalProfiles.Companies.push([row[0], answer]);
-                    }
-                    
-                } else {
-                    categorized.Conversations.Casual.push([row[0], answer]);
-                }
-            }
-            
-            for (const category in categorized) {
-                for (const subCategory in categorized[category]) {
-                    if (categorized[category][subCategory].length === 0) {
-                        delete categorized[category][subCategory];
-                    }
-                }
-                if (Object.keys(categorized[category]).length === 0) {
-                    delete categorized[category];
-                }
-            }
-            
-            return categorized;
-        }
-
-        function createDefaultCategories(categorizedDataSet) {
-            return {
-                Conversations: {
-                    name: "Conversations informelles",
-                    description: "Salutations et conversations courantes avec l'assistant",
-                    subCategories: {}
-                },
-                PDFAccessibility: {
-                    name: "Accessibilité PDF",
-                    description: "Questions pédagogiques sur l'accessibilité des documents PDF",
-                    subCategories: {}
-                },
-                ProfessionalProfiles: {
-                    name: "Profils professionnels",
-                    description: "Informations sur les dirigeants et entreprises",
-                    subCategories: {}
-                }
-            };
-        }
-
-        function extractSheetData(workbook, sheetName) {
-            if (!workbook.SheetNames.includes(sheetName)) {
-                console.warn(`Sheet "${sheetName}" not found`);
-                return [];
-            }
-            
-            const worksheet = workbook.Sheets[sheetName];
-            const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
-            return data.filter(row => row.some(cell => 
-                cell !== null && cell !== undefined && cell.toString().trim() !== ''
-            ));
-        }
-
-        function resetUploadUI() {
-            uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Import Categorized Data';
-            uploadBtn.disabled = false;
-            uploadZone.innerHTML = `
-                <div class="upload-icon">
-                    <i class="fas fa-file-excel"></i>
-                </div>
-                <div class="upload-text">
-                    Drag & Drop Excel File
-                </div>
-                <div class="upload-hint">
-                    Supports categorized or legacy formats
-                </div>
-            `;
-        }
-
-        // ============ HISTORY MANAGEMENT ============
-
-        function saveToHistory(question, answer, category = null) {
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const historyItem = [timestamp, question, answer, category];
-            
-            categorizedData.Temp.push(historyItem);
-            updateSheetStatus('Temp', true);
-            addToHistoryPanel(historyItem);
-        }
-
-        function addToHistoryPanel(item) {
-            const historyDiv = document.getElementById('conversation-history');
-            
-            const placeholder = historyDiv.querySelector('.history-item');
-            if (placeholder && placeholder.querySelector('.history-time').textContent === 'No data loaded') {
-                placeholder.remove();
-            }
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'history-item';
-            
-            const categoryText = item[3] ? `<span class="history-category">${item[3]}</span>` : '';
-            
-            itemDiv.innerHTML = `
-                <div class="history-time">
-                    ${item[0]}
-                    ${categoryText}
-                </div>
-                <div class="history-question">${item[1]}</div>
-                <div class="history-answer">${item[2].substring(0, 60)}${item[2].length > 60 ? '...' : ''}</div>
-            `;
-            
-            itemDiv.addEventListener('click', () => {
-                addMessageToChat("You", item[1], true);
-                setTimeout(() => {
-                    const categoryClass = item[3] ? 
-                        (item[3].includes('PDF') ? 'pdf' : 
-                         item[3].includes('Professional') ? 'professional' : 'conversation') : null;
-                    addMessageToChat("Assistant", item[2], false, item[3], categoryClass);
-                }, 300);
-            });
-            
-            historyDiv.insertBefore(itemDiv, historyDiv.firstChild);
-            
-            if (historyDiv.children.length > 20) {
-                historyDiv.removeChild(historyDiv.lastChild);
-            }
-            
-            historyDiv.scrollTop = 0;
-        }
-
-        function loadConversationHistory() {
-            const historyDiv = document.getElementById('conversation-history');
-            historyDiv.innerHTML = '';
-            
-            if (categorizedData.Temp.length === 0) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'history-item';
-                placeholder.innerHTML = `
-                    <div class="history-time">
-                        No data loaded
-                        <span class="history-category">System</span>
-                    </div>
-                    <div class="history-question">Upload data to begin session</div>
-                    <div class="history-answer">Import Excel file or use sample data</div>
-                `;
-                historyDiv.appendChild(placeholder);
-                return;
-            }
-            
-            const recent = categorizedData.Temp.slice(-20).reverse();
-            recent.forEach(item => addToHistoryPanel(item));
-        }
-
-        // ============ UTILITY FUNCTIONS ============
-
-        function clearChat() {
-            const messages = chatHistory.querySelectorAll('.message');
-            messages.forEach(msg => {
-                if (!msg.closest('.welcome-message')) {
-                    msg.remove();
-                }
-            });
-            
-            addMessageToChat("Assistant", "Chat cleared. You can continue asking questions - conflict-free matching is active!", false);
-        }
-
-        function showQuickHelp() {
-            addMessageToChat("Assistant", 
-                `🤖 **Conflict-Free Categorized Assistant**\n\n` +
-                `✅ **NO MORE MIXED ANSWERS!**\n\n` +
-                `**How it works:**\n` +
-                `• Technical questions → Technical answers\n` +
-                `• Conversation questions → Friendly responses\n` +
-                `• Professional questions → Professional info\n` +
-                `• Each stays in its own category\n\n` +
-                `**Examples that now work correctly:**\n` +
-                `• "pourquoi les images doivent avoir un texte de remplacement" → PDF answer ✅\n` +
-                `• "à plus tard" → Conversation answer ✅\n` +
-                `• "qui est m.iannuzzi" → Professional answer ✅\n\n` +
-                `**Smart detection:**\n` +
-                `• Questions with "pourquoi", "comment" → Technical\n` +
-                `• Short phrases like "merci", "bonjour" → Conversation\n` +
-                `• Names like "Iannuzzi", "Karamosly" → Professional\n\n` +
-                `**Try it!** Ask the same questions that caused conflicts before.`, 
-                false
-            );
-        }
-
-        function exportHistory() {
-            if (categorizedData.Temp.length === 0) {
-                addMessageToChat("Assistant", "No conversation history to export.", false);
-                return;
-            }
-            
-            let csv = "Time,Question,Answer,Category\n";
-            categorizedData.Temp.forEach(item => {
-                csv += `"${item[0]}","${item[1].replace(/"/g, '""')}","${item[2].replace(/"/g, '""')}","${item[3] || ''}"\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `conflict-free-chat-history-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            addMessageToChat("Assistant", "✅ Conflict-free conversation history exported as CSV.", false);
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            
-            if (isDark) {
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
-            } else {
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Dark Mode</span>';
-            }
-        }
-
-        // ============ EVENT LISTENERS ============
-
-        sendBtn.addEventListener('click', sendMessage);
+        // Event Listeners
+        fileInput.addEventListener('change', handleFile);
+        updateChartBtn.addEventListener('click', generateChart);
+        resetFileBtn.addEventListener('click', resetFile);
         
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        // Drag and drop functionality
+        dropArea.addEventListener('click', () => fileInput.click());
+        
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
         });
         
-        userInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
         });
-
-        uploadZone.addEventListener('click', () => fileInput.click());
-        uploadZone.addEventListener('dragover', (e) => {
+        
+        dropArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadZone.style.borderColor = '#3b82f6';
-            uploadZone.style.background = 'rgba(59, 130, 246, 0.1)';
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.style.borderColor = 'rgba(96, 165, 250, 0.4)';
-            uploadZone.style.background = 'rgba(96, 165, 250, 0.05)';
-        });
-
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.style.borderColor = 'rgba(96, 165, 250, 0.4)';
-            uploadZone.style.background = 'rgba(96, 165, 250, 0.05)';
+            dropArea.classList.remove('dragover');
             
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
-                handleFileUpload({ target: fileInput });
+                handleFile({ target: fileInput });
             }
         });
 
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileUpload);
-        
-        sampleDataBtn.addEventListener('click', loadSampleData);
-        clearChatBtn.addEventListener('click', clearChat);
-        quickHelpBtn.addEventListener('click', showQuickHelp);
-        exportHistoryBtn.addEventListener('click', exportHistory);
-        themeToggle.addEventListener('click', toggleTheme);
+        // Handle file upload
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // ============ INITIALIZATION ============
-
-        updateSheetStatus('DataSet', false);
-        updateSheetStatus('Synonyms', false);
-        updateSheetStatus('Extensions', false);
-        updateSheetStatus('Temp', false);
-
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Get first sheet
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    
+                    // Convert to JSON
+                    const json = XLSX.utils.sheet_to_json(sheet, { defval: null });
+                    
+                    if (json.length === 0) {
+                        alert('The Excel file appears to be empty.');
+                        return;
+                    }
+                    
+                    currentData = json;
+                    analyzeData();
+                    dataSection.style.display = 'block';
+                    
+                    // Scroll to data section
+                    dataSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                    console.error(error);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
         }
 
-        setTimeout(() => {
-            userInput.focus();
-        }, 500);
+        // Analyze data structure
+        function analyzeData() {
+            if (currentData.length === 0) return;
+            
+            const headers = Object.keys(currentData[0]);
+            numericCols = [];
+            textCols = [];
+            
+            // Detect column types
+            headers.forEach(header => {
+                // Check if column is numeric (all values are numbers or null)
+                const isNumeric = currentData.every(row => {
+                    const val = row[header];
+                    return val === null || val === '' || !isNaN(parseFloat(val));
+                });
+                
+                if (isNumeric) {
+                    numericCols.push(header);
+                } else {
+                    textCols.push(header);
+                }
+            });
+            
+            // Update UI
+            updateColumnSelects();
+            generateStats();
+            generateDataTable();
+            autoSuggestChart();
+            generateChart();
+        }
+
+        // Update column dropdowns
+        function updateColumnSelects() {
+            // Clear dropdowns
+            xAxisSelect.innerHTML = '';
+            yAxisSelect.innerHTML = '';
+            
+            // Add text columns to X-axis
+            textCols.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = `${col} 📝`;
+                xAxisSelect.appendChild(option);
+            });
+            
+            // Add numeric columns to Y-axis
+            numericCols.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = `${col} 🔢`;
+                yAxisSelect.appendChild(option);
+            });
+            
+            // Set default selections
+            if (textCols.length > 0) xAxisSelect.value = textCols[0];
+            if (numericCols.length > 0) yAxisSelect.value = numericCols[0];
+        }
+
+        // Generate statistics
+        function generateStats() {
+            statsContainer.innerHTML = '';
+            
+            const stats = [
+                { label: 'Total Rows', value: currentData.length },
+                { label: 'Total Columns', value: numericCols.length + textCols.length },
+                { label: 'Numeric Columns', value: numericCols.length },
+                { label: 'Text Columns', value: textCols.length },
+                { label: 'File Type', value: 'Excel' }
+            ];
+            
+            stats.forEach(stat => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+                statsContainer.appendChild(card);
+            });
+        }
+
+        // Generate data table preview
+        function generateDataTable() {
+            let tableHTML = `<table class="data-table">
+                <thead>
+                    <tr>`;
+            
+            // Table headers with type badges
+            const headers = Object.keys(currentData[0]);
+            headers.forEach(header => {
+                const type = numericCols.includes(header) ? 'numeric' : 'text';
+                tableHTML += `<th>${header} <span class="column-type type-${type}">${type === 'numeric' ? '🔢 Number' : '📝 Text'}</span></th>`;
+            });
+            
+            tableHTML += `</tr></thead><tbody>`;
+            
+            // Table rows (limit to 10 for preview)
+            const previewRows = currentData.slice(0, 10);
+            previewRows.forEach(row => {
+                tableHTML += `<tr>`;
+                headers.forEach(header => {
+                    const value = row[header];
+                    tableHTML += `<td>${value !== null && value !== undefined ? value : '<em>null</em>'}</td>`;
+                });
+                tableHTML += `</tr>`;
+            });
+            
+            tableHTML += `</tbody></table>`;
+            
+            if (currentData.length > 10) {
+                tableHTML += `<p style="margin-top: 10px; color: #666; text-align: center;">Showing 10 of ${currentData.length} rows</p>`;
+            }
+            
+            tableContainer.innerHTML = tableHTML;
+        }
+
+        // Auto-suggest chart type based on data
+        function autoSuggestChart() {
+            const selectedType = chartTypeSelect.value;
+            
+            if (selectedType !== 'auto') {
+                autoSuggestion.classList.add('hidden');
+                return;
+            }
+            
+            let suggestion = '';
+            let chartType = 'bar';
+            
+            if (numericCols.length >= 2 && textCols.length > 0) {
+                suggestion = '📊 Multiple numeric columns detected. Try a grouped bar chart or line chart.';
+                chartType = 'bar';
+            } else if (numericCols.length >= 2) {
+                suggestion = '🔢 Two numeric columns detected. Scatter plot would work well.';
+                chartType = 'scatter';
+            } else if (textCols.length > 0 && numericCols.length > 0) {
+                suggestion = '📈 Text and numeric columns detected. Bar chart is recommended.';
+                chartType = 'bar';
+            } else if (numericCols.length === 1) {
+                suggestion = '📉 Single numeric column detected. Try a histogram or distribution chart.';
+                chartType = 'bar';
+            } else {
+                suggestion = 'ℹ️ Not enough data for charting. Please check your file.';
+            }
+            
+            suggestionText.textContent = suggestion;
+            autoSuggestion.classList.remove('hidden');
+            
+            // Update hidden chart type
+            return chartType;
+        }
+
+        // Generate the chart
+        function generateChart() {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Destroy previous chart
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            // Get selected values
+            const xCol = xAxisSelect.value;
+            const yCol = yAxisSelect.value;
+            const color = colorSelect.value;
+            
+            if (!xCol || !yCol || currentData.length === 0) {
+                chartTitle.textContent = 'Please select valid columns';
+                return;
+            }
+            
+            // Prepare data
+            const labels = currentData.map(row => row[xCol] || 'N/A').slice(0, 50); // Limit to 50 points
+            const data = currentData.map(row => parseFloat(row[yCol]) || 0).slice(0, 50);
+            
+            // Determine chart type
+            let chartType = chartTypeSelect.value;
+            if (chartType === 'auto') {
+                chartType = autoSuggestChart();
+            }
+            
+            // Update chart title
+            chartTitle.textContent = `${yCol} by ${xCol}`;
+            
+            // Chart configuration
+            const chartConfig = {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: yCol,
+                        data: data,
+                        backgroundColor: chartType === 'bar' || chartType === 'pie' || chartType === 'doughnut' 
+                            ? color + '80'  // Add transparency
+                            : color,
+                        borderColor: color,
+                        borderWidth: 2,
+                        pointBackgroundColor: color,
+                        pointRadius: chartType === 'scatter' ? 5 : 3,
+                        fill: chartType === 'line' || chartType === 'radar'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: chartType !== 'pie' && chartType !== 'doughnut' ? {
+                        x: {
+                            title: {
+                                display: true,
+                                text: xCol,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: yCol,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            beginAtZero: true
+                        }
+                    } : {}
+                }
+            };
+            
+            // Create chart
+            chartInstance = new Chart(ctx, chartConfig);
+        }
+
+        // Reset to upload new file
+        function resetFile() {
+            currentData = [];
+            numericCols = [];
+            textCols = [];
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+            
+            dataSection.style.display = 'none';
+            fileInput.value = '';
+            chartTitle.textContent = 'Chart Preview';
+            tableContainer.innerHTML = '';
+            statsContainer.innerHTML = '';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Universal Excel Data Analyzer loaded!');
+        });
     </script>
 </body>
 </html>
