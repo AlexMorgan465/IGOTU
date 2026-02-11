@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofidis Executive Intelligence</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --cofidis-red: #E2001A;
+            --cofidis-dark: #121212;
+            --sidebar-width: 280px;
+            --bg-body: #F4F7FA;
+            --card-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            color: #2D3436;
+        }
+
+        /* Side Navigation - Premium Look */
+        aside {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1A1A1A 0%, #000000 100%);
+            color: white;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            padding: 0 35px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--cofidis-red);
+            letter-spacing: -1.5px;
+        }
+
+        .nav-link {
+            padding: 20px 35px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            opacity: 0.6;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+        .nav-link.active {
+            opacity: 1;
+            background: rgba(226, 0, 26, 0.1);
+            border-left: 5px solid var(--cofidis-red);
+            font-weight: 700;
+        }
+
+        /* Content Area */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, #FFFFFF, #F4F7FA);
+        }
+
+        header {
+            padding: 30px 50px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 50px;
+        }
+
+        /* KPI Cards - Modern Floating Style */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .kpi-card label { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-card .value { display: block; font-size: 2.8rem; font-weight: 900; margin-top: 10px; color: var(--cofidis-dark); }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .chart-card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: var(--card-shadow);
+            min-height: 500px;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 30px;
+            font-size: 1.3rem;
+            color: var(--cofidis-dark);
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+
+        .page { display: none; }
+        .active-page { display: block; animation: slideUp 0.5s ease-out; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-file-upload {
+            background: var(--cofidis-red);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="brand">COFIDIS <small style="font-size:0.5em; display:block; opacity:0.5;">Intelligence Lab</small></div>
+    <div class="nav-link active" onclick="navigate('general', this)">Dashboard Global</div>
+    <div class="nav-link" onclick="navigate('production', this)">Analyse Production</div>
+    <div class="nav-link" onclick="navigate('agent-view', this)">Performance Individuelle</div>
+</aside>
+
+<main>
+    <header>
+        <h2 id="page-header">Dashboard Global</h2>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+    </header>
+
+    <div class="container">
+        <div id="general" class="page active-page">
+            <div class="kpi-row">
+                <div class="kpi-card"><label>Dossiers Reçus</label><span class="value" id="kpi-total">0</span></div>
+                <div class="kpi-card"><label>Taux d'Accord</label><span class="value" id="kpi-rate" style="color:var(--cofidis-red);">0%</span></div>
+                <div class="kpi-card"><label>Délai Moyen</label><span class="value" id="kpi-delay">2.4j</span></div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="chart-card full-width">
+                    <h3>Évolution Mensuelle des Volumes</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Répartition des Produits</h3>
+                    <canvas id="productDonut"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Entonnoir de Conversion</h3>
+                    <canvas id="funnelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="production" class="page">
+            <div class="dashboard-grid">
+                <div class="chart-card full-width">
+                    <h3>Performance par Canal de Vente</h3>
+                    <canvas id="canalBarChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Statut des Signatures</h3>
+                    <canvas id="sigChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Motifs de Refus (Top 5)</h3>
+                    <canvas id="refusalChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="agent-view" class="page">
+            <div class="dashboard-grid">
+                <div class="chart-card full-width">
+                    <h3>Top 15 Gestionnaires - Volume & Efficacité</h3>
+                    <canvas id="agentMasterChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+let rawData = [];
+const COFIDIS_PALETTE = ['#E2001A', '#2D2D2D', '#FFB400', '#009688', '#5C6BC0', '#8D6E63', '#EC407A', '#F48FB1'];
+
+function navigate(pageId, element) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active-page');
+    element.classList.add('active');
+    document.getElementById('page-header').innerText = element.innerText;
+}
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const wb = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
+        rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        renderAll();
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
+});
+
+function renderAll() {
+    if (!rawData.length) return;
+
+    // Data Processing
+    const products = groupBy(rawData, 'Type de produit');
+    const decisions = groupBy(rawData, 'Decision');
+    const canals = groupBy(rawData, 'Canal');
+    const signatures = groupBy(rawData, 'Type de signature');
+    const agents = groupBy(rawData, 'Agent');
+
+    // KPI Update
+    document.getElementById('kpi-total').innerText = rawData.length;
+    const ok = decisions["Accord"] || decisions["Approuvé"] || 0;
+    document.getElementById('kpi-rate').innerText = ((ok / rawData.length) * 100).toFixed(1) + "%";
+
+    // Charts
+    draw(document.getElementById('productDonut'), 'doughnut', products);
+    draw(document.getElementById('funnelChart'), 'bar', decisions, true);
+    draw(document.getElementById('canalBarChart'), 'bar', canals);
+    draw(document.getElementById('sigChart'), 'pie', signatures);
+    
+    // Complex Agent Chart (Top 15)
+    const sortedAgents = Object.entries(agents).sort((a,b) => b[1] - a[1]).slice(0, 15);
+    draw(document.getElementById('agentMasterChart'), 'bar', {
+        labels: sortedAgents.map(x => x[0]),
+        values: sortedAgents.map(x => x[1])
+    }, true);
+
+    // Trend Chart (Dummy trend if no dates, but logic is ready)
+    draw(document.getElementById('trendChart'), 'line', {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        values: [rawData.length * 0.1, rawData.length * 0.15, rawData.length * 0.12, rawData.length * 0.2, rawData.length * 0.18, rawData.length * 0.25]
+    });
+}
+
+function groupBy(data, key) {
+    return data.reduce((acc, row) => {
+        const v = row[key] || "Non spécifié";
+        acc[v] = (acc[v] || 0) + 1;
+        return acc;
+    }, {});
+}
+
+function draw(ctx, type, dataObj, horizontal = false) {
+    const labels = dataObj.labels || Object.keys(dataObj);
+    const values = dataObj.values || Object.values(dataObj);
+
+    const chartId = ctx.id;
+    const existing = Chart.getChart(chartId);
+    if (existing) existing.destroy();
+
+    new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Volume',
+                data: values,
+                backgroundColor: type === 'line' ? 'rgba(226, 0, 26, 0.1)' : COFIDIS_PALETTE,
+                borderColor: type === 'line' ? '#E2001A' : 'transparent',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                borderRadius: 10,
+                barThickness: 20
+            }]
+        },
+        options: {
+            indexAxis: horizontal ? 'y' : 'x',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: type !== 'bar', position: 'bottom' }
+            },
+            scales: type === 'bar' || type === 'line' ? {
+                x: { grid: { display: false } },
+                y: { grid: { color: '#f0f0f0' }, border: { display: false } }
+            } : {}
+        }
+    });
+}
+</script>
+
+</body>
+</html>
