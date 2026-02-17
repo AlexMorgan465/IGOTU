@@ -1,0 +1,83 @@
+Option Explicit
+
+Sub ExtraireMailVersTableau()
+
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim contenu As String
+    
+    Set wsSource = Workbooks("Mail.xlsx").Sheets(1) ' Feuille source
+    Set wsDest = ThisWorkbook.Sheets(1) ' Feuille du tableau
+    
+    lastRow = wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 2 To lastRow
+    
+        contenu = wsSource.Cells(i, "A").Value ' Colonne Contenu
+        
+        If contenu <> "" Then
+            
+            wsDest.Cells(i, 2).Value = ExtraireValeur(contenu, "Prénom :")
+            wsDest.Cells(i, 3).Value = ExtraireValeur(contenu, "Nom :")
+            wsDest.Cells(i, 4).Value = ExtraireValeur(contenu, "Email :")
+            wsDest.Cells(i, 5).Value = ExtraireValeur(contenu, "Téléphone :")
+            
+            Dim adresse As String
+            adresse = ExtraireValeur(contenu, "Adresse du bien :")
+            
+            wsDest.Cells(i, 6).Value = adresse
+            
+            ' Extraction Code Postal et Ville
+            Call ExtraireCPVille(adresse, wsDest, i)
+            
+        End If
+        
+    Next i
+    
+    MsgBox "Extraction terminée !", vbInformation
+
+End Sub
+
+
+Function ExtraireValeur(texte As String, motCle As String) As String
+    
+    Dim pos As Long
+    Dim debut As Long
+    Dim finLigne As Long
+    
+    pos = InStr(1, texte, motCle, vbTextCompare)
+    
+    If pos > 0 Then
+        
+        debut = pos + Len(motCle)
+        finLigne = InStr(debut, texte, vbLf)
+        
+        If finLigne = 0 Then finLigne = Len(texte)
+        
+        ExtraireValeur = Trim(Mid(texte, debut, finLigne - debut))
+        
+    Else
+        ExtraireValeur = ""
+    End If
+    
+End Function
+
+
+Sub ExtraireCPVille(adresse As String, ws As Worksheet, ligne As Long)
+
+    Dim regex As Object
+    Set regex = CreateObject("VBScript.RegExp")
+    
+    regex.Pattern = "(\d{5})\s(.+)"
+    regex.Global = False
+    
+    If regex.test(adresse) Then
+        
+        ws.Cells(ligne, 7).Value = regex.Execute(adresse)(0).SubMatches(0) ' Code Postal
+        ws.Cells(ligne, 8).Value = regex.Execute(adresse)(0).SubMatches(1) ' Ville
+        
+    End If
+
+End Sub
