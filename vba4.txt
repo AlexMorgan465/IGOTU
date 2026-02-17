@@ -1,0 +1,227 @@
+Option Explicit
+
+Sub ExtraireMailVersTableau()
+
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim contenu As String
+    Dim prenom As String
+    Dim adresse As String
+    
+    Set wsSource = Workbooks("Mail.xlsx").Sheets(1)
+    Set wsDest = ThisWorkbook.Sheets(1)
+    
+    lastRow = wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 2 To lastRow
+        
+        contenu = wsSource.Cells(i, "A").Value
+        
+        If contenu <> "" Then
+            
+            ' ===== Extraction Prénom
+            prenom = ExtraireValeur(contenu, "Prénom :")
+            wsDest.Cells(i, 2).Value = prenom
+            
+            ' ===== Civilité automatique
+            wsDest.Cells(i, 1).Value = DeterminerCivilite(prenom)
+            
+            ' ===== Autres champs
+            wsDest.Cells(i, 3).Value = ExtraireValeur(contenu, "Nom :")
+            wsDest.Cells(i, 4).Value = ExtraireValeur(contenu, "Email :")
+            wsDest.Cells(i, 5).Value = ExtraireValeur(contenu, "Téléphone :")
+            
+            ' ===== Adresse (coupée à la virgule)
+            adresse = ExtraireAdresse(contenu)
+            wsDest.Cells(i, 6).Value = adresse
+            
+            ' ===== Code postal + Ville
+            ExtraireCPVille contenu, wsDest, i
+            
+        End If
+        
+    Next i
+    
+    MsgBox "Extraction terminée avec succès.", vbInformation
+
+End Sub
+
+
+
+' ============================================================
+' EXTRACTION STANDARD ENTRE LABELS
+' ============================================================
+
+Function ExtraireValeur(texte As String, motCle As String) As String
+
+    Dim posDebut As Long
+    Dim posFin As Long
+    Dim valeur As String
+    
+    posDebut = InStr(1, texte, motCle, vbTextCompare)
+    
+    If posDebut = 0 Then
+        ExtraireValeur = ""
+        Exit Function
+    End If
+    
+    posDebut = posDebut + Len(motCle)
+    posFin = ProchainLabel(texte, posDebut)
+    
+    If posFin = 0 Then
+        valeur = Mid(texte, posDebut)
+    Else
+        valeur = Mid(texte, posDebut, posFin - posDebut)
+    End If
+    
+    valeur = NettoyerChamp(valeur)
+    
+    ExtraireValeur = valeur
+
+End Function
+
+
+
+' ============================================================
+' EXTRACTION SPÉCIALE ADRESSE
+' ============================================================
+
+Function ExtraireAdresse(texte As String) As String
+
+    Dim adresse As String
+    Dim posVirgule As Long
+    
+    adresse = ExtraireValeur(texte, "Adresse du bien :")
+    
+    posVirgule = InStr(1, adresse, ",")
+    
+    If posVirgule > 0 Then
+        adresse = Left(adresse, posVirgule - 1)
+    End If
+    
+    ExtraireAdresse = Trim(adresse)
+
+End Function
+
+
+
+' ============================================================
+' TROUVER LE PROCHAIN LABEL
+' ============================================================
+
+Function ProchainLabel(texte As String, startPos As Long) As Long
+
+    Dim labels As Variant
+    Dim i As Integer
+    Dim pos As Long
+    Dim minPos As Long
+    
+    labels = Array("Nom :", "Prénom :", "Email :", "Téléphone :", "Adresse du bien :")
+    
+    minPos = 0
+    
+    For i = LBound(labels) To UBound(labels)
+        
+        pos = InStr(startPos, texte, labels(i), vbTextCompare)
+        
+        If pos > 0 Then
+            If minPos = 0 Or pos < minPos Then
+                minPos = pos
+            End If
+        End If
+        
+    Next i
+    
+    ProchainLabel = minPos
+
+End Function
+
+
+
+' ============================================================
+' NETTOYAGE CHAMPS (SUPPRIME "Contact par ...")
+' ============================================================
+
+Function NettoyerChamp(valeur As String) As String
+
+    Dim pos As Long
+    
+    pos = InStr(1, valeur, "Contact par", vbTextCompare)
+    
+    If pos > 0 Then
+        valeur = Left(valeur, pos - 1)
+    End If
+    
+    NettoyerChamp = Trim(valeur)
+
+End Function
+
+
+
+' ============================================================
+' EXTRACTION CODE POSTAL + VILLE
+' ============================================================
+
+Sub ExtraireCPVille(texte As String, ws As Worksheet, ligne As Long)
+
+    Dim words() As String
+    Dim i As Integer
+    
+    words = Split(texte, " ")
+    
+    For i = 0 To UBound(words)
+        
+        If Len(words(i)) = 5 And IsNumeric(words(i)) Then
+            
+            ws.Cells(ligne, 7).Value = words(i)
+            
+            If i < UBound(words) Then
+                ws.Cells(ligne, 8).Value = words(i + 1)
+            End If
+            
+            Exit For
+            
+        End If
+        
+    Next i
+
+End Sub
+
+
+
+' ============================================================
+' DÉTERMINATION CIVILITÉ À PARTIR DU PRÉNOM
+' ============================================================
+
+Function DeterminerCivilite(prenom As String) As String
+
+    Dim p As String
+    p = UCase(Trim(prenom))
+    
+    Dim hommes As Variant
+    hommes = Array("GEORGES", "PAUL", "JEAN", "PIERRE", "MOHAMED", "AHMED", "DAVID", "THOMAS", "ANTOINE", "LUC")
+    
+    Dim femmes As Variant
+    femmes = Array("MARIE", "SOPHIE", "ANNE", "NADIA", "SARAH", "JULIE", "CLAIRE", "FATIMA", "EMMA", "LINA")
+    
+    Dim i As Integer
+    
+    For i = LBound(hommes) To UBound(hommes)
+        If p = hommes(i) Then
+            DeterminerCivilite = "M."
+            Exit Function
+        End If
+    Next i
+    
+    For i = LBound(femmes) To UBound(femmes)
+        If p = femmes(i) Then
+            DeterminerCivilite = "Mme"
+            Exit Function
+        End If
+    Next i
+    
+    DeterminerCivilite = "" ' inconnu
+
+End Function
