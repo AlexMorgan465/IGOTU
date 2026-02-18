@@ -1,0 +1,29 @@
+Option Explicit
+
+Sub ExtraireColonne()
+
+    Dim wsSource As Worksheet
+    Dim wsDestination As Worksheet
+    Dim derniereLigne As Long
+    Dim colonneSource As String
+    Dim colonneDestination As String
+    
+    ' --- PARAMETRES A MODIFIER ---
+    Set wsSource = ThisWorkbook.Sheets("Feuil1")          ' Feuille source
+    Set wsDestination = ThisWorkbook.Sheets("Feuil2")     ' Feuille destination
+    colonneSource = "B"                                   ' Colonne à extraire
+    colonneDestination = "A"                              ' Colonne où coller
+    
+    ' Trouver la dernière ligne utilisée
+    derniereLigne = wsSource.Cells(wsSource.Rows.Count, colonneSource).End(xlUp).Row
+    
+    ' Effacer ancienne colonne destination
+    wsDestination.Columns(colonneDestination).ClearContents
+    
+    ' Copier / Coller
+    wsSource.Range(colonneSource & "1:" & colonneSource & derniereLigne).Copy _
+        Destination:=wsDestination.Range(colonneDestination & "1")
+    
+    MsgBox "Extraction terminée avec succès !", vbInformation
+
+End Sub
