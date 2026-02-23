@@ -1,0 +1,11 @@
+Bonjour [Nom du manager],
+
+Je souhaite vous informer des différents points bloquants que j’ai rencontrés lors du traitement d’accessibilité des documents PDF 1, 2 et 3.
+
+1️⃣ Polices non intégréesCertains documents contiennent des polices qui ne sont pas intégrées. L’incorporation de ces polices est impossible sans disposer des fichiers sources originaux (documents natifs). Sans ces fichiers, je ne peux pas intégrer correctement les polices dans les PDF existants.
+
+2️⃣ Méthode Tanaguru – Contrôle d’amontLors de l’application de la méthode Tanaguru via le contrôle d’amont, l’outil convertit automatiquement l’ensemble du contenu en chemins. Cette conversion altère la structure du document et rend le balisage et l’accessibilité plus complexes à corriger.
+
+3️⃣ Problème de contraste des couleursAfin de respecter les exigences d’accessibilité (contraste suffisant), j’ai modifié la couleur de fond de certains en-têtes de tableaux.La couleur est passée de #7BC9CE à #328085 avec un texte blanc, afin d’assurer un contraste conforme.Cette modification a été appliquée de manière identique sur les trois documents (1, 2 et 3).
+
+N’hésitez pas à me dire si vous souhaitez que nous envisagions une autre approche, notamment concernant les fichiers sources originaux.
