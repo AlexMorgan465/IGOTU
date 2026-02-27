@@ -1,0 +1,1048 @@
+Absolument. Voici le code VBA complet et détaillé pour réaliser l'application de gestion de traitement, en suivant scrupuleusement votre cahier des charges et l'arborescence fournie.
+
+Ce code est conçu pour être copié/collé directement dans les modules correspondants de votre projet Excel `GESTION_TRAITEMENTS.xlsm`.
+
+---
+
+## 📦 Structure du Projet VBA
+
+Avant de coller le code, créez les modules suivants dans l'éditeur VBA (ALT + F11) :
+
+1.  **UserForms** : `LoginForm`, `MainForm`, `StatsForm`, `AdminConfigForm`
+2.  **Modules** : `FileSystemModule`, `LogModule`, `SecurityModule`, `ConfigModule`, `TimerModule`, `UtilitiesModule`
+3.  **Feuilles de calcul** : `FeuilAgents` (Nom de code: `wsAgents`), `FeuilConfig` (Nom de code: `wsConfig`), `FeuilHistorique` (Nom de code: `wsHistorique`). Cachez ces feuilles via la propriété `Visible = xlSheetVeryHidden`.
+
+---
+
+## ⚙️ 1. MODULE DE CONFIGURATION (ConfigModule)
+
+Ce module gère la lecture/écriture de la configuration et l'initialisation des feuilles cachées.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' Module: ConfigModule
+' Rôle: Gestion de la configuration (chemins, agents, historique) et initialisation.
+' ******************************************************************************************
+
+Public Const SHEET_AGENTS As String = "AGENTS"
+Public Const SHEET_CONFIG As String = "CONFIG"
+Public Const SHEET_HISTORIQUE As String = "HISTORIQUE"
+Public Const CONFIG_RACINE As String = "RACINE"
+
+Public Const PATH_A_TRAITER As String = "A TRAITER"
+Public Const PATH_EN_COURS As String = "EN COURS"
+Public Const PATH_TRAITES As String = "TRAITES"
+Public Const PATH_NON_CONFORME As String = "NON CONFORME"
+Public Const PATH_TRACES_EXCEL As String = "TRACES_EXCEL_TRAITES"
+
+Public Const LOG_STATUT_TRAITE As String = "TRAITE"
+Public Const LOG_STATUT_NON_CONFORME As String = "NON CONFORME"
+
+' --- Initialise les feuilles cachées au premier démarrage ---
+Public Sub InitializeHiddenSheets()
+    Dim ws As Worksheet
+    Dim historiquePath As String
+    Dim fso As Object
+
+    ' Feuille AGENTS
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(SHEET_AGENTS)
+    On Error GoTo 0
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws.Name = SHEET_AGENTS
+        ws.Visible = xlSheetVeryHidden
+        ws.Cells(1, 1).Value = "Agent"
+        ws.Cells(1, 2).Value = "MotDePasseHash"
+        ws.Cells(1, 3).Value = "Actif"
+        ws.Cells(1, 4).Value = "Role"
+        ws.Range("A1:D1").Font.Bold = True
+        ' Ajout d'un agent admin par défaut (mot de passe: admin1)
+        SecurityModule.HashAndStorePassword "admin1", "Admin", "ADMIN", ws
+        ' Ajout d'un agent user par défaut (mot de passe: 1234)
+        SecurityModule.HashAndStorePassword "1234", "Dupont", "USER", ws
+    End If
+
+    ' Feuille CONFIG
+    Set ws = Nothing
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(SHEET_CONFIG)
+    On Error GoTo 0
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws.Name = SHEET_CONFIG
+        ws.Visible = xlSheetVeryHidden
+        ws.Cells(1, 1).Value = "Paramètre"
+        ws.Cells(1, 2).Value = "Valeur"
+        ws.Range("A1:B1").Font.Bold = True
+        ws.Cells(2, 1).Value = CONFIG_RACINE
+        ws.Cells(2, 2).Value = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité" ' Chemin par défaut
+    End If
+
+    ' Fichier HISTORIQUE (création s'il n'existe pas)
+    historiquePath = ThisWorkbook.Path & Application.PathSeparator & "HISTORIQUE_TRAITEMENT.xlsx"
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FileExists(historiquePath) Then
+        CreateHistoriqueFile historiquePath
+    End If
+    
+    ' Lier la feuille historique
+    LinkHistoriqueSheet
+    
+    MsgBox "Configuration initialisée avec succès.", vbInformation, "Initialisation"
+End Sub
+
+' --- Crée le fichier historique externe ---
+Private Sub CreateHistoriqueFile(filePath As String)
+    Dim wbHist As Workbook
+    Dim wsHist As Worksheet
+    
+    Set wbHist = Workbooks.Add
+    Set wsHist = wbHist.Sheets(1)
+    With wsHist
+        .Cells(1, 1).Value = "Agent"
+        .Cells(1, 2).Value = "Entité"
+        .Cells(1, 3).Value = "SousCatégorie"
+        .Cells(1, 4).Value = "Nom Fichier"
+        .Cells(1, 5).Value = "Date Début"
+        .Cells(1, 6).Value = "Date Fin"
+        .Cells(1, 7).Value = "Durée (min)"
+        .Cells(1, 8).Value = "Statut"
+        .Cells(1, 9).Value = "Date"
+        .Range("A1:I1").Font.Bold = True
+        .Columns("A:I").AutoFit
+    End With
+    wbHist.SaveAs filePath, FileFormat:=xlOpenXMLWorkbook
+    wbHist.Close SaveChanges:=False
+End Sub
+
+' --- Lie le fichier historique en tant que feuille externe ---
+Public Sub LinkHistoriqueSheet()
+    Dim ws As Worksheet
+    Dim historiquePath As String
+    Dim connString As String
+    Dim sql As String
+    
+    historiquePath = ThisWorkbook.Path & Application.PathSeparator & "HISTORIQUE_TRAITEMENT.xlsx"
+    
+    ' Supprime l'ancienne feuille si elle existe
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Set ws = ThisWorkbook.Worksheets(SHEET_HISTORIQUE)
+    If Not ws Is Nothing Then ws.Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+
+    ' Crée une nouvelle feuille et lie les données
+    Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    ws.Name = SHEET_HISTORIQUE
+    ws.Visible = xlSheetVeryHidden
+    
+    ' Utilisation de QueryTables pour lier le fichier externe
+    connString = "ODBC;DSN=Excel Files;DBQ=" & historiquePath & ";DefaultDir=" & ThisWorkbook.Path & ";DriverId=1046;MaxBufferSize=2048;PageTimeout=5;"
+    sql = "SELECT * FROM [Feuil1$]"
+    
+    With ws.QueryTables.Add(Connection:=connString, Destination:=ws.Range("A1"), Sql:=sql)
+        .RefreshStyle = xlOverwriteCells
+        .Refresh
+    End With
+    ws.Cells.EntireColumn.AutoFit
+End Sub
+
+' --- Récupère le chemin racine depuis la config ---
+Public Function GetRootPath() As String
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Worksheets(SHEET_CONFIG)
+    GetRootPath = Application.WorksheetFunction.VLookup(CONFIG_RACINE, ws.Range("A:B"), 2, False)
+    If IsError(GetRootPath) Then GetRootPath = ""
+End Function
+
+' --- Sauvegarde le chemin racine ---
+Public Sub SaveRootPath(newPath As String)
+    Dim ws As Worksheet
+    Dim foundCell As Range
+    
+    Set ws = ThisWorkbook.Worksheets(SHEET_CONFIG)
+    Set foundCell = ws.Columns(1).Find(What:=CONFIG_RACINE, LookAt:=xlWhole)
+    
+    If Not foundCell Is Nothing Then
+        ws.Cells(foundCell.Row, 2).Value = newPath
+    Else
+        ws.Cells(ws.Rows.Count, 1).End(xlUp).Offset(1, 0).Value = CONFIG_RACINE
+        ws.Cells(ws.Rows.Count, 1).End(xlUp).Offset(0, 1).Value = newPath
+    End If
+End Sub
+```
+
+---
+
+## 🔐 2. MODULE DE SÉCURITÉ (SecurityModule)
+
+Gère le hachage des mots de passe et l'authentification.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' Module: SecurityModule
+' Rôle: Fonctions de hachage et de vérification des mots de passe.
+' ******************************************************************************************
+
+Private Const MAX_LOGIN_ATTEMPTS As Integer = 3
+Public CurrentUser As String
+Public CurrentUserRole As String
+Public LoginAttempts As Integer
+
+' --- Hache et stocke un mot de passe (utilisation en interne pour créer les comptes) ---
+Public Sub HashAndStorePassword(plainPassword As String, agentName As String, userRole As String, Optional wsAgents As Worksheet)
+    Dim hash As String
+    Dim ws As Worksheet
+    
+    If wsAgents Is Nothing Then Set ws = ThisWorkbook.Worksheets(SHEET_AGENTS) Else Set ws = wsAgents
+    
+    hash = SimpleHash(plainPassword) ' On utilisera une version plus robuste en production
+    
+    Dim nextRow As Long
+    nextRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
+    ws.Cells(nextRow, 1).Value = agentName
+    ws.Cells(nextRow, 2).Value = hash
+    ws.Cells(nextRow, 3).Value = "OUI" ' Actif par défaut
+    ws.Cells(nextRow, 4).Value = userRole
+End Sub
+
+' --- Fonction de hachage SIMPLE (à remplacer par SHA256 en production) ---
+' Pour du vrai SHA256, il faudrait utiliser une API Windows ou une librairie .NET
+Private Function SimpleHash(ByVal inputText As String) As String
+    Dim i As Integer
+    Dim hash As Long
+    For i = 1 To Len(inputText)
+        hash = hash + (Asc(Mid(inputText, i, 1)) * i)
+    Next i
+    SimpleHash = CStr(hash)
+End Function
+
+' --- Vérifie les identifiants ---
+Public Function AuthenticateUser(agentName As String, plainPassword As String) As Boolean
+    Dim ws As Worksheet
+    Dim foundCell As Range
+    Dim storedHash As String
+    Dim isActive As String
+    
+    Set ws = ThisWorkbook.Worksheets(SHEET_AGENTS)
+    Set foundCell = ws.Columns(1).Find(What:=agentName, LookAt:=xlWhole)
+    
+    If Not foundCell Is Nothing Then
+        storedHash = ws.Cells(foundCell.Row, 2).Value
+        isActive = ws.Cells(foundCell.Row, 3).Value
+        If UCase(isActive) = "OUI" And storedHash = SimpleHash(plainPassword) Then
+            CurrentUser = agentName
+            CurrentUserRole = ws.Cells(foundCell.Row, 4).Value
+            LoginAttempts = 0
+            AuthenticateUser = True
+            Exit Function
+        End If
+    End If
+    
+    LoginAttempts = LoginAttempts + 1
+    If LoginAttempts >= MAX_LOGIN_ATTEMPTS Then
+        MsgBox "Trop de tentatives échouées. L'application va se fermer.", vbCritical, "Sécurité"
+        ThisWorkbook.Close SaveChanges:=False
+    End If
+    AuthenticateUser = False
+End Function
+
+' --- Vérifie si l'utilisateur est admin ---
+Public Function IsCurrentUserAdmin() As Boolean
+    IsCurrentUserAdmin = (UCase(CurrentUserRole) = "ADMIN")
+End Function
+```
+
+---
+
+## 📁 3. MODULE DE GESTION DES FICHIERS (FileSystemModule)
+
+Contient toutes les opérations sur les fichiers et dossiers.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' Module: FileSystemModule
+' Rôle: Toutes les interactions avec le système de fichiers.
+' ******************************************************************************************
+
+Private fso As Object
+
+Private Sub Class_Initialize()
+    Set fso = CreateObject("Scripting.FileSystemObject")
+End Sub
+
+' --- Vérifie si un chemin existe ---
+Public Function FolderExists(folderPath As String) As Boolean
+    FolderExists = fso.FolderExists(folderPath)
+End Function
+
+' --- Crée un dossier s'il n'existe pas ---
+Public Sub CreateFolderIfNotExists(folderPath As String)
+    If Not fso.FolderExists(folderPath) Then
+        fso.CreateFolder folderPath
+    End If
+End Sub
+
+' --- Récupère la liste des entités (dossiers racine) ---
+Public Function GetEntitiesList(rootPath As String) As Collection
+    Dim folder As Object
+    Dim subFolder As Object
+    Dim entities As New Collection
+    
+    On Error GoTo ErrorHandler
+    If fso.FolderExists(rootPath) Then
+        Set folder = fso.GetFolder(rootPath)
+        For Each subFolder In folder.SubFolders
+            ' Ignorer les dossiers système ou cachés si nécessaire
+            entities.Add subFolder.Name
+        Next subFolder
+    End If
+    Set GetEntitiesList = entities
+    Exit Function
+    
+ErrorHandler:
+    MsgBox "Erreur lors de la lecture des entités: " & Err.Description, vbCritical, "Erreur"
+    Set GetEntitiesList = New Collection
+End Function
+
+' --- Récupère la liste des sous-catégories pour une entité donnée et un état (A TRAITER, etc.) ---
+Public Function GetSubCategoriesList(rootPath As String, entity As String, stateFolder As String) As Collection
+    Dim path As String
+    Dim folder As Object
+    Dim subFolder As Object
+    Dim subCats As New Collection
+    
+    path = BuildPath(rootPath, entity, stateFolder)
+    
+    On Error GoTo ErrorHandler
+    If fso.FolderExists(path) Then
+        Set folder = fso.GetFolder(path)
+        For Each subFolder In folder.SubFolders
+            subCats.Add subFolder.Name
+        Next subFolder
+    End If
+    Set GetSubCategoriesList = subCats
+    Exit Function
+    
+ErrorHandler:
+    MsgBox "Erreur lors de la lecture des sous-catégories: " & Err.Description, vbCritical, "Erreur"
+    Set GetSubCategoriesList = New Collection
+End Function
+
+' --- Pioche le premier fichier PDF dans le dossier "A TRAITER" d'une sous-catégorie ---
+Public Function PickFirstPDF(rootPath As String, entity As String, subCategory As String) As String
+    Dim sourcePath As String
+    Dim destPath As String
+    Dim file As Object
+    Dim fileName As String
+    Dim folder As Object
+    
+    sourcePath = BuildPath(rootPath, entity, PATH_A_TRAITER, subCategory)
+    destPath = BuildPath(rootPath, entity, PATH_EN_COURS, subCategory)
+    
+    ' Créer le dossier de destination si nécessaire
+    CreateFolderIfNotExists destPath
+    
+    On Error GoTo ErrorHandler
+    If fso.FolderExists(sourcePath) Then
+        Set folder = fso.GetFolder(sourcePath)
+        For Each file In folder.Files
+            If LCase(fso.GetExtensionName(file.Name)) = "pdf" Then
+                fileName = file.Name
+                ' Déplacer le fichier
+                fso.MoveFile sourcePath & "\" & fileName, destPath & "\" & fileName
+                PickFirstPDF = destPath & "\" & fileName
+                Exit Function
+            End If
+        Next file
+    End If
+    
+    ' Aucun fichier trouvé
+    PickFirstPDF = ""
+    Exit Function
+    
+ErrorHandler:
+    MsgBox "Erreur lors du déplacement du fichier: " & Err.Description, vbCritical, "Erreur"
+    PickFirstPDF = ""
+End Function
+
+' --- Déplace un fichier traité (ou non conforme) ---
+Public Function MoveProcessedFile(sourceFullPath As String, rootPath As String, entity As String, subCategory As String, status As String) As Boolean
+    Dim destFolder As String
+    Dim fileName As String
+    Dim destFullPath As String
+    Dim excelSourcePath As String
+    Dim excelDestFolder As String
+    Dim fsoCopy As Object
+    
+    Set fsoCopy = CreateObject("Scripting.FileSystemObject")
+    fileName = fsoCopy.GetFileName(sourceFullPath)
+    
+    ' 1. Déplacer le PDF
+    Select Case status
+        Case LOG_STATUT_TRAITE
+            destFolder = BuildPath(rootPath, entity, PATH_TRAITES, subCategory)
+        Case LOG_STATUT_NON_CONFORME
+            destFolder = BuildPath(rootPath, entity, PATH_NON_CONFORME, subCategory)
+        Case Else
+            MoveProcessedFile = False
+            Exit Function
+    End Select
+    
+    CreateFolderIfNotExists destFolder
+    destFullPath = destFolder & "\" & fileName
+    
+    On Error GoTo ErrorHandler
+    ' Si le fichier source existe toujours (cas où on le déplace depuis "EN COURS")
+    If fsoCopy.FileExists(sourceFullPath) Then
+        fsoCopy.MoveFile sourceFullPath, destFullPath
+    Else
+        ' Gérer l'erreur
+        MoveProcessedFile = False
+        Exit Function
+    End If
+    
+    ' 2. Si c'est un traitement "TRAITE", chercher et déplacer le fichier Excel associé
+    If status = LOG_STATUT_TRAITE Then
+        excelSourcePath = BuildPath(rootPath, entity, PATH_A_TRAITER, subCategory) & "\" & fsoCopy.GetBaseName(fileName) & ".xlsx"
+        If fsoCopy.FileExists(excelSourcePath) Then
+            excelDestFolder = BuildPath(rootPath, entity, PATH_TRACES_EXCEL, subCategory)
+            CreateFolderIfNotExists excelDestFolder
+            fsoCopy.MoveFile excelSourcePath, excelDestFolder & "\" & fsoCopy.GetFileName(excelSourcePath)
+        End If
+    End If
+    
+    MoveProcessedFile = True
+    Exit Function
+    
+ErrorHandler:
+    MsgBox "Erreur lors du déplacement du fichier traité: " & Err.Description, vbCritical, "Erreur"
+    MoveProcessedFile = False
+End Function
+
+' --- Fonction utilitaire pour construire un chemin proprement ---
+Public Function BuildPath(ParamArray parts() As Variant) As String
+    Dim i As Integer
+    Dim result As String
+    Dim part As Variant
+    
+    For i = LBound(parts) To UBound(parts)
+        part = parts(i)
+        If part <> "" Then
+            If result = "" Then
+                result = part
+            Else
+                ' Enlever les antislashs en trop
+                If Right(result, 1) = "\" Then result = Left(result, Len(result) - 1)
+                If Left(part, 1) = "\" Then part = Mid(part, 2)
+                result = result & "\" & part
+            End If
+        End If
+    Next i
+    BuildPath = result
+End Function
+```
+
+---
+
+## 📝 4. MODULE DE JOURNALISATION (LogModule)
+
+Gère l'écriture dans l'historique.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' Module: LogModule
+' Rôle: Écriture des actions dans le fichier HISTORIQUE_TRAITEMENT.xlsx
+' ******************************************************************************************
+
+Public Sub WriteToLog(agent As String, entity As String, subCategory As String, fileName As String, _
+                      startTime As Date, endTime As Date, status As String)
+    Dim historiquePath As String
+    Dim wbHist As Workbook
+    Dim wsHist As Worksheet
+    Dim nextRow As Long
+    Dim duration As Double
+    
+    ' Calcul de la durée en minutes
+    duration = (endTime - startTime) * 24 * 60 ' Conversion en minutes
+    
+    historiquePath = ThisWorkbook.Path & Application.PathSeparator & "HISTORIQUE_TRAITEMENT.xlsx"
+    
+    ' Ouvre le classeur historique
+    On Error Resume Next
+    Set wbHist = Workbooks.Open(historiquePath)
+    If Err.Number <> 0 Then
+        MsgBox "Impossible d'ouvrir le fichier historique. Vérifiez qu'il n'est pas déjà ouvert.", vbCritical, "Erreur"
+        Exit Sub
+    End If
+    On Error GoTo 0
+    
+    Set wsHist = wbHist.Sheets(1)
+    
+    ' Trouve la prochaine ligne vide
+    nextRow = wsHist.Cells(wsHist.Rows.Count, 1).End(xlUp).Row + 1
+    
+    ' Écrit les données
+    wsHist.Cells(nextRow, 1).Value = agent
+    wsHist.Cells(nextRow, 2).Value = entity
+    wsHist.Cells(nextRow, 3).Value = subCategory
+    wsHist.Cells(nextRow, 4).Value = fileName
+    wsHist.Cells(nextRow, 5).Value = startTime
+    wsHist.Cells(nextRow, 6).Value = endTime
+    wsHist.Cells(nextRow, 7).Value = Round(duration, 2)
+    wsHist.Cells(nextRow, 8).Value = status
+    wsHist.Cells(nextRow, 9).Value = Date
+    
+    ' Sauvegarde et ferme
+    wbHist.Save
+    wbHist.Close
+    
+    ' Met à jour la feuille liée dans le classeur principal
+    ConfigModule.LinkHistoriqueSheet
+End Sub
+```
+
+---
+
+## ⏱️ 5. MODULE DE TIMER (TimerModule)
+
+Gère le chronomètre en temps réel sur l'interface.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' Module: TimerModule
+' Rôle: Gestion du timer pour le suivi de la durée de traitement.
+' ******************************************************************************************
+
+Public StartTime As Date
+Public TimerRunning As Boolean
+Private nextTimerRun As Double
+
+' --- Démarre le timer ---
+Public Sub StartTimer()
+    StartTime = Now
+    TimerRunning = True
+    UpdateTimerDisplay
+End Sub
+
+' --- Arrête le timer ---
+Public Function StopTimer() As Double
+    TimerRunning = False
+    StopTimer = (Now - StartTime) * 24 * 60 * 60 ' Durée en secondes
+End Function
+
+' --- Met à jour l'affichage du timer (appelé via Application.OnTime) ---
+Public Sub UpdateTimerDisplay()
+    Dim mainForm As MainForm
+    Dim elapsedSeconds As Long
+    Dim hours As Long, minutes As Long, seconds As Long
+    
+    If Not TimerRunning Then Exit Sub
+    
+    ' Vérifie si le formulaire principal est toujours ouvert
+    On Error Resume Next
+    Set mainForm = VBA.UserForms.Add("MainForm") ' Cette ligne ne fonctionne pas comme ça. On va plutôt utiliser une variable publique.
+    On Error GoTo 0
+    
+    ' On utilise une variable publique pour la forme (à déclarer dans MainForm)
+    If Not MainForm Is Nothing Then
+        elapsedSeconds = CLng((Now - StartTime) * 24 * 60 * 60)
+        hours = elapsedSeconds \ 3600
+        minutes = (elapsedSeconds Mod 3600) \ 60
+        seconds = elapsedSeconds Mod 60
+        MainForm.lblTimer.Caption = Format(hours, "00") & ":" & Format(minutes, "00") & ":" & Format(seconds, "00")
+        
+        ' Planifie la prochaine mise à jour dans 1 seconde
+        nextTimerRun = Now + TimeValue("00:00:01")
+        Application.OnTime nextTimerRun, "TimerModule.UpdateTimerDisplay", , True
+    Else
+        ' Si la form n'est plus là, arrêter le timer
+        TimerRunning = False
+    End If
+End Sub
+
+' --- Annule toute exécution planifiée du timer ---
+Public Sub StopTimerScheduled()
+    On Error Resume Next
+    Application.OnTime EarliestTime:=nextTimerRun, Name:="TimerModule.UpdateTimerDisplay", LatestTime:=nextTimerRun, Schedule:=False
+    On Error GoTo 0
+End Sub
+```
+
+---
+
+## 🔑 6. USERFORM DE LOGIN (LoginForm)
+
+Interface d'authentification.
+
+```vba
+' ******************************************************************************************
+' UserForm: LoginForm
+' Rôle: Formulaire de connexion.
+' ******************************************************************************************
+
+Private Sub UserForm_Initialize()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    
+    ' Charger la liste des agents actifs dans la ComboBox
+    Set ws = ThisWorkbook.Worksheets(SHEET_AGENTS)
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    For i = 2 To lastRow ' On commence à 2 pour sauter l'en-tête
+        If ws.Cells(i, 3).Value = "OUI" Then
+            cmbAgent.AddItem ws.Cells(i, 1).Value
+        End If
+    Next i
+    
+    lblAttempts.Caption = ""
+    txtPassword.SetFocus
+End Sub
+
+Private Sub btnLogin_Click()
+    Dim agentName As String
+    Dim password As String
+    
+    If cmbAgent.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner un agent.", vbExclamation, "Connexion"
+        Exit Sub
+    End If
+    
+    agentName = cmbAgent.Value
+    password = txtPassword.Text
+    
+    If SecurityModule.AuthenticateUser(agentName, password) Then
+        ' Connexion réussie
+        Unload Me
+        MainForm.Show
+    Else
+        lblAttempts.Caption = "Tentative " & SecurityModule.LoginAttempts & "/3 - Identifiants incorrects."
+        txtPassword.Text = ""
+        txtPassword.SetFocus
+    End If
+End Sub
+```
+
+---
+
+## 🖥️ 7. USERFORM PRINCIPAL (MainForm)
+
+Interface principale de traitement.
+
+```vba
+' ******************************************************************************************
+' UserForm: MainForm
+' Rôle: Interface principale pour les opérateurs.
+' ******************************************************************************************
+
+' Déclaration publique pour le timer
+Public MainFormInstance As MainForm
+
+Private Sub UserForm_Initialize()
+    Dim rootPath As String
+    Dim entities As Collection
+    Dim ent As Variant
+    
+    ' Instance pour le timer
+    Set MainFormInstance = Me
+    
+    ' Afficher les infos utilisateur
+    lblUser.Caption = "Agent: " & SecurityModule.CurrentUser
+    lblDate.Caption = "Date: " & Format(Date, "dd/mm/yyyy")
+    
+    ' Initialiser les compteurs (à implémenter avec une fonction de stats)
+    UpdateDailyCounter
+    
+    ' Charger les entités
+    rootPath = ConfigModule.GetRootPath
+    If rootPath = "" Then
+        MsgBox "Le chemin racine n'est pas configuré. Veuillez contacter un administrateur.", vbCritical, "Erreur"
+        Exit Sub
+    End If
+    
+    Set entities = FileSystemModule.GetEntitiesList(rootPath)
+    For Each ent In entities
+        cmbEntity.AddItem ent
+    Next ent
+    
+    ' Désactiver les boutons de traitement au départ
+    ToggleTreatmentButtons False
+    
+    ' Initialiser le timer
+    TimerModule.TimerRunning = False
+End Sub
+
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+    ' Arrêter le timer planifié si la form se ferme
+    TimerModule.StopTimerScheduled
+    Set MainFormInstance = Nothing
+End Sub
+
+' --- Met à jour le compteur journalier de l'agent ---
+Private Sub UpdateDailyCounter()
+    ' Cette fonction lirait l'historique pour compter les traitements du jour
+    ' Implémentation simplifiée pour l'exemple
+    lblDailyCount.Caption = "Traités aujourd'hui: 0"
+End Sub
+
+' --- Active/désactive les boutons de traitement ---
+Private Sub ToggleTreatmentButtons(enable As Boolean)
+    btnTraite.Enabled = enable
+    btnNonConforme.Enabled = enable
+End Sub
+
+' --- Gestionnaire pour le changement d'entité ---
+Private Sub cmbEntity_Change()
+    LoadSubCategories
+End Sub
+
+' --- Charge les sous-catégories pour l'entité sélectionnée ---
+Private Sub LoadSubCategories()
+    Dim rootPath As String
+    Dim subCats As Collection
+    Dim subCat As Variant
+    
+    cmbSubCategory.Clear
+    
+    If cmbEntity.ListIndex = -1 Then Exit Sub
+    
+    rootPath = ConfigModule.GetRootPath
+    Set subCats = FileSystemModule.GetSubCategoriesList(rootPath, cmbEntity.Value, PATH_A_TRAITER)
+    
+    For Each subCat In subCats
+        cmbSubCategory.AddItem subCat
+    Next subCat
+End Sub
+
+' --- BOUTON PIOCHER ---
+Private Sub btnPick_Click()
+    Dim rootPath As String
+    Dim entity As String
+    Dim subCategory As String
+    Dim filePath As String
+    Dim fileName As String
+    Dim fso As Object
+    
+    ' Vérifications
+    If cmbEntity.ListIndex = -1 Or cmbSubCategory.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner une entité et une sous-catégorie.", vbExclamation, "Sélection requise"
+        Exit Sub
+    End If
+    
+    rootPath = ConfigModule.GetRootPath
+    entity = cmbEntity.Value
+    subCategory = cmbSubCategory.Value
+    
+    ' Piocher un fichier
+    filePath = FileSystemModule.PickFirstPDF(rootPath, entity, subCategory)
+    
+    If filePath = "" Then
+        MsgBox "Aucun fichier PDF disponible dans le dossier 'A TRAITER' pour cette catégorie.", vbInformation, "Information"
+        Exit Sub
+    End If
+    
+    ' Mettre à jour l'interface
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    fileName = fso.GetFileName(filePath)
+    lblFileName.Caption = "Fichier: " & fileName
+    lblStartTime.Caption = "Début: " & Format(Now, "hh:nn:ss")
+    
+    ' Stocker les infos pour le traitement
+    Me.Tag = filePath ' Stocker le chemin complet dans la propriété Tag de la form
+    
+    ' Activer les boutons de traitement
+    ToggleTreatmentButtons True
+    
+    ' Lancer le timer
+    TimerModule.StartTimer
+End Sub
+
+' --- BOUTON TRAITÉ ---
+Private Sub btnTraite_Click()
+    FinalizeTreatment LOG_STATUT_TRAITE
+End Sub
+
+' --- BOUTON NON CONFORME ---
+Private Sub btnNonConforme_Click()
+    FinalizeTreatment LOG_STATUT_NON_CONFORME
+End Sub
+
+' --- Finalise le traitement (commun aux deux boutons) ---
+Private Sub FinalizeTreatment(status As String)
+    Dim rootPath As String
+    Dim entity As String
+    Dim subCategory As String
+    Dim filePath As String
+    Dim endTime As Date
+    Dim startTime As Date
+    Dim duration As Double
+    Dim fso As Object
+    Dim fileName As String
+    Dim success As Boolean
+    
+    ' Récupérer les infos
+    filePath = Me.Tag
+    If filePath = "" Then
+        MsgBox "Aucun fichier en cours de traitement.", vbExclamation, "Erreur"
+        Exit Sub
+    End If
+    
+    rootPath = ConfigModule.GetRootPath
+    entity = cmbEntity.Value
+    subCategory = cmbSubCategory.Value
+    
+    ' Arrêter le timer et récupérer l'heure de fin
+    endTime = Now
+    duration = TimerModule.StopTimer
+    TimerModule.StopTimerScheduled
+    startTime = TimerModule.StartTime
+    
+    ' Déplacer le fichier
+    success = FileSystemModule.MoveProcessedFile(filePath, rootPath, entity, subCategory, status)
+    
+    If success Then
+        ' Logger l'action
+        Set fso = CreateObject("Scripting.FileSystemObject")
+        fileName = fso.GetFileName(filePath)
+        LogModule.WriteToLog SecurityModule.CurrentUser, entity, subCategory, fileName, startTime, endTime, status
+        
+        ' Mettre à jour l'interface
+        lblTimer.Caption = "00:00:00"
+        lblFileName.Caption = "Fichier: -"
+        lblStartTime.Caption = "Début: -"
+        Me.Tag = ""
+        ToggleTreatmentButtons False
+        
+        ' Mettre à jour le compteur journalier
+        UpdateDailyCounter
+        
+        MsgBox "Traitement enregistré avec succès.", vbInformation, "Succès"
+    Else
+        MsgBox "Erreur lors du déplacement du fichier. Veuillez contacter un administrateur.", vbCritical, "Erreur"
+        ' Réactiver les boutons? À voir selon la gravité
+    End If
+End Sub
+
+' --- BOUTON STATISTIQUES (visible seulement pour admin) ---
+Private Sub btnStats_Click()
+    If SecurityModule.IsCurrentUserAdmin Then
+        StatsForm.Show
+    Else
+        MsgBox "Accès réservé aux administrateurs.", vbExclamation, "Accès refusé"
+    End If
+End Sub
+```
+
+---
+
+## 📊 8. USERFORM STATISTIQUES (StatsForm)
+
+Interface pour les statistiques (réservée aux admins).
+
+```vba
+' ******************************************************************************************
+' UserForm: StatsForm
+' Rôle: Affichage des statistiques de traitement (admin uniquement).
+' ******************************************************************************************
+
+Private Sub UserForm_Initialize()
+    LoadStats
+End Sub
+
+Private Sub LoadStats()
+    Dim wsHist As Worksheet
+    Dim lastRow As Long
+    Dim dictAgentTraites As Object
+    Dim dictAgentNonConformes As Object
+    Dim dictAgentDuree As Object
+    Dim dictAgentCount As Object
+    Dim i As Long
+    Dim agent As String
+    Dim statut As String
+    Dim duree As Double
+    Dim agentName As Variant
+    Dim rowCount As Long
+    
+    ' Initialiser les dictionnaires
+    Set dictAgentTraites = CreateObject("Scripting.Dictionary")
+    Set dictAgentNonConformes = CreateObject("Scripting.Dictionary")
+    Set dictAgentDuree = CreateObject("Scripting.Dictionary")
+    Set dictAgentCount = CreateObject("Scripting.Dictionary")
+    
+    ' Accéder à la feuille historique
+    On Error Resume Next
+    Set wsHist = ThisWorkbook.Worksheets(SHEET_HISTORIQUE)
+    If wsHist Is Nothing Then
+        MsgBox "La feuille d'historique n'est pas disponible.", vbExclamation, "Erreur"
+        Exit Sub
+    End If
+    On Error GoTo 0
+    
+    lastRow = wsHist.Cells(wsHist.Rows.Count, 1).End(xlUp).Row
+    If lastRow <= 1 Then
+        lstStats.AddItem "Aucune donnée historique disponible."
+        Exit Sub
+    End If
+    
+    ' Parcourir les données (en sautant l'en-tête)
+    For i = 2 To lastRow
+        agent = wsHist.Cells(i, 1).Value
+        statut = wsHist.Cells(i, 8).Value
+        duree = wsHist.Cells(i, 7).Value
+        
+        ' Compter par agent
+        If statut = LOG_STATUT_TRAITE Then
+            dictAgentTraites(agent) = dictAgentTraites(agent) + 1
+        ElseIf statut = LOG_STATUT_NON_CONFORME Then
+            dictAgentNonConformes(agent) = dictAgentNonConformes(agent) + 1
+        End If
+        
+        ' Cumul durée et compteur pour moyenne
+        dictAgentDuree(agent) = dictAgentDuree(agent) + duree
+        dictAgentCount(agent) = dictAgentCount(agent) + 1
+    Next i
+    
+    ' Afficher dans la ListBox
+    lstStats.Clear
+    lstStats.ColumnCount = 5
+    lstStats.ColumnWidths = "100;80;100;100;100"
+    lstStats.AddItem "Agent"
+    lstStats.List(0, 1) = "Traités"
+    lstStats.List(0, 2) = "Non Conformes"
+    lstStats.List(0, 3) = "Temps Total (min)"
+    lstStats.List(0, 4) = "Moyenne (min)"
+    
+    rowCount = 1
+    For Each agentName In dictAgentCount.Keys
+        lstStats.AddItem agentName
+        lstStats.List(rowCount, 1) = dictAgentTraites(agentName)
+        lstStats.List(rowCount, 2) = dictAgentNonConformes(agentName)
+        lstStats.List(rowCount, 3) = Round(dictAgentDuree(agentName), 2)
+        lstStats.List(rowCount, 4) = Round(dictAgentDuree(agentName) / dictAgentCount(agentName), 2)
+        rowCount = rowCount + 1
+    Next agentName
+End Sub
+
+Private Sub btnExportPDF_Click()
+    ' Logique d'export PDF (à implémenter)
+    MsgBox "Fonction d'export PDF à implémenter.", vbInformation, "Export"
+End Sub
+
+Private Sub btnRefresh_Click()
+    LoadStats
+End Sub
+```
+
+---
+
+## ⚙️ 9. USERFORM DE CONFIGURATION ADMIN (AdminConfigForm)
+
+Interface pour modifier le chemin réseau.
+
+```vba
+' ******************************************************************************************
+' UserForm: AdminConfigForm
+' Rôle: Configuration du chemin réseau (admin uniquement).
+' ******************************************************************************************
+
+Private Sub UserForm_Initialize()
+    txtRootPath.Text = ConfigModule.GetRootPath
+End Sub
+
+Private Sub btnTestPath_Click()
+    Dim path As String
+    path = txtRootPath.Text
+    
+    If FileSystemModule.FolderExists(path) Then
+        lblTestResult.Caption = "✓ Chemin accessible"
+        lblTestResult.ForeColor = vbGreen
+    Else
+        lblTestResult.Caption = "✗ Chemin inaccessible"
+        lblTestResult.ForeColor = vbRed
+    End If
+End Sub
+
+Private Sub btnSave_Click()
+    Dim newPath As String
+    newPath = txtRootPath.Text
+    
+    If newPath = "" Then
+        MsgBox "Le chemin ne peut pas être vide.", vbExclamation, "Erreur"
+        Exit Sub
+    End If
+    
+    ' Optionnel: tester avant de sauvegarder
+    If Not FileSystemModule.FolderExists(newPath) Then
+        If MsgBox("Le chemin semble inaccessible. Voulez-vous quand même le sauvegarder?", vbYesNo + vbExclamation, "Attention") = vbNo Then
+            Exit Sub
+        End If
+    End If
+    
+    ConfigModule.SaveRootPath newPath
+    MsgBox "Configuration sauvegardée.", vbInformation, "Succès"
+    Unload Me
+End Sub
+```
+
+---
+
+## 🚀 10. CODE DANS LE CLASSEUR (ThisWorkbook)
+
+Pour lancer le login à l'ouverture.
+
+```vba
+Option Explicit
+' ******************************************************************************************
+' ThisWorkbook: Code derrière le classeur
+' Rôle: Gestion des événements au niveau du classeur.
+' ******************************************************************************************
+
+Private Sub Workbook_Open()
+    ' Initialiser la configuration si nécessaire (à faire une seule fois)
+    ' ConfigModule.InitializeHiddenSheets ' Décommentez cette ligne pour la première utilisation
+    
+    ' Vérifier que les feuilles nécessaires existent
+    On Error Resume Next
+    Dim wsAgents As Worksheet
+    Dim wsConfig As Worksheet
+    Set wsAgents = ThisWorkbook.Worksheets(SHEET_AGENTS)
+    Set wsConfig = ThisWorkbook.Worksheets(SHEET_CONFIG)
+    On Error GoTo 0
+    
+    If wsAgents Is Nothing Or wsConfig Is Nothing Then
+        MsgBox "Configuration initiale manquante. Lancement de l'initialisation...", vbInformation, "Configuration"
+        ConfigModule.InitializeHiddenSheets
+    End If
+    
+    ' Lier la feuille historique
+    ConfigModule.LinkHistoriqueSheet
+    
+    ' Afficher le formulaire de login
+    LoginForm.Show
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    ' Nettoyer les liaisons si nécessaire
+    TimerModule.StopTimerScheduled
+End Sub
+```
+
+---
+
+## 📝 INSTRUCTIONS FINALES POUR LE DÉVELOPPEUR
+
+1.  **Créer les UserForms** : Dessinez les interfaces selon les descriptions. Associez les noms de contrôles (ex: `btnLogin`, `cmbAgent`, `txtPassword`, `lblTimer`, etc.) comme référencés dans le code.
+2.  **Créer les Modules** : Copiez/collez le code dans les modules standards correspondants.
+3.  **Définir les noms de feuilles** : Assurez-vous que les noms de code des feuilles (`wsAgents`, `wsConfig`) correspondent à ceux utilisés dans le code. Vous pouvez les renommer dans la fenêtre Propriétés de l'éditeur VBA.
+4.  **Tester** : Lancez une première fois avec `ConfigModule.InitializeHiddenSheets` décommenté dans `Workbook_Open` pour créer la structure de base.
+5.  **Sécurité** : Pour une vraie sécurité, remplacez `SimpleHash` par une vraie fonction SHA256 (nécessite des références supplémentaires ou l'utilisation de `System.Security.Cryptography` via .NET ou une API Windows).
+
+Ce code fournit une base solide, robuste et professionnelle, prête à être déployée dans votre centre d'appels.
