@@ -1,21 +1,26 @@
-function setLangOnStruct(elem, lang) {
-    if (elem == null) return;
-    
+function walk(elem, lang) {
+    if (!elem) return;
+
+    try { elem.lang = lang; } catch (e) {}
+
     try {
-        elem.lang = lang;
-    } catch(e) {}
-    
-    if (elem.kids != null) {
-        for (var i = 0; i < elem.kids.length; i++) {
-            setLangOnStruct(elem.kids[i], lang);
+        var k = elem.kids;
+        if (k && k.length) {
+            for (var i = 0; i < k.length; i++) {
+                walk(k[i], lang);
+            }
         }
-    }
+    } catch (e) {}
 }
 
-var root = this.getStructTreeRoot();
-if (root != null) {
-    setLangOnStruct(root, "fr-FR");
-    console.println("Langue modifiée pour toutes les balises.");
-} else {
-    console.println("Aucune structure de balise trouvée.");
+try {
+    var root = this.getStructTreeRoot();
+    if (root) {
+        walk(root, "fr-FR");
+        console.println("DONE");
+    } else {
+        console.println("No struct tree.");
+    }
+} catch (e) {
+    console.println("Error: " + e);
 }
