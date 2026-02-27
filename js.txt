@@ -1,0 +1,21 @@
+function setLangOnStruct(elem, lang) {
+    if (elem == null) return;
+    
+    try {
+        elem.lang = lang;
+    } catch(e) {}
+    
+    if (elem.kids != null) {
+        for (var i = 0; i < elem.kids.length; i++) {
+            setLangOnStruct(elem.kids[i], lang);
+        }
+    }
+}
+
+var root = this.getStructTreeRoot();
+if (root != null) {
+    setLangOnStruct(root, "fr-FR");
+    console.println("Langue modifiée pour toutes les balises.");
+} else {
+    console.println("Aucune structure de balise trouvée.");
+}
