@@ -1,40 +1,32 @@
 Private Sub btnDeplacer_Click()
 
-    Dim fso As Object
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
     Dim dossierSource As String
     Dim dossierDestination As String
     Dim nomDossier As String
+    Dim cmd As String
     
-    ' Sélection du dossier source
+    ' Choisir dossier source
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Sélectionner le dossier à déplacer"
         If .Show <> -1 Then Exit Sub
         dossierSource = .SelectedItems(1)
     End With
     
-    ' Sélection du dossier destination
+    ' Choisir destination
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Sélectionner le dossier destination"
         If .Show <> -1 Then Exit Sub
         dossierDestination = .SelectedItems(1)
     End With
     
-    ' Récupérer le nom du dossier
+    ' Nom du dossier
     nomDossier = Mid(dossierSource, InStrRev(dossierSource, "\") + 1)
     
-    ' Vérifier existence
-    If fso.FolderExists(dossierSource) Then
-        
-        ' Déplacer dossier
-        fso.MoveFolder dossierSource, dossierDestination & "\" & nomDossier
-        
-        MsgBox "Dossier déplacé avec succès !", vbInformation
-        
-    Else
-        MsgBox "Dossier source introuvable !", vbExclamation
-        
-    End If
+    ' Commande Windows MOVE (fiable réseau)
+    cmd = "cmd /c move """ & dossierSource & """ """ & dossierDestination & "\"""
+    
+    Shell cmd, vbHide
+    
+    MsgBox "Dossier déplacé avec succès !", vbInformation
 
 End Sub
