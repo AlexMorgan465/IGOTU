@@ -1,190 +1,35 @@
-Private Sub btnMoveFinal_Click()
-    ' Vérifications de base
-    If selectedFolderEtape2 = "" Then
-        MsgBox "Veuillez sélectionner un dossier LOCAL.", vbExclamation
-        Exit Sub
-    End If
-    
-    If selectedEnCoursFolderName = "" Then
-        MsgBox "Veuillez sélectionner un fichier dans EN COURS.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Vérifier que les noms correspondent
-    If selectedFolderEtape2 <> selectedEnCoursFolderName Then
-        MsgBox "Le nom du dossier LOCAL doit correspondre au nom du fichier EN COURS." & vbCrLf & _
-               "Dossier local: " & selectedFolderEtape2 & vbCrLf & _
-               "Fichier EN COURS: " & selectedEnCoursFolderName, vbExclamation
-        Exit Sub
-    End If
-    
-    ' Vérifier la destination choisie
-    If Not optToTraite And Not optToNonConforme Then
-        MsgBox "Veuillez sélectionner TRAITES ou NON CONFORME.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Déterminer la destination
-    Dim destType As String
-    If optToTraite Then
-        destType = "TRAITES"
-    Else
-        destType = "NON CONFORME"
-    End If
-    
-    ' === CONSTRUCTION DES CHEMINS ===
-    
-    ' 1. Chemin du dossier source (local)
-    Dim sourceFolder As String
-    sourceFolder = currentFolderEtape2 & selectedFolderEtape2 & "\"
-    
-    ' 2. Chemin du fichier dans EN COURS
-    Dim enCoursFilePath As String
-    enCoursFilePath = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath & selectedEnCoursFileName
-    
-    ' 3. Chemin de destination = MÊME STRUCTURE mais EN COURS → destType
-    Dim destFolder As String
-    
-    ' Extraire le chemin du dossier parent dans EN COURS (sans le nom du fichier)
-    Dim enCoursParentFolder As String
-    enCoursParentFolder = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath
-    
-    ' Nettoyer les backslashes (enlever le dernier s'il existe)
-    If Right(enCoursParentFolder, 1) = "\" Then
-        enCoursParentFolder = Left(enCoursParentFolder, Len(enCoursParentFolder) - 1)
-    End If
-    
-    ' Remplacer "EN COURS" par destType dans le chemin parent
-    destFolder = Replace(enCoursParentFolder, "\EN COURS\", "\" & destType & "\", 1, 1, vbTextCompare)
-    
-    ' Ajouter le nom du dossier et un backslash
-    destFolder = destFolder & "\" & selectedFolderEtape2 & "\"
-    
-    ' === MESSAGE DE DÉBOGAGE (à supprimer après test) ===
-    MsgBox "Source: " & sourceFolder & vbCrLf & _
-           "Fichier EN COURS: " & enCoursFilePath & vbCrLf & _
-           "Destination: " & destFolder & vbCrLf & _
-           "Dossier parent destination: " & destParent
-    ' =================================================
-    
-    ' === VÉRIFICATIONS ===
-    
-    ' Vérifier que le dossier source existe
-    If Dir(sourceFolder, vbDirectory) = "" Then
-        MsgBox "Dossier local introuvable: " & sourceFolder, vbExclamation
-        Exit Sub
-    End If
-    
-    ' Vérifier que le fichier EN COURS existe
-    If Dir(enCoursFilePath) = "" Then
-        MsgBox "Fichier EN COURS introuvable: " & enCoursFilePath, vbExclamation
-        Exit Sub
-    End If
-    
-    ' Vérifier que le dossier parent de destination existe
-    Dim destParent As String
-    destParent = basePath & selectedEnCoursClient & "\" & destType & "\" & selectedEnCoursSubPath
-    
-    ' Nettoyer destParent
-    If Right(destParent, 1) = "\" Then
-        destParent = Left(destParent, Len(destParent) - 1)
-    End If
-    
-    If Dir(destParent, vbDirectory) = "" Then
-        MsgBox "Le dossier de destination n'existe pas: " & destParent, vbCritical
-        Exit Sub
-    End If
-    
-    ' === EXÉCUTION DU DÉPLACEMENT ===
-    
-    On Error GoTo MoveError
-    
-    ' Compter les fichiers à déplacer
-    Dim fileCount As Integer
-    fileCount = 0
-    Dim fileInFolder As String
-    fileInFolder = Dir(sourceFolder & "*.*")
-    
-    Do While fileInFolder <> ""
-        fileCount = fileCount + 1
-        fileInFolder = Dir()
-    Loop
-    
-    ' Demander confirmation si aucun fichier
-    If fileCount = 0 Then
-        If MsgBox("Le dossier local est vide. Voulez-vous continuer?", vbYesNo + vbQuestion) = vbNo Then
-            Exit Sub
-        End If
-    End If
-    
-    ' Créer le dossier de destination s'il n'existe pas
-    If Dir(destFolder, vbDirectory) = "" Then
-        MkDir destFolder
-    End If
-    
-    ' Déplacer tous les fichiers du dossier local vers la destination
-    fileInFolder = Dir(sourceFolder & "*.*")
-    
-    Do While fileInFolder <> ""
-        ' Supprimer le fichier destination s'il existe déjà
-        If Dir(destFolder & fileInFolder) <> "" Then
-            Kill destFolder & fileInFolder
-        End If
-        
-        ' Copier le fichier
-        FileCopy sourceFolder & fileInFolder, destFolder & fileInFolder
-        
-        ' Supprimer l'original
-        Kill sourceFolder & fileInFolder
-        
-        fileInFolder = Dir()
-    Loop
-    
-    ' Supprimer le dossier local vide
-    RmDir sourceFolder
-    
-    ' Supprimer le fichier dans EN COURS
-    Kill enCoursFilePath
-    
-    ' Vérifier si le dossier EN COURS parent est vide, si oui le supprimer
-    If IsFolderEmpty(enCoursParentFolder) Then
-        On Error Resume Next
-        RmDir enCoursParentFolder
-        On Error GoTo MoveError
-    End If
-    
-    ' Enregistrer dans le tracking
-    RecordSecondPick selectedFolderEtape2, selectedEnCoursClient & "\" & selectedEnCoursSubPath, destType
-    
-    ' Journaliser
-    lstLog.AddItem Format(Now, "dd/mm/yyyy hh:mm:ss") & " - ÉTAPE 2: " & selectedFolderEtape2 & " (" & fileCount & " fichiers) → " & destType
-    
-    ' Rafraîchir les listes
-    LoadFoldersEtape2
-    LoadEnCoursFiles
-    
-    ' Message de succès
-    MsgBox "Dossier déplacé avec succès!" & vbCrLf & _
-           "Destination: " & destFolder & vbCrLf & _
-           "Fichiers déplacés: " & fileCount, vbInformation
-    
-    Exit Sub
-    
-MoveError:
-    MsgBox "Erreur lors du déplacement: " & Err.Description & vbCrLf & _
-           "Code erreur: " & Err.Number & vbCrLf & _
-           "Source: " & sourceFolder & vbCrLf & _
-           "Destination: " & destFolder, vbCritical
-End Sub
+Private Sub btnDeplacer_Click()
 
-' Ajouter cette fonction utilitaire si elle n'existe pas
-Private Function IsFolderEmpty(folderPath As String) As Boolean
-    Dim fileName As String
-    fileName = Dir(folderPath & "\*.*")
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
     
-    If fileName = "" Then
-        IsFolderEmpty = True
+    Dim cheminSource As String
+    Dim cheminDestination As String
+    
+    ' Sélection du fichier source
+    With Application.FileDialog(msoFileDialogFilePicker)
+        .Title = "Sélectionner le fichier à déplacer"
+        If .Show <> -1 Then Exit Sub
+        cheminSource = .SelectedItems(1)
+    End With
+    
+    ' Sélection du dossier destination
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Sélectionner le dossier destination"
+        If .Show <> -1 Then Exit Sub
+        cheminDestination = .SelectedItems(1)
+    End With
+    
+    ' Vérification et déplacement
+    If fso.FileExists(cheminSource) Then
+        
+        fso.MoveFile cheminSource, cheminDestination & "\" & _
+                     Mid(cheminSource, InStrRev(cheminSource, "\") + 1)
+        
+        MsgBox "Fichier déplacé avec succès !", vbInformation
+        
     Else
-        IsFolderEmpty = False
+        MsgBox "Fichier introuvable !", vbExclamation
     End If
-End Function
+
+End Sub
