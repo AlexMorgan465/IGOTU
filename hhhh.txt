@@ -38,23 +38,34 @@ Private Sub btnMoveFinal_Click()
     Dim sourceFolder As String
     sourceFolder = currentFolderEtape2 & selectedFolderEtape2 & "\"
     
-    ' 2. Chemin du fichier dans EN COURS (pour le supprimer)
+    ' 2. Chemin du fichier dans EN COURS
     Dim enCoursFilePath As String
     enCoursFilePath = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath & selectedEnCoursFileName
     
-    ' 3. Chemin de destination = MÊME CHEMIN que le fichier EN COURS mais en remplaçant "EN COURS" par destType
-    '    Et en remplaçant le nom du fichier par le nom du dossier
+    ' 3. Chemin de destination = MÊME STRUCTURE mais EN COURS → destType
     Dim destFolder As String
     
-    ' Extraire le chemin sans le fichier
-    Dim baseEnCoursPath As String
-    baseEnCoursPath = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath
+    ' Extraire le chemin du dossier parent dans EN COURS (sans le nom du fichier)
+    Dim enCoursParentFolder As String
+    enCoursParentFolder = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath
     
-    ' Remplacer "EN COURS" par destType dans le chemin
-    destFolder = Replace(baseEnCoursPath, "EN COURS\", destType & "\", 1, 1, vbTextCompare)
+    ' Nettoyer les backslashes (enlever le dernier s'il existe)
+    If Right(enCoursParentFolder, 1) = "\" Then
+        enCoursParentFolder = Left(enCoursParentFolder, Len(enCoursParentFolder) - 1)
+    End If
     
-    ' Ajouter le nom du dossier à la fin
-    destFolder = destFolder & selectedFolderEtape2 & "\"
+    ' Remplacer "EN COURS" par destType dans le chemin parent
+    destFolder = Replace(enCoursParentFolder, "\EN COURS\", "\" & destType & "\", 1, 1, vbTextCompare)
+    
+    ' Ajouter le nom du dossier et un backslash
+    destFolder = destFolder & "\" & selectedFolderEtape2 & "\"
+    
+    ' === MESSAGE DE DÉBOGAGE (à supprimer après test) ===
+    MsgBox "Source: " & sourceFolder & vbCrLf & _
+           "Fichier EN COURS: " & enCoursFilePath & vbCrLf & _
+           "Destination: " & destFolder & vbCrLf & _
+           "Dossier parent destination: " & destParent
+    ' =================================================
     
     ' === VÉRIFICATIONS ===
     
@@ -74,8 +85,13 @@ Private Sub btnMoveFinal_Click()
     Dim destParent As String
     destParent = basePath & selectedEnCoursClient & "\" & destType & "\" & selectedEnCoursSubPath
     
+    ' Nettoyer destParent
+    If Right(destParent, 1) = "\" Then
+        destParent = Left(destParent, Len(destParent) - 1)
+    End If
+    
     If Dir(destParent, vbDirectory) = "" Then
-        MsgBox "Le dossier de destination n'existe pas dans l'arborescence: " & destParent, vbCritical
+        MsgBox "Le dossier de destination n'existe pas: " & destParent, vbCritical
         Exit Sub
     End If
     
@@ -101,7 +117,7 @@ Private Sub btnMoveFinal_Click()
         End If
     End If
     
-    ' Créer le dossier de destination s'il n'existe pas (car on remplace EN COURS par TRAITES/NON CONFORME)
+    ' Créer le dossier de destination s'il n'existe pas
     If Dir(destFolder, vbDirectory) = "" Then
         MkDir destFolder
     End If
@@ -130,27 +146,8 @@ Private Sub btnMoveFinal_Click()
     ' Supprimer le fichier dans EN COURS
     Kill enCoursFilePath
     
-    ' Vérifier si le dossier EN COURS parent est vide, si oui on peut le supprimer
-    Dim enCoursParentFolder As String
-    enCoursParentFolder = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath
-    
-    ' Enlever le dernier backslash si nécessaire
-    If Right(enCoursParentFolder, 1) = "\" Then
-        enCoursParentFolder = Left(enCoursParentFolder, Len(enCoursParentFolder) - 1)
-    End If
-    
-    ' Vérifier si le dossier parent EN COURS est vide
-    Dim isEmpty As Boolean
-    isEmpty = True
-    Dim testFile As String
-    testFile = Dir(enCoursParentFolder & "\*.*")
-    
-    If testFile <> "" Then
-        isEmpty = False
-    End If
-    
-    ' Si vide, supprimer le dossier parent EN COURS
-    If isEmpty Then
+    ' Vérifier si le dossier EN COURS parent est vide, si oui le supprimer
+    If IsFolderEmpty(enCoursParentFolder) Then
         On Error Resume Next
         RmDir enCoursParentFolder
         On Error GoTo MoveError
@@ -168,7 +165,6 @@ Private Sub btnMoveFinal_Click()
     
     ' Message de succès
     MsgBox "Dossier déplacé avec succès!" & vbCrLf & _
-           "Source: " & sourceFolder & vbCrLf & _
            "Destination: " & destFolder & vbCrLf & _
            "Fichiers déplacés: " & fileCount, vbInformation
     
@@ -176,5 +172,19 @@ Private Sub btnMoveFinal_Click()
     
 MoveError:
     MsgBox "Erreur lors du déplacement: " & Err.Description & vbCrLf & _
-           "Code erreur: " & Err.Number, vbCritical
+           "Code erreur: " & Err.Number & vbCrLf & _
+           "Source: " & sourceFolder & vbCrLf & _
+           "Destination: " & destFolder, vbCritical
 End Sub
+
+' Ajouter cette fonction utilitaire si elle n'existe pas
+Private Function IsFolderEmpty(folderPath As String) As Boolean
+    Dim fileName As String
+    fileName = Dir(folderPath & "\*.*")
+    
+    If fileName = "" Then
+        IsFolderEmpty = True
+    Else
+        IsFolderEmpty = False
+    End If
+End Function
