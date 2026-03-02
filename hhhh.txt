@@ -1,32 +1,47 @@
 Private Sub btnDeplacer_Click()
 
+    On Error GoTo GestionErreur
+    
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
     Dim dossierSource As String
     Dim dossierDestination As String
     Dim nomDossier As String
-    Dim cmd As String
+    Dim destinationFinale As String
     
-    ' Choisir dossier source
+    ' Sélection source
     With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier à déplacer"
         If .Show <> -1 Then Exit Sub
         dossierSource = .SelectedItems(1)
     End With
     
-    ' Choisir destination
+    ' Enlever "\" final si présent
+    If Right(dossierSource, 1) = "\" Then
+        dossierSource = Left(dossierSource, Len(dossierSource) - 1)
+    End If
+    
+    ' Sélection destination
     With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier destination"
         If .Show <> -1 Then Exit Sub
         dossierDestination = .SelectedItems(1)
     End With
     
-    ' Nom du dossier
-    nomDossier = Mid(dossierSource, InStrRev(dossierSource, "\") + 1)
+    nomDossier = fso.GetFolder(dossierSource).Name
+    destinationFinale = dossierDestination & "\" & nomDossier
     
-    ' Commande Windows MOVE (fiable réseau)
-    cmd = "cmd /c move """ & dossierSource & """ """ & dossierDestination & "\"""
+    If fso.FolderExists(destinationFinale) Then
+        MsgBox "Le dossier existe déjà à destination."
+        Exit Sub
+    End If
     
-    Shell cmd, vbHide
+    fso.MoveFolder dossierSource, destinationFinale
     
-    MsgBox "Dossier déplacé avec succès !", vbInformation
+    MsgBox "Dossier déplacé avec succès !"
+    
+    Exit Sub
+
+GestionErreur:
+    MsgBox "Erreur : " & Err.Number & " - " & Err.Description
 
 End Sub
