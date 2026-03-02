@@ -1,68 +1,341 @@
+' UserForm Code (Name: frmFileManager)
+' Create a new UserForm with this layout:
+' - Label1: "Source Directory:"
+' - TextBox1: txtSourcePath (Multiline = False, Width = 400)
+' - CommandButton1: btnBrowse (Caption = "Browse...")
+' - ListBox1: lstFiles (Width = 500, Height = 150)
+' - Frame1: Caption = "Step 1: Initial Move"
+'   - CommandButton2: btnToEnCours (Caption = "Move to EN COURS")
+' - Frame2: Caption = "Step 2: Final Move"
+'   - OptionButton1: optToTraite (Caption = "To TRAITE")
+'   - OptionButton2: optToNonConforme (Caption = "To NON CONFORME")
+'   - CommandButton3: btnMoveFinal (Caption = "Move Selected")
+' - ListBox2: lstLog (Width = 500, Height = 100)
+' - CommandButton4: btnRefresh (Caption = "Refresh")
+
 Option Explicit
-' ******************************************************************************************
-' Module: FileSystemModule
-' Rôle: Toutes les interactions avec le système de fichiers.
-' Version corrigée (sans Class_Initialize)
-' ******************************************************************************************
 
-' --- Vérifie si un dossier existe ---
-Public Function FolderExists(folderPath As String) As Boolean
-    Dim fso As Object
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    FolderExists = fso.FolderExists(folderPath)
-End Function
+Private basePath As String
+Private currentFolder As String
+Private selectedFile As String
+Private firstPickDate As Variant
 
-' --- Crée un dossier s'il n'existe pas ---
-Public Sub CreateFolderIfNotExists(folderPath As String)
-    Dim fso As Object
-    Set fso = CreateObject("Scripting.FileSystemObject")
+Private Sub UserForm_Initialize()
+    basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
+    currentFolder = basePath
+    txtSourcePath.Text = currentFolder
+    LoadFiles
+    LoadTrackingData
+End Sub
+
+Private Sub btnBrowse_Click()
+    Dim fd As FileDialog
+    Set fd = Application.FileDialog(msoFileDialogFolderPicker)
     
-    If Not fso.FolderExists(folderPath) Then
-        fso.CreateFolder folderPath
+    With fd
+        .Title = "Select the A TRAITER folder or subfolder"
+        .InitialFileName = currentFolder
+        If .Show = -1 Then
+            currentFolder = .SelectedItems(1) & "\"
+            txtSourcePath.Text = currentFolder
+            LoadFiles
+        End If
+    End With
+End Sub
+
+Private Sub lstFiles_Change()
+    If lstFiles.ListIndex >= 0 Then
+        selectedFile = lstFiles.List(lstFiles.ListIndex)
     End If
 End Sub
 
-' --- Récupère la liste des entités ---
-Public Function GetEntitiesList(rootPath As String) As Collection
-    
-    Dim fso As Object
-    Dim folder As Object
-    Dim subFolder As Object
-    Dim entities As New Collection
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    If fso.FolderExists(rootPath) Then
-        Set folder = fso.GetFolder(rootPath)
-        For Each subFolder In folder.SubFolders
-            entities.Add subFolder.Name
-        Next subFolder
+Private Sub btnToEnCours_Click()
+    If selectedFile = "" Then
+        MsgBox "Please select a file first.", vbExclamation
+        Exit Sub
     End If
     
-    Set GetEntitiesList = entities
+    Dim sourcePath As String
+    Dim destPath As String
+    Dim fileName As String
+    Dim folderName As String
     
-End Function
-
-' --- Récupère les sous-catégories ---
-Public Function GetSubCategoriesList(rootPath As String, entity As String, stateFolder As String) As Collection
+    ' Get the full source path
+    sourcePath = currentFolder & selectedFile
     
-    Dim fso As Object
-    Dim folder As Object
-    Dim subFolder As Object
-    Dim subCats As New Collection
-    Dim path As String
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    path = BuildPath(rootPath, entity, stateFolder)
-    
-    If fso.FolderExists(path) Then
-        Set folder = fso.GetFolder(path)
-        For Each subFolder In folder.SubFolders
-            subCats.Add subFolder.Name
-        Next subFolder
+    ' Check if it's a folder or file
+    If (GetAttr(sourcePath) And vbDirectory) = vbDirectory Then
+        ' It's a folder - get the folder name
+        folderName = selectedFile
+    Else
+        ' It's a file - get the file name without extension for folder
+        folderName = Left(selectedFile, InStrRev(selectedFile, ".") - 1)
     End If
     
-    Set GetSubCategoriesList = subCats
+    ' Construct destination path in EN COURS
+    ' Need to find the relative path from A TRAITER to determine the subfolder in EN COURS
+    Dim relativePath As String
+    Dim searchStr As String
+    searchStr = "A TRAITER\"
+    Dim pos As Integer
+    pos = InStr(currentFolder, searchStr)
+    
+    If pos > 0 Then
+        relativePath = Mid(currentFolder, pos + Len(searchStr))
+        destPath = basePath & "EN COURS\" & relativePath & folderName & "\"
+    Else
+        MsgBox "Current folder is not under A TRAITER. Please navigate to an A TRAITER subfolder.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Create destination folder if it doesn't exist
+    If Dir(destPath, vbDirectory) = "" Then
+        MkDir destPath
+    End If
+    
+    ' Move the folder/file
+    On Error GoTo MoveError
+    If (GetAttr(sourcePath) And vbDirectory) = vbDirectory Then
+        ' It's a folder - move all contents
+        Dim fso As Object
+        Set fso = CreateObject("Scripting.FileSystemObject")
+        fso.MoveFolder sourcePath & "\*", destPath
+        RmDir sourcePath
+    Else
+        ' It's a file - move the file
+        FileCopy sourcePath, destPath & selectedFile
+        Kill sourcePath
+    End If
+    
+    ' Record the first pick (pick from A TRAITER)
+    RecordFirstPick folderName, relativePath
+    
+    ' Log the action
+    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - Moved: " & selectedFile & " to EN COURS"
+    
+    ' Refresh file list
+    LoadFiles
+    
+    MsgBox "File moved successfully to EN COURS!", vbInformation
+    Exit Sub
+    
+MoveError:
+    MsgBox "Error moving file: " & Err.Description, vbCritical
+End Sub
 
+Private Sub btnMoveFinal_Click()
+    If selectedFile = "" Then
+        MsgBox "Please select a folder first.", vbExclamation
+        Exit Sub
+    End If
+    
+    If Not optToTraite And Not optToNonConforme Then
+        MsgBox "Please select destination (TRAITE or NON CONFORME).", vbExclamation
+        Exit Sub
+    End If
+    
+    Dim destType As String
+    If optToTraite Then
+        destType = "TRAITES"
+    Else
+        destType = "NON CONFORME"
+    End If
+    
+    ' Current path should be under EN COURS
+    Dim searchStr As String
+    searchStr = "EN COURS\"
+    Dim pos As Integer
+    pos = InStr(currentFolder, searchStr)
+    
+    If pos = 0 Then
+        MsgBox "Please navigate to an EN COURS subfolder.", vbExclamation
+        Exit Sub
+    End If
+    
+    Dim relativePath As String
+    relativePath = Mid(currentFolder, pos + Len(searchStr))
+    
+    Dim sourceFolder As String
+    sourceFolder = currentFolder & selectedFile
+    
+    Dim destFolder As String
+    destFolder = basePath & destType & "\" & relativePath & selectedFile & "\"
+    
+    ' Check if source is a folder
+    If (GetAttr(sourceFolder) And vbDirectory) <> vbDirectory Then
+        MsgBox "Please select a folder to move.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Create destination folder
+    If Dir(destFolder, vbDirectory) = "" Then
+        MkDir destFolder
+    End If
+    
+    ' Move all contents
+    On Error GoTo MoveError
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    fso.MoveFolder sourceFolder & "\*", destFolder
+    RmDir sourceFolder
+    
+    ' Record the second pick and calculate DMT
+    RecordSecondPick selectedFile, relativePath, destType
+    
+    ' Log the action
+    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - Moved: " & selectedFile & " to " & destType
+    
+    ' Refresh file list
+    LoadFiles
+    
+    MsgBox "Folder moved successfully to " & destType & "!", vbInformation
+    Exit Sub
+    
+MoveError:
+    MsgBox "Error moving folder: " & Err.Description, vbCritical
+End Sub
+
+Private Sub btnRefresh_Click()
+    LoadFiles
+End Sub
+
+Private Sub LoadFiles()
+    lstFiles.Clear
+    
+    Dim folder As String
+    folder = txtSourcePath.Text
+    
+    If Dir(folder, vbDirectory) = "" Then
+        Exit Sub
+    End If
+    
+    ' List folders first
+    Dim fileName As String
+    fileName = Dir(folder & "*", vbDirectory)
+    
+    Do While fileName <> ""
+        If fileName <> "." And fileName <> ".." Then
+            If (GetAttr(folder & fileName) And vbDirectory) = vbDirectory Then
+                lstFiles.AddItem "[FOLDER] " & fileName
+            End If
+        End If
+        fileName = Dir()
+    Loop
+    
+    ' Then list files
+    fileName = Dir(folder & "*.*")
+    
+    Do While fileName <> ""
+        If (GetAttr(folder & fileName) And vbDirectory) <> vbDirectory Then
+            lstFiles.AddItem fileName
+        End If
+        fileName = Dir()
+    Loop
+End Sub
+
+Private Sub RecordFirstPick(folderName As String, relativePath As String)
+    ' Store in a worksheet for tracking
+    Dim ws As Worksheet
+    Set ws = GetTrackingWorksheet
+    
+    ' Find the next empty row
+    Dim nextRow As Long
+    nextRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
+    
+    ' Record the pick
+    ws.Cells(nextRow, 1).Value = folderName  ' File/Folder name
+    ws.Cells(nextRow, 2).Value = relativePath ' Path
+    ws.Cells(nextRow, 3).Value = Now          ' First pick date/time
+    ws.Cells(nextRow, 4).Value = Environ("username") ' User/Agent
+    ws.Cells(nextRow, 7).Value = Application.ActiveWorkbook.Name ' Session/Workbook name
+End Sub
+
+Private Sub RecordSecondPick(folderName As String, relativePath As String, destType As String)
+    Dim ws As Worksheet
+    Set ws = GetTrackingWorksheet
+    
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    ' Find the matching record (folder with same name and path without second pick)
+    Dim i As Long
+    For i = 2 To lastRow
+        If ws.Cells(i, 1).Value = folderName And _
+           ws.Cells(i, 2).Value = relativePath And _
+           IsEmpty(ws.Cells(i, 5).Value) Then
+            
+            ' Record second pick
+            ws.Cells(i, 5).Value = Now  ' Second pick date/time
+            ws.Cells(i, 6).Value = destType ' Destination
+            
+            ' Calculate DMT (in minutes)
+            Dim dmt As Double
+            dmt = DateDiff("n", ws.Cells(i, 3).Value, Now) ' Minutes difference
+            ws.Cells(i, 8).Value = dmt / 1440 ' Convert to days (for Excel time format)
+            ws.Cells(i, 8).NumberFormat = "[h]:mm:ss" ' Format as hours:minutes:seconds
+            
+            Exit For
+        End If
+    Next i
+End Sub
+
+Private Function GetTrackingWorksheet() As Worksheet
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    Dim trackingSheetName As String
+    trackingSheetName = "Tracking"
+    
+    ' Check if tracking worksheet exists in current workbook
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(trackingSheetName)
+    On Error GoTo 0
+    
+    If ws Is Nothing Then
+        ' Create tracking worksheet
+        Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
+        ws.Name = trackingSheetName
+        
+        ' Add headers
+        With ws
+            .Cells(1, 1).Value = "File/Folder Name"
+            .Cells(1, 2).Value = "Relative Path"
+            .Cells(1, 3).Value = "First Pick (A TRAITER to EN COURS)"
+            .Cells(1, 4).Value = "Agent"
+            .Cells(1, 5).Value = "Second Pick (EN COURS to Final)"
+            .Cells(1, 6).Value = "Final Destination"
+            .Cells(1, 7).Value = "Session/Workbook"
+            .Cells(1, 8).Value = "DMT (Processing Time)"
+            
+            ' Format headers
+            .Range("A1:H1").Font.Bold = True
+            .Range("A1:H1").Interior.Color = RGB(200, 200, 200)
+            .Columns("A:H").AutoFit
+        End With
+    End If
+    
+    Set GetTrackingWorksheet = ws
 End Function
+
+Private Sub LoadTrackingData()
+    ' Load recent tracking data into log listbox
+    Dim ws As Worksheet
+    Set ws = GetTrackingWorksheet
+    
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    If lastRow > 1 Then
+        lstLog.Clear
+        lstLog.AddItem "=== Recent Activity ==="
+        
+        Dim i As Long
+        For i = 2 To Application.WorksheetFunction.Min(lastRow, 11) ' Show last 10 entries
+            Dim logEntry As String
+            logEntry = ws.Cells(i, 3).Text & " - " & ws.Cells(i, 1).Value & " picked by " & ws.Cells(i, 4).Value
+            If Not IsEmpty(ws.Cells(i, 5).Value) Then
+                logEntry = logEntry & " → Completed in " & Format(ws.Cells(i, 8).Value, "[h]:mm:ss")
+            End If
+            lstLog.AddItem logEntry
+        Next i
+    End If
+End Sub
