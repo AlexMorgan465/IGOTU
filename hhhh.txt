@@ -2,26 +2,26 @@
 ' Create a new UserForm with this layout:
 ' ===== ÉTAPE 1 =====
 ' - Frame1: Caption = "ÉTAPE 1: A TRAITER → EN COURS"
-'   - Label1: "Dossier source (A TRAITER):"
+'   - Label1: "Dossier Source (A TRAITER):"
 '   - TextBox1: txtSourcePathEtape1 (Multiline = False, Width = 400)
 '   - CommandButton1: btnBrowseEtape1 (Caption = "Parcourir A TRAITER...")
 '   - ListBox1: lstFilesEtape1 (Width = 500, Height = 120)
 '   - CommandButton2: btnToEnCours (Caption = "Déplacer vers EN COURS")
 '
+' ===== LISTE DE RÉFÉRENCE EN COURS =====
+' - Frame2: Caption = "Fichiers en attente dans EN COURS"
+'   - ListBox2: lstEnCoursFiles (Width = 500, Height = 100)
+'
 ' ===== ÉTAPE 2 =====
-' - Frame2: Caption = "ÉTAPE 2: EN COURS → TRAITES/NON CONFORME"
-'   - Label2: "Dossier source (LOCAL):"
+' - Frame3: Caption = "ÉTAPE 2: DOSSIER LOCAL → TRAITES/NON CONFORME"
+'   - Label2: "Dossier Source (LOCAL):"
 '   - TextBox2: txtSourcePathEtape2 (Multiline = False, Width = 400)
 '   - CommandButton3: btnBrowseEtape2 (Caption = "Parcourir dossier LOCAL...")
-'   - ListBox2: lstFoldersEtape2 (Width = 500, Height = 120)
-'   - Frame3: Caption = "Destination"
+'   - ListBox3: lstFoldersEtape2 (Width = 500, Height = 120)
+'   - Frame4: Caption = "Destination"
 '     - OptionButton1: optToTraite (Caption = "TRAITES")
 '     - OptionButton2: optToNonConforme (Caption = "NON CONFORME")
 '   - CommandButton4: btnMoveFinal (Caption = "Déplacer dossier vers destination")
-'
-' ===== LISTE DE RÉFÉRENCE EN COURS =====
-' - Frame4: Caption = "Fichiers en attente dans EN COURS"
-'   - ListBox3: lstEnCoursFiles (Width = 500, Height = 100)
 '
 ' ===== LOG =====
 ' - ListBox4: lstLog (Width = 500, Height = 80)
@@ -34,12 +34,15 @@ Private currentFolderEtape1 As String
 Private currentFolderEtape2 As String
 Private selectedFileEtape1 As String
 Private selectedFolderEtape2 As String
-Private selectedEnCoursItem As String
+Private selectedEnCoursFolderName As String
+Private selectedEnCoursFileName As String
+Private selectedEnCoursClient As String
+Private selectedEnCoursSubPath As String
 
 Private Sub UserForm_Initialize()
     basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
     currentFolderEtape1 = basePath
-    currentFolderEtape2 = "C:\" ' Dossier local par défaut
+    currentFolderEtape2 = "C:\Users\" & Environ("username") & "\Desktop\"
     
     txtSourcePathEtape1.Text = currentFolderEtape1
     txtSourcePathEtape2.Text = currentFolderEtape2
@@ -49,7 +52,7 @@ Private Sub UserForm_Initialize()
     LoadTrackingData
 End Sub
 
-' ===== BOUTONS DE BROWSING SÉPARÉS =====
+' ===== BOUTONS DE BROWSING =====
 
 Private Sub btnBrowseEtape1_Click()
     Dim fd As FileDialog
@@ -71,7 +74,7 @@ Private Sub btnBrowseEtape2_Click()
     Set fd = Application.FileDialog(msoFileDialogFolderPicker)
     
     With fd
-        .Title = "Sélectionnez un dossier LOCAL contenant les fichiers traités"
+        .Title = "Sélectionnez un dossier LOCAL"
         .InitialFileName = currentFolderEtape2
         If .Show = -1 Then
             currentFolderEtape2 = .SelectedItems(1) & "\"
@@ -85,15 +88,15 @@ End Sub
 
 Private Sub lstFilesEtape1_Change()
     If lstFilesEtape1.ListIndex >= 0 Then
-        ' Récupérer le nom du fichier sélectionné
         selectedFileEtape1 = lstFilesEtape1.List(lstFilesEtape1.ListIndex)
     End If
 End Sub
 
 Private Sub lstFoldersEtape2_Change()
     If lstFoldersEtape2.ListIndex >= 0 Then
-        ' Récupérer le nom du dossier sélectionné (enlever le préfixe [DOSSIER])
-        selectedFolderEtape2 = Replace(lstFoldersEtape2.List(lstFoldersEtape2.ListIndex), "[DOSSIER] ", "")
+        Dim itemText As String
+        itemText = lstFoldersEtape2.List(lstFoldersEtape2.ListIndex)
+        selectedFolderEtape2 = Replace(itemText, "[DOSSIER] ", "")
     End If
 End Sub
 
@@ -102,14 +105,39 @@ Private Sub lstEnCoursFiles_Change()
         Dim itemText As String
         itemText = lstEnCoursFiles.List(lstEnCoursFiles.ListIndex)
         
-        ' Extraire le nom du fichier (entre crochets)
-        Dim startPos As Integer
-        Dim endPos As Integer
-        startPos = InStr(itemText, "[") + 1
-        endPos = InStr(itemText, "]")
+        ' Format: "NomDossier [NomFichier] - Client\Sous-dossier"
+        Dim parts() As String
+        parts = Split(itemText, " [")
         
-        If startPos > 0 And endPos > startPos Then
-            selectedEnCoursItem = Mid(itemText, startPos, endPos - startPos)
+        If UBound(parts) >= 0 Then
+            selectedEnCoursFolderName = parts(0)
+            
+            If UBound(parts) >= 1 Then
+                Dim filePart As String
+                filePart = parts(1)
+                Dim endBracket As Integer
+                endBracket = InStr(filePart, "]")
+                If endBracket > 0 Then
+                    selectedEnCoursFileName = Left(filePart, endBracket - 1)
+                End If
+                
+                ' Extraire Client et sous-dossier
+                Dim pathPart As String
+                pathPart = Mid(filePart, endBracket + 3)
+                
+                Dim pathParts() As String
+                pathParts = Split(pathPart, "\")
+                
+                If UBound(pathParts) >= 0 Then
+                    selectedEnCoursClient = pathParts(0)
+                    
+                    If UBound(pathParts) >= 1 Then
+                        selectedEnCoursSubPath = Mid(pathPart, Len(selectedEnCoursClient) + 2)
+                    Else
+                        selectedEnCoursSubPath = ""
+                    End If
+                End If
+            End If
         End If
     End If
 End Sub
@@ -118,7 +146,7 @@ End Sub
 
 Private Sub btnToEnCours_Click()
     If selectedFileEtape1 = "" Then
-        MsgBox "Veuillez sélectionner un fichier d'abord.", vbExclamation
+        MsgBox "Veuillez sélectionner un fichier.", vbExclamation
         Exit Sub
     End If
     
@@ -127,20 +155,18 @@ Private Sub btnToEnCours_Click()
     Dim fileName As String
     Dim folderName As String
     
-    ' Chemin source complet
     sourcePath = currentFolderEtape1 & selectedFileEtape1
     
-    ' Vérifier que c'est un fichier (pas un dossier)
+    ' Vérifier que c'est un fichier
     If (GetAttr(sourcePath) And vbDirectory) = vbDirectory Then
-        MsgBox "Veuillez sélectionner un FICHIER, pas un dossier.", vbExclamation
+        MsgBox "Veuillez sélectionner un FICHIER.", vbExclamation
         Exit Sub
     End If
     
-    ' Nom du fichier sans extension (pour le tracking)
     fileName = selectedFileEtape1
     folderName = Left(selectedFileEtape1, InStrRev(selectedFileEtape1, ".") - 1)
     
-    ' Extraire le client et le sous-dossier
+    ' Extraire le client et sous-dossier
     Dim clientName As String
     Dim subPath As String
     
@@ -148,69 +174,63 @@ Private Sub btnToEnCours_Click()
         Exit Sub
     End If
     
-    ' Construire le chemin de destination dans EN COURS
+    ' Construire le chemin de destination (les dossiers existent déjà)
     destPath = basePath & clientName & "\EN COURS\" & subPath
     
-    ' Créer le dossier de destination si nécessaire
-    On Error GoTo CreateFolderError
+    ' Vérifier que le dossier destination existe
     If Dir(destPath, vbDirectory) = "" Then
-        MkDir destPath
+        MsgBox "Le dossier destination n'existe pas: " & destPath, vbCritical
+        Exit Sub
     End If
     
-    ' Copier le fichier vers EN COURS
+    ' Déplacer le fichier
     On Error GoTo MoveError
-    FileCopy sourcePath, destPath & selectedFileEtape1
-    
-    ' Supprimer le fichier source
+    FileCopy sourcePath, destPath & fileName
     Kill sourcePath
     
-    ' Enregistrer la première prise en charge
+    ' Enregistrer dans tracking
     RecordFirstPick folderName, clientName & "\" & subPath, fileName
     
     ' Log
-    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - ÉTAPE 1: " & selectedFileEtape1 & " → EN COURS (" & clientName & ")"
+    lstLog.AddItem Format(Now, "dd/mm/yyyy hh:mm:ss") & " - ÉTAPE 1: " & fileName & " → EN COURS"
     
-    ' Rafraîchir les listes
+    ' Rafraîchir
     LoadFilesEtape1
     LoadEnCoursFiles
     
-    MsgBox "Fichier déplacé avec succès vers EN COURS!", vbInformation
-    Exit Sub
-    
-CreateFolderError:
-    MsgBox "Erreur création dossier: " & Err.Description, vbCritical
+    MsgBox "Fichier déplacé vers EN COURS!", vbInformation
     Exit Sub
     
 MoveError:
-    MsgBox "Erreur déplacement fichier: " & Err.Description, vbCritical
+    MsgBox "Erreur déplacement: " & Err.Description, vbCritical
 End Sub
 
-' ===== ÉTAPE 2: DÉPLACER DOSSIER VERS TRAITES/NON CONFORME =====
+' ===== ÉTAPE 2: DÉPLACER DOSSIER VERS DESTINATION =====
 
 Private Sub btnMoveFinal_Click()
+    ' Vérifications
     If selectedFolderEtape2 = "" Then
-        MsgBox "Veuillez sélectionner un dossier LOCAL d'abord.", vbExclamation
+        MsgBox "Sélectionnez un dossier LOCAL.", vbExclamation
         Exit Sub
     End If
     
-    If selectedEnCoursItem = "" Then
-        MsgBox "Veuillez sélectionner un fichier dans la liste EN COURS qui correspond à votre dossier.", vbExclamation
+    If selectedEnCoursFolderName = "" Then
+        MsgBox "Sélectionnez un fichier dans EN COURS.", vbExclamation
         Exit Sub
     End If
     
-    ' Vérifier que les noms correspondent
-    If selectedFolderEtape2 <> selectedEnCoursItem Then
-        MsgBox "Le nom du dossier LOCAL doit correspondre au nom du fichier EN COURS." & vbCrLf & _
-               "Dossier local: " & selectedFolderEtape2 & vbCrLf & _
-               "Fichier EN COURS: " & selectedEnCoursItem, vbExclamation
+    ' Vérifier correspondance des noms
+    If selectedFolderEtape2 <> selectedEnCoursFolderName Then
+        MsgBox "Le nom du dossier doit correspondre au fichier EN COURS.", vbExclamation
         Exit Sub
     End If
     
     If Not optToTraite And Not optToNonConforme Then
-        MsgBox "Veuillez sélectionner une destination (TRAITES ou NON CONFORME).", vbExclamation
+        MsgBox "Sélectionnez TRAITES ou NON CONFORME.", vbExclamation
         Exit Sub
     End If
     
+    ' Destination
     Dim destType As String
     If optToTraite Then
         destType = "TRAITES"
@@ -218,88 +238,70 @@ Private Sub btnMoveFinal_Click()
         destType = "NON CONFORME"
     End If
     
-    ' Récupérer les informations du fichier EN COURS depuis le tracking
-    Dim ws As Worksheet
-    Set ws = GetTrackingWorksheet
-    
-    Dim lastRow As Long
-    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-    
-    Dim clientName As String
-    Dim subPath As String
-    Dim fileName As String
-    Dim found As Boolean
-    
-    Dim i As Long
-    For i = 2 To lastRow
-        If ws.Cells(i, 1).Value = selectedEnCoursItem And IsEmpty(ws.Cells(i, 5).Value) Then
-            fileName = ws.Cells(i, 9).Value ' On stocke le nom du fichier original
-            Dim fullPath As String
-            fullPath = ws.Cells(i, 2).Value
-            
-            ' Extraire client et subPath
-            Dim pathParts() As String
-            pathParts = Split(fullPath, "\")
-            
-            If UBound(pathParts) >= 0 Then
-                clientName = pathParts(0)
-                If UBound(pathParts) >= 1 Then
-                    subPath = Mid(fullPath, Len(clientName) + 2)
-                Else
-                    subPath = ""
-                End If
-            End If
-            
-            found = True
-            Exit For
-        End If
-    Next i
-    
-    If Not found Then
-        MsgBox "Fichier EN COURS non trouvé dans le tracking.", vbExclamation
-        Exit Sub
-    End If
-    
     ' Chemins
     Dim sourceFolder As String
     sourceFolder = currentFolderEtape2 & selectedFolderEtape2 & "\"
     
     Dim enCoursFilePath As String
-    enCoursFilePath = basePath & clientName & "\EN COURS\" & subPath & fileName
+    enCoursFilePath = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath & selectedEnCoursFileName
     
     Dim destFolder As String
-    destFolder = basePath & clientName & "\" & destType & "\" & subPath & selectedFolderEtape2 & "\"
+    destFolder = basePath & selectedEnCoursClient & "\" & destType & "\" & selectedEnCoursSubPath & selectedFolderEtape2 & "\"
     
-    ' Vérifications
+    ' Vérifications d'existence
     If Dir(sourceFolder, vbDirectory) = "" Then
-        MsgBox "Dossier local non trouvé: " & sourceFolder, vbExclamation
+        MsgBox "Dossier local introuvable: " & sourceFolder, vbExclamation
         Exit Sub
     End If
     
     If Dir(enCoursFilePath) = "" Then
-        MsgBox "Fichier EN COURS non trouvé: " & enCoursFilePath, vbExclamation
+        MsgBox "Fichier EN COURS introuvable: " & enCoursFilePath, vbExclamation
         Exit Sub
     End If
     
-    ' Créer le dossier de destination
-    On Error GoTo CreateDestError
-    If Dir(destFolder, vbDirectory) = "" Then
-        CreateFolderPath destFolder
+    ' Vérifier que le dossier destination parent existe
+    Dim destParent As String
+    destParent = basePath & selectedEnCoursClient & "\" & destType & "\" & selectedEnCoursSubPath
+    
+    If Dir(destParent, vbDirectory) = "" Then
+        MsgBox "Le dossier destination n'existe pas: " & destParent, vbCritical
+        Exit Sub
     End If
     
-    ' Déplacer les fichiers du dossier LOCAL vers la destination
+    ' Vérifier si le dossier destination existe déjà
+    If Dir(destFolder, vbDirectory) <> "" Then
+        If MsgBox("Le dossier destination existe déjà. Voulez-vous écraser?", vbYesNo + vbQuestion) <> vbYes Then
+            Exit Sub
+        End If
+    End If
+    
+    ' Déplacer les fichiers
     On Error GoTo MoveError
     
-    Dim fso As Object
-    Set fso = CreateObject("Scripting.FileSystemObject")
+    ' Créer le dossier destination s'il n'existe pas (mais son parent existe)
+    If Dir(destFolder, vbDirectory) = "" Then
+        MkDir destFolder
+    End If
     
-    ' Copier tous les fichiers du dossier local vers la destination
+    ' Compter et déplacer les fichiers
+    Dim fileCount As Integer
+    fileCount = 0
+    
     Dim fileInFolder As String
     fileInFolder = Dir(sourceFolder & "*.*")
     
     Do While fileInFolder <> ""
+        fileCount = fileCount + 1
+        
+        ' Supprimer fichier existant dans destination si nécessaire
+        If Dir(destFolder & fileInFolder) <> "" Then
+            Kill destFolder & fileInFolder
+        End If
+        
+        ' Copier puis supprimer
         FileCopy sourceFolder & fileInFolder, destFolder & fileInFolder
         Kill sourceFolder & fileInFolder
+        
         fileInFolder = Dir()
     Loop
     
@@ -309,38 +311,26 @@ Private Sub btnMoveFinal_Click()
     ' Supprimer le fichier dans EN COURS
     Kill enCoursFilePath
     
-    ' Vérifier si le dossier EN COURS est vide, si oui le supprimer
-    Dim enCoursFolder As String
-    enCoursFolder = basePath & clientName & "\EN COURS\" & subPath
-    If IsFolderEmpty(enCoursFolder) Then
-        RmDir enCoursFolder
-    End If
-    
-    ' Enregistrer la deuxième prise en charge
-    RecordSecondPick selectedFolderEtape2, clientName & "\" & subPath, destType
+    ' Enregistrer dans tracking
+    RecordSecondPick selectedFolderEtape2, selectedEnCoursClient & "\" & selectedEnCoursSubPath, destType
     
     ' Log
-    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - ÉTAPE 2: " & selectedFolderEtape2 & " → " & destType & " (" & clientName & ")"
+    lstLog.AddItem Format(Now, "dd/mm/yyyy hh:mm:ss") & " - ÉTAPE 2: " & selectedFolderEtape2 & " (" & fileCount & " fichiers) → " & destType
     
     ' Rafraîchir
     LoadFoldersEtape2
     LoadEnCoursFiles
     
-    MsgBox "Dossier traité avec succès!", vbInformation
-    Exit Sub
-    
-CreateDestError:
-    MsgBox "Erreur création dossier destination: " & Err.Description, vbCritical
+    MsgBox "Dossier traité! " & fileCount & " fichier(s) déplacé(s) vers " & destType, vbInformation
     Exit Sub
     
 MoveError:
-    MsgBox "Erreur déplacement: " & Err.Description, vbCritical
+    MsgBox "Erreur: " & Err.Description, vbCritical
 End Sub
 
 ' ===== FONCTIONS UTILITAIRES =====
 
 Private Function ExtractClientAndSubPath(fullPath As String, statusFolder As String, ByRef clientName As String, ByRef subPath As String) As Boolean
-    ' Extraire le client et le sous-dossier à partir du chemin complet
     If InStr(fullPath, basePath) <> 1 Then
         MsgBox "Le chemin doit commencer par: " & basePath, vbExclamation
         ExtractClientAndSubPath = False
@@ -356,7 +346,6 @@ Private Function ExtractClientAndSubPath(fullPath As String, statusFolder As Str
     If UBound(parts) >= 0 Then
         clientName = parts(0)
         
-        ' Trouver le dossier status (A TRAITER, EN COURS, etc.)
         Dim statusPos As Integer
         statusPos = InStr(remainingPath, statusFolder & "\")
         
@@ -372,40 +361,6 @@ Private Function ExtractClientAndSubPath(fullPath As String, statusFolder As Str
     End If
 End Function
 
-Private Sub CreateFolderPath(folderPath As String)
-    Dim parts() As String
-    parts = Split(folderPath, "\")
-    
-    Dim buildPath As String
-    buildPath = parts(0) & "\" & parts(1) & "\" & parts(2) & "\" & parts(3) & "\"
-    
-    Dim i As Integer
-    For i = 4 To UBound(parts) - 1
-        buildPath = buildPath & parts(i) & "\"
-        If Dir(buildPath, vbDirectory) = "" Then
-            MkDir buildPath
-        End If
-    Next i
-    
-    ' Créer le dossier final
-    MkDir folderPath
-End Sub
-
-Private Function IsFolderEmpty(folderPath As String) As Boolean
-    Dim fileCount As Integer
-    fileCount = 0
-    
-    Dim fileName As String
-    fileName = Dir(folderPath & "*.*")
-    
-    Do While fileName <> ""
-        fileCount = fileCount + 1
-        fileName = Dir()
-    Loop
-    
-    IsFolderEmpty = (fileCount = 0)
-End Function
-
 ' ===== CHARGEMENT DES LISTES =====
 
 Private Sub LoadFilesEtape1()
@@ -415,10 +370,10 @@ Private Sub LoadFilesEtape1()
     folder = txtSourcePathEtape1.Text
     
     If Dir(folder, vbDirectory) = "" Then
+        lstFilesEtape1.AddItem "Dossier inaccessible"
         Exit Sub
     End If
     
-    ' Lister uniquement les FICHIERS (pas les dossiers)
     Dim fileName As String
     fileName = Dir(folder & "*.*")
     
@@ -430,7 +385,7 @@ Private Sub LoadFilesEtape1()
     Loop
     
     If lstFilesEtape1.ListCount = 0 Then
-        lstFilesEtape1.AddItem "Aucun fichier trouvé"
+        lstFilesEtape1.AddItem "Aucun fichier"
     End If
     
     selectedFileEtape1 = ""
@@ -443,10 +398,10 @@ Private Sub LoadFoldersEtape2()
     folder = txtSourcePathEtape2.Text
     
     If Dir(folder, vbDirectory) = "" Then
+        lstFoldersEtape2.AddItem "Dossier inaccessible"
         Exit Sub
     End If
     
-    ' Lister uniquement les DOSSIERS
     Dim fileName As String
     fileName = Dir(folder & "*", vbDirectory)
     
@@ -460,7 +415,7 @@ Private Sub LoadFoldersEtape2()
     Loop
     
     If lstFoldersEtape2.ListCount = 0 Then
-        lstFoldersEtape2.AddItem "Aucun dossier trouvé"
+        lstFoldersEtape2.AddItem "Aucun dossier"
     End If
     
     selectedFolderEtape2 = ""
@@ -469,7 +424,6 @@ End Sub
 Private Sub LoadEnCoursFiles()
     lstEnCoursFiles.Clear
     
-    ' Récupérer tous les fichiers actuellement dans EN COURS depuis le tracking
     Dim ws As Worksheet
     Set ws = GetTrackingWorksheet
     
@@ -479,9 +433,10 @@ Private Sub LoadEnCoursFiles()
     If lastRow > 1 Then
         Dim i As Long
         For i = 2 To lastRow
-            ' Afficher uniquement les éléments en cours (première date remplie, deuxième vide)
             If Not IsEmpty(ws.Cells(i, 3).Value) And IsEmpty(ws.Cells(i, 5).Value) Then
-                lstEnCoursFiles.AddItem ws.Cells(i, 1).Value & " [" & ws.Cells(i, 9).Value & "] - " & ws.Cells(i, 2).Value
+                Dim displayText As String
+                displayText = ws.Cells(i, 1).Value & " [" & ws.Cells(i, 9).Value & "] - " & ws.Cells(i, 2).Value
+                lstEnCoursFiles.AddItem displayText
             End If
         Next i
     End If
@@ -490,7 +445,10 @@ Private Sub LoadEnCoursFiles()
         lstEnCoursFiles.AddItem "Aucun fichier en cours"
     End If
     
-    selectedEnCoursItem = ""
+    selectedEnCoursFolderName = ""
+    selectedEnCoursFileName = ""
+    selectedEnCoursClient = ""
+    selectedEnCoursSubPath = ""
 End Sub
 
 Private Sub btnRefresh_Click()
@@ -509,13 +467,14 @@ Private Sub RecordFirstPick(folderName As String, fullPath As String, fileName A
     Dim nextRow As Long
     nextRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
     
-    ' Enregistrer
-    ws.Cells(nextRow, 1).Value = folderName  ' Nom du dossier (sans extension)
-    ws.Cells(nextRow, 2).Value = fullPath    ' Chemin complet
-    ws.Cells(nextRow, 3).Value = Now         ' Date première prise en charge
-    ws.Cells(nextRow, 4).Value = Environ("username") ' Agent
-    ws.Cells(nextRow, 7).Value = ThisWorkbook.Name ' Session
-    ws.Cells(nextRow, 9).Value = fileName    ' Nom du fichier original
+    ws.Cells(nextRow, 1).Value = folderName
+    ws.Cells(nextRow, 2).Value = fullPath
+    ws.Cells(nextRow, 3).Value = Now
+    ws.Cells(nextRow, 4).Value = Environ("username")
+    ws.Cells(nextRow, 7).Value = ThisWorkbook.Name
+    ws.Cells(nextRow, 9).Value = fileName
+    
+    ws.Columns("A:I").AutoFit
 End Sub
 
 Private Sub RecordSecondPick(folderName As String, fullPath As String, destType As String)
@@ -525,26 +484,28 @@ Private Sub RecordSecondPick(folderName As String, fullPath As String, destType 
     Dim lastRow As Long
     lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
     
-    ' Trouver l'enregistrement correspondant
+    Dim found As Boolean
     Dim i As Long
+    
     For i = 2 To lastRow
         If ws.Cells(i, 1).Value = folderName And _
            ws.Cells(i, 2).Value = fullPath And _
            IsEmpty(ws.Cells(i, 5).Value) Then
             
-            ' Deuxième prise en charge
             ws.Cells(i, 5).Value = Now
             ws.Cells(i, 6).Value = destType
             
-            ' Calculer DMT
             Dim dmtMinutes As Double
             dmtMinutes = DateDiff("n", ws.Cells(i, 3).Value, Now)
             ws.Cells(i, 8).Value = dmtMinutes / 1440
             ws.Cells(i, 8).NumberFormat = "[h]:mm:ss"
             
+            found = True
             Exit For
         End If
     Next i
+    
+    ws.Columns("A:I").AutoFit
 End Sub
 
 Private Function GetTrackingWorksheet() As Worksheet
@@ -560,13 +521,12 @@ Private Function GetTrackingWorksheet() As Worksheet
         Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
         ws.Name = trackingSheetName
         
-        ' En-têtes
         With ws
             .Cells(1, 1).Value = "Nom Dossier"
             .Cells(1, 2).Value = "Chemin (Client\Sous-dossier)"
-            .Cells(1, 3).Value = "Date Prise en Charge (Étape 1)"
+            .Cells(1, 3).Value = "Date Prise en Charge"
             .Cells(1, 4).Value = "Agent"
-            .Cells(1, 5).Value = "Date Fin (Étape 2)"
+            .Cells(1, 5).Value = "Date Fin"
             .Cells(1, 6).Value = "Destination Finale"
             .Cells(1, 7).Value = "Session/Workbook"
             .Cells(1, 8).Value = "DMT"
@@ -598,7 +558,7 @@ Private Sub LoadTrackingData()
         
         For i = lastRow To startRow Step -1
             Dim logEntry As String
-            logEntry = Format(ws.Cells(i, 3).Value, "dd/mm/yyyy hh:mm") & " - " & ws.Cells(i, 1).Value & " par " & ws.Cells(i, 4).Value
+            logEntry = Format(ws.Cells(i, 3).Value, "dd/mm/yyyy hh:mm") & " - " & ws.Cells(i, 1).Value
             
             If Not IsEmpty(ws.Cells(i, 5).Value) Then
                 logEntry = logEntry & " → Terminé en " & Format(ws.Cells(i, 8).Value, "[h]:mm:ss")
