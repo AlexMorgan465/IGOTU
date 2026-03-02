@@ -10,19 +10,21 @@ Private Sub btnDeplacer_Click()
     Dim nomDossier As String
     Dim destinationFinale As String
     
-    ' Sélection source
+    ' Sélection dossier source
     With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Sélectionner le dossier à copier"
         If .Show <> -1 Then Exit Sub
         dossierSource = .SelectedItems(1)
     End With
     
-    ' Enlever "\" final si présent
+    ' Supprimer "\" final si présent
     If Right(dossierSource, 1) = "\" Then
         dossierSource = Left(dossierSource, Len(dossierSource) - 1)
     End If
     
-    ' Sélection destination
+    ' Sélection dossier destination
     With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Sélectionner le dossier destination"
         If .Show <> -1 Then Exit Sub
         dossierDestination = .SelectedItems(1)
     End With
@@ -30,18 +32,30 @@ Private Sub btnDeplacer_Click()
     nomDossier = fso.GetFolder(dossierSource).Name
     destinationFinale = dossierDestination & "\" & nomDossier
     
+    ' Vérifier que destination n'existe pas
     If fso.FolderExists(destinationFinale) Then
-        MsgBox "Le dossier existe déjà à destination."
+        MsgBox "Le dossier existe déjà à destination.", vbExclamation
         Exit Sub
     End If
     
-    fso.MoveFolder dossierSource, destinationFinale
+    ' 1️⃣ Copier le dossier
+    fso.CopyFolder dossierSource, destinationFinale, True
     
-    MsgBox "Dossier déplacé avec succès !"
+    ' 2️⃣ Vérifier que la copie existe
+    If fso.FolderExists(destinationFinale) Then
+        
+        ' 3️⃣ Supprimer l’original
+        fso.DeleteFolder dossierSource, True
+        
+        MsgBox "Dossier déplacé avec succès (copie + suppression).", vbInformation
+        
+    Else
+        MsgBox "La copie a échoué. Suppression annulée.", vbCritical
+    End If
     
     Exit Sub
 
 GestionErreur:
-    MsgBox "Erreur : " & Err.Number & " - " & Err.Description
+    MsgBox "Erreur : " & Err.Number & " - " & Err.Description, vbCritical
 
 End Sub
