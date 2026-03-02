@@ -1,61 +1,162 @@
-Private Sub btnDeplacer_Click()
-
+Private Sub btnMoveFinal_Click()
     On Error GoTo GestionErreur
     
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
     
     Dim dossierSource As String
-    Dim dossierDestination As String
+    Dim dossierDestinationParent As String
     Dim nomDossier As String
     Dim destinationFinale As String
+    Dim enCoursFilePath As String
+    Dim destType As String
     
-    ' Sélection dossier source
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier à copier"
-        If .Show <> -1 Then Exit Sub
-        dossierSource = .SelectedItems(1)
-    End With
+    ' === VÉRIFICATIONS PRÉALABLES ===
     
-    ' Supprimer "\" final si présent
+    ' Vérifier qu'un dossier LOCAL est sélectionné
+    If selectedFolderEtape2 = "" Then
+        MsgBox "Veuillez sélectionner un dossier LOCAL dans la liste.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Vérifier qu'un fichier EN COURS est sélectionné
+    If selectedEnCoursFolderName = "" Then
+        MsgBox "Veuillez sélectionner un fichier dans EN COURS.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Vérifier que les noms correspondent
+    If selectedFolderEtape2 <> selectedEnCoursFolderName Then
+        MsgBox "Le nom du dossier LOCAL doit correspondre au nom du fichier EN COURS." & vbCrLf & _
+               "Dossier local: " & selectedFolderEtape2 & vbCrLf & _
+               "Fichier EN COURS: " & selectedEnCoursFolderName, vbExclamation
+        Exit Sub
+    End If
+    
+    ' Vérifier qu'une destination est choisie
+    If Not optToTraite And Not optToNonConforme Then
+        MsgBox "Veuillez sélectionner TRAITES ou NON CONFORME.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Déterminer le type de destination
+    If optToTraite Then
+        destType = "TRAITES"
+    Else
+        destType = "NON CONFORME"
+    End If
+    
+    ' === CONSTRUCTION DES CHEMINS ===
+    
+    ' 1. Dossier source (local) - chemin complet
+    dossierSource = currentFolderEtape2 & selectedFolderEtape2
+    
+    ' Supprimer "\" final si présent (pour normaliser)
     If Right(dossierSource, 1) = "\" Then
         dossierSource = Left(dossierSource, Len(dossierSource) - 1)
     End If
     
-    ' Sélection dossier destination
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier destination"
-        If .Show <> -1 Then Exit Sub
-        dossierDestination = .SelectedItems(1)
-    End With
-    
-    nomDossier = fso.GetFolder(dossierSource).Name
-    destinationFinale = dossierDestination & "\" & nomDossier
-    
-    ' Vérifier que destination n'existe pas
-    If fso.FolderExists(destinationFinale) Then
-        MsgBox "Le dossier existe déjà à destination.", vbExclamation
+    ' 2. Vérifier que le dossier source existe
+    If Not fso.FolderExists(dossierSource) Then
+        MsgBox "Dossier local introuvable: " & dossierSource, vbExclamation
         Exit Sub
     End If
     
-    ' 1️⃣ Copier le dossier
+    ' 3. Chemin du fichier EN COURS à supprimer
+    enCoursFilePath = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath & selectedEnCoursFileName
+    
+    ' 4. Dossier parent de destination (celui qui contiendra le dossier à copier)
+    dossierDestinationParent = basePath & selectedEnCoursClient & "\" & destType & "\" & selectedEnCoursSubPath
+    
+    ' Nettoyer le chemin parent
+    If Right(dossierDestinationParent, 1) = "\" Then
+        dossierDestinationParent = Left(dossierDestinationParent, Len(dossierDestinationParent) - 1)
+    End If
+    
+    ' 5. Vérifier que le dossier parent de destination existe
+    If Not fso.FolderExists(dossierDestinationParent) Then
+        MsgBox "Le dossier de destination n'existe pas dans l'arborescence: " & dossierDestinationParent, vbCritical
+        Exit Sub
+    End If
+    
+    ' 6. Nom du dossier (pour la destination)
+    nomDossier = fso.GetFolder(dossierSource).Name
+    
+    ' 7. Chemin complet de destination
+    destinationFinale = dossierDestinationParent & "\" & nomDossier
+    
+    ' 8. Vérifier que la destination n'existe pas déjà
+    If fso.FolderExists(destinationFinale) Then
+        If MsgBox("Le dossier destination existe déjà. Voulez-vous le remplacer?", vbYesNo + vbQuestion) <> vbYes Then
+            Exit Sub
+        End If
+        ' Si oui, on supprimera l'ancien dossier après confirmation
+        fso.DeleteFolder destinationFinale, True
+    End If
+    
+    ' 9. Vérifier que le fichier EN COURS existe
+    If Not fso.FileExists(enCoursFilePath) Then
+        MsgBox "Fichier EN COURS introuvable: " & enCoursFilePath, vbExclamation
+        Exit Sub
+    End If
+    
+    ' === LOGIQUE DE DÉPLACEMENT (COPIE + SUPPRESSION) ===
+    
+    ' 1️⃣ Copier le dossier source vers la destination
     fso.CopyFolder dossierSource, destinationFinale, True
     
     ' 2️⃣ Vérifier que la copie existe
     If fso.FolderExists(destinationFinale) Then
         
-        ' 3️⃣ Supprimer l’original
+        ' 3️⃣ Supprimer le dossier source original
         fso.DeleteFolder dossierSource, True
         
-        MsgBox "Dossier déplacé avec succès (copie + suppression).", vbInformation
+        ' 4️⃣ Supprimer le fichier dans EN COURS
+        fso.DeleteFile enCoursFilePath, True
+        
+        ' 5️⃣ Optionnel : Vérifier si le dossier EN COURS parent est vide
+        Dim enCoursParent As String
+        enCoursParent = basePath & selectedEnCoursClient & "\EN COURS\" & selectedEnCoursSubPath
+        If Right(enCoursParent, 1) = "\" Then
+            enCoursParent = Left(enCoursParent, Len(enCoursParent) - 1)
+        End If
+        
+        ' Compter les fichiers dans le dossier parent EN COURS
+        Dim count As Integer
+        Dim file As String
+        file = Dir(enCoursParent & "\*.*")
+        Do While file <> ""
+            count = count + 1
+            file = Dir()
+        Loop
+        
+        ' Si vide, supprimer le dossier parent
+        If count = 0 Then
+            fso.DeleteFolder enCoursParent, True
+        End If
+        
+        ' 6️⃣ Enregistrer dans le tracking
+        RecordSecondPick selectedFolderEtape2, selectedEnCoursClient & "\" & selectedEnCoursSubPath, destType
+        
+        ' 7️⃣ Journaliser
+        lstLog.AddItem Format(Now, "dd/mm/yyyy hh:mm:ss") & " - ÉTAPE 2: " & selectedFolderEtape2 & " → " & destType
+        
+        ' 8️⃣ Rafraîchir les listes
+        LoadFoldersEtape2
+        LoadEnCoursFiles
+        
+        ' 9️⃣ Message de succès
+        MsgBox "Dossier déplacé avec succès !" & vbCrLf & _
+               "Destination: " & destinationFinale, vbInformation
         
     Else
-        MsgBox "La copie a échoué. Suppression annulée.", vbCritical
+        MsgBox "La copie a échoué. Le dossier source n'a pas été supprimé.", vbCritical
     End If
     
     Exit Sub
 
 GestionErreur:
-    MsgBox "Erreur : " & Err.Number & " - " & Err.Description, vbCritical
-
+    MsgBox "Erreur : " & Err.Number & " - " & Err.Description & vbCrLf & _
+           "Source: " & dossierSource & vbCrLf & _
+           "Destination: " & destinationFinale, vbCritical
 End Sub
