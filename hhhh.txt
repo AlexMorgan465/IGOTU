@@ -4,27 +4,30 @@
 ' - TextBox1: txtSourcePath (Multiline = False, Width = 400)
 ' - CommandButton1: btnBrowse (Caption = "Browse...")
 ' - ListBox1: lstFiles (Width = 500, Height = 150)
-' - Frame1: Caption = "Step 1: Initial Move"
+' - Frame1: Caption = "Step 1: Initial Move (A TRAITER → EN COURS)"
 '   - CommandButton2: btnToEnCours (Caption = "Move to EN COURS")
-' - Frame2: Caption = "Step 2: Final Move"
+' - Frame2: Caption = "Step 2: Final Move (Any Location → TRAITES/NON CONFORME)"
 '   - OptionButton1: optToTraite (Caption = "To TRAITES")
 '   - OptionButton2: optToNonConforme (Caption = "To NON CONFORME")
-'   - CommandButton3: btnMoveFinal (Caption = "Move Selected")
-' - ListBox2: lstLog (Width = 500, Height = 100)
-' - CommandButton4: btnRefresh (Caption = "Refresh")
+'   - CommandButton3: btnMoveFinal (Caption = "Move Selected Folder to Destination")
+' - Frame3: Caption = "Files in EN COURS (for reference)"
+'   - ListBox2: lstEnCoursFiles (Width = 500, Height = 100)
+' - ListBox3: lstLog (Width = 500, Height = 100)
+' - CommandButton4: btnRefresh (Caption = "Refresh All")
 
 Option Explicit
 
 Private basePath As String
 Private currentFolder As String
 Private selectedFile As String
-Private firstPickDate As Variant
+Private selectedFolder As String
 
 Private Sub UserForm_Initialize()
     basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
     currentFolder = basePath
     txtSourcePath.Text = currentFolder
     LoadFiles
+    LoadEnCoursFiles
     LoadTrackingData
 End Sub
 
@@ -33,7 +36,7 @@ Private Sub btnBrowse_Click()
     Set fd = Application.FileDialog(msoFileDialogFolderPicker)
     
     With fd
-        .Title = "Select the A TRAITER folder or subfolder"
+        .Title = "Select a folder containing files to process"
         .InitialFileName = currentFolder
         If .Show = -1 Then
             currentFolder = .SelectedItems(1) & "\"
@@ -47,6 +50,13 @@ Private Sub lstFiles_Change()
     If lstFiles.ListIndex >= 0 Then
         ' Remove [FOLDER] prefix if present
         selectedFile = Replace(lstFiles.List(lstFiles.ListIndex), "[FOLDER] ", "")
+    End If
+End Sub
+
+Private Sub lstEnCoursFiles_Change()
+    If lstEnCoursFiles.ListIndex >= 0 Then
+        ' Get the selected folder from EN COURS list
+        selectedFolder = Replace(lstEnCoursFiles.List(lstEnCoursFiles.ListIndex), "[FOLDER] ", "")
     End If
 End Sub
 
@@ -147,8 +157,9 @@ Private Sub btnToEnCours_Click()
     ' Log the action
     lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - Moved: " & selectedFile & " to EN COURS under " & clientName
     
-    ' Refresh file list
+    ' Refresh file lists
     LoadFiles
+    LoadEnCoursFiles
     
     MsgBox "File moved successfully to EN COURS under " & clientName & "!", vbInformation
     Exit Sub
@@ -163,7 +174,20 @@ End Sub
 
 Private Sub btnMoveFinal_Click()
     If selectedFile = "" Then
-        MsgBox "Please select a folder first.", vbExclamation
+        MsgBox "Please select a folder from the source location first.", vbExclamation
+        Exit Sub
+    End If
+    
+    If selectedFolder = "" Then
+        MsgBox "Please select a matching folder from the EN COURS list.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Verify that the selected folder name matches
+    If selectedFile <> selectedFolder Then
+        MsgBox "The selected folder name must match the EN COURS folder name." & vbCrLf & _
+               "Selected: " & selectedFile & vbCrLf & _
+               "EN COURS folder: " & selectedFolder, vbExclamation
         Exit Sub
     End If
     
@@ -179,37 +203,7 @@ Private Sub btnMoveFinal_Click()
         destType = "NON CONFORME"
     End If
     
-    ' Extract client name and subpath from current folder (which should be under EN COURS)
-    Dim searchStr As String
-    searchStr = basePath
-    Dim remainingPath As String
-    remainingPath = Mid(currentFolder, Len(searchStr) + 1)
-    
-    ' Extract client name and path
-    Dim parts() As String
-    parts = Split(remainingPath, "\")
-    
-    If UBound(parts) < 1 Then
-        MsgBox "Invalid folder structure. Please navigate to an EN COURS subfolder.", vbExclamation
-        Exit Sub
-    End If
-    
-    Dim clientName As String
-    clientName = parts(0)
-    
-    ' Find EN COURS in the path
-    Dim enCoursPos As Integer
-    enCoursPos = InStr(remainingPath, "EN COURS\")
-    
-    If enCoursPos = 0 Then
-        MsgBox "Please navigate to an EN COURS subfolder.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Get the subpath after EN COURS
-    Dim subPath As String
-    subPath = Mid(remainingPath, enCoursPos + Len("EN COURS\"))
-    
+    ' Get the source folder path
     Dim sourceFolder As String
     sourceFolder = currentFolder & selectedFile
     
@@ -219,24 +213,78 @@ Private Sub btnMoveFinal_Click()
         Exit Sub
     End If
     
-    ' Construct destination folder with proper client structure
-    Dim destFolder As String
-    If subPath <> "" Then
-        ' Remove the selected folder name from subPath if it's at the end
-        If Right(subPath, Len(selectedFile) + 1) = selectedFile & "\" Then
-            subPath = Left(subPath, Len(subPath) - Len(selectedFile) - 1)
+    ' Find the matching EN COURS folder to get its path and delete it
+    Dim ws As Worksheet
+    Set ws = GetTrackingWorksheet
+    
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    Dim enCoursFolderPath As String
+    Dim fullPath As String
+    Dim found As Boolean
+    
+    ' Find the EN COURS folder path from tracking data
+    Dim i As Long
+    For i = 2 To lastRow
+        If ws.Cells(i, 1).Value = selectedFolder And IsEmpty(ws.Cells(i, 5).Value) Then
+            fullPath = ws.Cells(i, 2).Value
+            found = True
+            Exit For
         End If
-        
-        If subPath <> "" Then
-            destFolder = basePath & clientName & "\" & destType & "\" & subPath & "\" & selectedFile & "\"
-        Else
-            destFolder = basePath & clientName & "\" & destType & "\" & selectedFile & "\"
-        End If
-    Else
-        destFolder = basePath & clientName & "\" & destType & "\" & selectedFile & "\"
+    Next i
+    
+    If Not found Then
+        MsgBox "Could not find matching folder in EN COURS tracking data.", vbExclamation
+        Exit Sub
     End If
     
-    ' Create destination folder
+    ' Construct the EN COURS folder path
+    Dim pathParts() As String
+    pathParts = Split(fullPath, "\")
+    
+    If UBound(pathParts) >= 0 Then
+        enCoursFolderPath = basePath & pathParts(0) & "\EN COURS\"
+        
+        ' Add subpath if exists
+        If UBound(pathParts) >= 1 Then
+            Dim j As Integer
+            For j = 1 To UBound(pathParts)
+                If pathParts(j) <> "" Then
+                    enCoursFolderPath = enCoursFolderPath & pathParts(j) & "\"
+                End If
+            Next j
+        End If
+        
+        enCoursFolderPath = enCoursFolderPath & selectedFolder & "\"
+    Else
+        MsgBox "Invalid path structure in tracking data.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Check if EN COURS folder exists
+    If Dir(enCoursFolderPath, vbDirectory) = "" Then
+        MsgBox "EN COURS folder not found at: " & enCoursFolderPath, vbExclamation
+        Exit Sub
+    End If
+    
+    ' Construct destination folder with proper client structure
+    Dim destFolder As String
+    destFolder = basePath & pathParts(0) & "\" & destType & "\"
+    
+    ' Add subpath if exists
+    If UBound(pathParts) >= 1 Then
+        Dim k As Integer
+        For k = 1 To UBound(pathParts)
+            If pathParts(k) <> "" Then
+                destFolder = destFolder & pathParts(k) & "\"
+            End If
+        Next k
+    End If
+    
+    destFolder = destFolder & selectedFolder & "\"
+    
+    ' Create destination folder structure
     On Error GoTo CreateDestError
     If Dir(destFolder, vbDirectory) = "" Then
         ' Create all necessary subfolders
@@ -245,19 +293,19 @@ Private Sub btnMoveFinal_Click()
         Dim buildPath As String
         buildPath = folderParts(0) & "\" & folderParts(1) & "\" & folderParts(2) & "\" & folderParts(3) & "\"
         
-        Dim i As Integer
-        For i = 4 To UBound(folderParts) - 1
-            buildPath = buildPath & folderParts(i) & "\"
+        Dim m As Integer
+        For m = 4 To UBound(folderParts) - 1
+            buildPath = buildPath & folderParts(m) & "\"
             If Dir(buildPath, vbDirectory) = "" Then
                 MkDir buildPath
             End If
-        Next i
+        Next m
         
         ' Create final folder
         MkDir destFolder
     End If
     
-    ' Move all contents
+    ' Move files from source folder to destination
     On Error GoTo MoveError
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -274,16 +322,25 @@ Private Sub btnMoveFinal_Click()
     ' Remove the empty source folder
     RmDir sourceFolder
     
+    ' Delete the EN COURS folder
+    On Error Resume Next
+    Kill enCoursFolderPath & "*.*"
+    RmDir enCoursFolderPath
+    On Error GoTo MoveError
+    
     ' Record the second pick and calculate DMT
-    RecordSecondPick selectedFile, clientName & "\" & subPath, destType
+    RecordSecondPick selectedFolder, fullPath, destType
     
     ' Log the action
-    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - Moved: " & selectedFile & " to " & destType & " under " & clientName
+    lstLog.AddItem Format(Now, "yyyy-mm-dd hh:mm:ss") & " - Completed: " & selectedFolder & " moved to " & destType & " (EN COURS folder deleted)"
     
-    ' Refresh file list
+    ' Refresh file lists
     LoadFiles
+    LoadEnCoursFiles
     
-    MsgBox "Folder moved successfully to " & destType & " under " & clientName & "!", vbInformation
+    MsgBox "Folder processed successfully!" & vbCrLf & _
+           "Files moved to: " & destType & vbCrLf & _
+           "EN COURS folder has been deleted.", vbInformation
     Exit Sub
     
 CreateDestError:
@@ -296,6 +353,8 @@ End Sub
 
 Private Sub btnRefresh_Click()
     LoadFiles
+    LoadEnCoursFiles
+    LoadTrackingData
 End Sub
 
 Private Sub LoadFiles()
@@ -308,7 +367,7 @@ Private Sub LoadFiles()
         Exit Sub
     End If
     
-    ' List folders first
+    ' List folders only (since we need to select folders for step 2)
     Dim fileName As String
     fileName = Dir(folder & "*", vbDirectory)
     
@@ -321,18 +380,36 @@ Private Sub LoadFiles()
         fileName = Dir()
     Loop
     
-    ' Then list files
-    fileName = Dir(folder & "*.*")
-    
-    Do While fileName <> ""
-        If (GetAttr(folder & fileName) And vbDirectory) <> vbDirectory Then
-            lstFiles.AddItem fileName
-        End If
-        fileName = Dir()
-    Loop
-    
     ' Reset selected file
     selectedFile = ""
+End Sub
+
+Private Sub LoadEnCoursFiles()
+    lstEnCoursFiles.Clear
+    
+    ' Get all folders currently in EN COURS from tracking data
+    Dim ws As Worksheet
+    Set ws = GetTrackingWorksheet
+    
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    If lastRow > 1 Then
+        Dim i As Long
+        For i = 2 To lastRow
+            ' Only show items that are in EN COURS (have first pick but no second pick)
+            If Not IsEmpty(ws.Cells(i, 3).Value) And IsEmpty(ws.Cells(i, 5).Value) Then
+                lstEnCoursFiles.AddItem "[FOLDER] " & ws.Cells(i, 1).Value & " (" & ws.Cells(i, 2).Value & ")"
+            End If
+        Next i
+    End If
+    
+    If lstEnCoursFiles.ListCount = 0 Then
+        lstEnCoursFiles.AddItem "No folders in EN COURS"
+    End If
+    
+    ' Reset selected folder
+    selectedFolder = ""
 End Sub
 
 Private Sub RecordFirstPick(folderName As String, fullPath As String)
@@ -349,7 +426,7 @@ Private Sub RecordFirstPick(folderName As String, fullPath As String)
     ws.Cells(nextRow, 2).Value = fullPath    ' Full path (client + subfolders)
     ws.Cells(nextRow, 3).Value = Now         ' First pick date/time
     ws.Cells(nextRow, 4).Value = Environ("username") ' User/Agent
-    ws.Cells(nextRow, 7).Value = Application.ActiveWorkbook.Name ' Session/Workbook name
+    ws.Cells(nextRow, 7).Value = ThisWorkbook.Name ' Session/Workbook name
 End Sub
 
 Private Sub RecordSecondPick(folderName As String, fullPath As String, destType As String)
