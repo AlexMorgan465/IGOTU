@@ -3,33 +3,38 @@ Private Sub btnDeplacer_Click()
     Dim fso As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    Dim cheminSource As String
-    Dim cheminDestination As String
+    Dim dossierSource As String
+    Dim dossierDestination As String
+    Dim nomDossier As String
     
-    ' Sélection du fichier source
-    With Application.FileDialog(msoFileDialogFilePicker)
-        .Title = "Sélectionner le fichier à déplacer"
+    ' Sélection du dossier source
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Sélectionner le dossier à déplacer"
         If .Show <> -1 Then Exit Sub
-        cheminSource = .SelectedItems(1)
+        dossierSource = .SelectedItems(1)
     End With
     
     ' Sélection du dossier destination
     With Application.FileDialog(msoFileDialogFolderPicker)
         .Title = "Sélectionner le dossier destination"
         If .Show <> -1 Then Exit Sub
-        cheminDestination = .SelectedItems(1)
+        dossierDestination = .SelectedItems(1)
     End With
     
-    ' Vérification et déplacement
-    If fso.FileExists(cheminSource) Then
+    ' Récupérer le nom du dossier
+    nomDossier = Mid(dossierSource, InStrRev(dossierSource, "\") + 1)
+    
+    ' Vérifier existence
+    If fso.FolderExists(dossierSource) Then
         
-        fso.MoveFile cheminSource, cheminDestination & "\" & _
-                     Mid(cheminSource, InStrRev(cheminSource, "\") + 1)
+        ' Déplacer dossier
+        fso.MoveFolder dossierSource, dossierDestination & "\" & nomDossier
         
-        MsgBox "Fichier déplacé avec succès !", vbInformation
+        MsgBox "Dossier déplacé avec succès !", vbInformation
         
     Else
-        MsgBox "Fichier introuvable !", vbExclamation
+        MsgBox "Dossier source introuvable !", vbExclamation
+        
     End If
 
 End Sub
