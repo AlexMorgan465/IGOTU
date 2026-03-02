@@ -1,3 +1,87 @@
-Text.PadStart(Text.From([H_P_NET_1] * 24), 2, "0") & ":" &
-Text.PadStart(Text.From([H_P_NET_2] * 1440), 2, "0") & ":" &
-Text.PadStart(Text.From([H_P_NET_3]), 2, "0")
+Option Explicit
+' ******************************************************************************************
+' Module: TimerModule
+' Rôle: Gestion du timer pour le suivi de la durée de traitement.
+' Version corrigée et sécurisée (sans erreur Objet requis)
+' ******************************************************************************************
+
+Public StartTime As Date
+Public TimerRunning As Boolean
+Private nextTimerRun As Double
+
+' --- Démarre le timer ---
+Public Sub StartTimer()
+    StartTime = Now
+    TimerRunning = True
+    UpdateTimerDisplay
+End Sub
+
+' --- Arrête le timer ---
+Public Function StopTimer() As Double
+    TimerRunning = False
+    StopTimer = (Now - StartTime) * 24 * 60 * 60 ' Durée en secondes
+End Function
+
+' --- Met à jour l'affichage du timer ---
+Public Sub UpdateTimerDisplay()
+
+    Dim elapsedSeconds As Long
+    Dim hours As Long
+    Dim minutes As Long
+    Dim seconds As Long
+    
+    If Not TimerRunning Then Exit Sub
+    
+    ' Vérifie si le formulaire MainForm est chargé
+    If IsFormLoaded("MainForm") Then
+        
+        elapsedSeconds = CLng((Now - StartTime) * 24 * 60 * 60)
+        
+        hours = elapsedSeconds \ 3600
+        minutes = (elapsedSeconds Mod 3600) \ 60
+        seconds = elapsedSeconds Mod 60
+        
+        ' Met à jour le label du timer
+        MainForm.lblTimer.Caption = _
+            Format(hours, "00") & ":" & _
+            Format(minutes, "00") & ":" & _
+            Format(seconds, "00")
+        
+        ' Planifie la prochaine mise à jour dans 1 seconde
+        nextTimerRun = Now + TimeValue("00:00:01")
+        Application.OnTime nextTimerRun, "TimerModule.UpdateTimerDisplay", , True
+        
+    Else
+        ' Si la form n'est plus ouverte, on stoppe le timer
+        TimerRunning = False
+    End If
+
+End Sub
+
+' --- Vérifie si un formulaire est chargé ---
+Private Function IsFormLoaded(formName As String) As Boolean
+    
+    Dim frm As Object
+    
+    For Each frm In VBA.UserForms
+        If frm.Name = formName Then
+            IsFormLoaded = True
+            Exit Function
+        End If
+    Next frm
+    
+    IsFormLoaded = False
+
+End Function
+
+' --- Annule toute exécution planifiée du timer ---
+Public Sub StopTimerScheduled()
+    
+    On Error Resume Next
+    Application.OnTime _
+        EarliestTime:=nextTimerRun, _
+        Name:="TimerModule.UpdateTimerDisplay", _
+        Schedule:=False
+    On Error GoTo 0
+    
+End Sub
