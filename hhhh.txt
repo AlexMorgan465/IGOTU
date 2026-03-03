@@ -1,14 +1,66 @@
-Select Case structType
+Sub Generate_Trace()
 
-    Case SIMPLE
-        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & statutFinal
+    Dim wsLog As Worksheet
+    Dim wsTrace As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim outputRow As Long
+    
+    Dim fileName As String
+    Dim agentName As String
+    Dim startDate As Variant
+    Dim endDate As Variant
+    Dim details As String
+    Dim status As String
+    Dim parts() As String
+    
+    Set wsLog = ThisWorkbook.Sheets("LOG_ACTIONS")
+    Set wsTrace = ThisWorkbook.Sheets("SHEET_TRACE_NAME")
+    
+    ' Clear old data (except headers)
+    wsTrace.Rows("2:" & wsTrace.Rows.Count).ClearContents
+    
+    lastRow = wsLog.Cells(wsLog.Rows.Count, "A").End(xlUp).Row
+    outputRow = 2
+    
+    i = 2 ' Start after header
+    
+    Do While i <= lastRow
         
-    Case Complex
-        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
-                  statutFinal & "\" & cmbSousDomaine.Value
-                  
-    Case THREE_LEVEL
-        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
-                  statutFinal & "\" & cmbSousDomaine.Value
+        ' First row (A TRAITER → EN COURS)
+        fileName = wsLog.Cells(i, 3).Value
+        agentName = wsLog.Cells(i, 4).Value
+        startDate = wsLog.Cells(i, 1).Value
+        
+        ' Second row (EN COURS → TRAITES / NON CONFORME)
+        If i + 1 <= lastRow Then
+            
+            endDate = wsLog.Cells(i + 1, 1).Value
+            details = wsLog.Cells(i + 1, 5).Value
+            
+            ' Extract last word after "?"
+            If InStr(details, "?") > 0 Then
+                parts = Split(details, "?")
+                status = Trim(parts(UBound(parts)))
+            Else
+                status = details
+            End If
+            
+            ' Write to SHEET_TRACE_NAME
+            wsTrace.Cells(outputRow, 1).Value = fileName
+            wsTrace.Cells(outputRow, 4).Value = status
+            wsTrace.Cells(outputRow, 5).Value = startDate
+            wsTrace.Cells(outputRow, 6).Value = endDate
+            wsTrace.Cells(outputRow, 7).Value = agentName
+            
+            outputRow = outputRow + 1
+            
+        End If
+        
+        i = i + 2 ' Jump to next pair
+        
+    Loop
+    
+    MsgBox "Trace generated successfully!", vbInformation
 
-End Select
+End Sub
