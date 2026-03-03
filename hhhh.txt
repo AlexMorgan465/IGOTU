@@ -1,66 +1,110 @@
-Sub Generate_Trace()
+Option Explicit
 
-    Dim wsLog As Worksheet
-    Dim wsTrace As Worksheet
-    Dim lastRow As Long
-    Dim i As Long
-    Dim outputRow As Long
+Dim FSO As Object
+Dim basePath As String
+
+Private Sub UserForm_Initialize()
+
+    basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
     
-    Dim fileName As String
-    Dim agentName As String
-    Dim startDate As Variant
-    Dim endDate As Variant
-    Dim details As String
-    Dim status As String
-    Dim parts() As String
+    ' Remplir racines
+    cboRacine.AddItem "ACM"
+    cboRacine.AddItem "Bouygues telecom"
+    cboRacine.AddItem "CIC CIB ASSET SERVICING"
+    cboRacine.AddItem "CONTRTHEQUE"
+    cboRacine.AddItem "DIRCO"
     
-    Set wsLog = ThisWorkbook.Sheets("LOG_ACTIONS")
-    Set wsTrace = ThisWorkbook.Sheets("SHEET_TRACE_NAME")
+    lstResultats.ColumnCount = 2
+    lstResultats.ColumnWidths = "250 pt;0 pt" ' cacher chemin complet
     
-    ' Clear old data (except headers)
-    wsTrace.Rows("2:" & wsTrace.Rows.Count).ClearContents
+End Sub
+
+
+Private Sub cboRacine_Change()
+
+    cboSousDossier.Clear
     
-    lastRow = wsLog.Cells(wsLog.Rows.Count, "A").End(xlUp).Row
-    outputRow = 2
-    
-    i = 2 ' Start after header
-    
-    Do While i <= lastRow
+    Select Case cboRacine.Value
         
-        ' First row (A TRAITER → EN COURS)
-        fileName = wsLog.Cells(i, 3).Value
-        agentName = wsLog.Cells(i, 4).Value
-        startDate = wsLog.Cells(i, 1).Value
+        Case "DIRCO"
+            cboSousDossier.AddItem "FICHES CLIENTS"
         
-        ' Second row (EN COURS → TRAITES / NON CONFORME)
-        If i + 1 <= lastRow Then
+        Case "CONTRTHEQUE"
+            cboSousDossier.AddItem "CONDITIONS GENERALES"
+            cboSousDossier.AddItem "Conventions"
+            cboSousDossier.AddItem "Document d’Information Tarifaire"
+            cboSousDossier.AddItem "Granties"
+            cboSousDossier.AddItem "Politique de Protection"
             
-            endDate = wsLog.Cells(i + 1, 1).Value
-            details = wsLog.Cells(i + 1, 5).Value
+        Case Else
+            cboSousDossier.AddItem "(Aucun)"
             
-            ' Extract last word after "?"
-            If InStr(details, "?") > 0 Then
-                parts = Split(details, "?")
-                status = Trim(parts(UBound(parts)))
-            Else
-                status = details
-            End If
+    End Select
+
+End Sub
+
+
+Private Sub cmdRechercher_Click()
+
+    Dim cheminFinal As String
+    Dim dossier As Object
+    
+    If cboRacine.Value = "" Then
+        MsgBox "Sélectionnez un dossier racine"
+        Exit Sub
+    End If
+    
+    cheminFinal = basePath & cboRacine.Value
+    
+    If cboSousDossier.Value <> "" And cboSousDossier.Value <> "(Aucun)" Then
+        cheminFinal = cheminFinal & "\" & cboSousDossier.Value
+    End If
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    If Not FSO.FolderExists(cheminFinal) Then
+        MsgBox "Dossier introuvable"
+        Exit Sub
+    End If
+    
+    lstResultats.Clear
+    
+    Call ParcourirDossier(FSO.GetFolder(cheminFinal))
+    
+    If lstResultats.ListCount = 0 Then
+        MsgBox "Aucun dossier NON CONFORME trouvé"
+    End If
+
+End Sub
+
+
+Private Sub ParcourirDossier(ByVal dossier As Object)
+
+    Dim sousDossier As Object
+    Dim d As Object
+    
+    For Each sousDossier In dossier.SubFolders
+        
+        If UCase(sousDossier.Name) = "NON CONFORME" Then
             
-            ' Write to SHEET_TRACE_NAME
-            wsTrace.Cells(outputRow, 1).Value = fileName
-            wsTrace.Cells(outputRow, 4).Value = status
-            wsTrace.Cells(outputRow, 5).Value = startDate
-            wsTrace.Cells(outputRow, 6).Value = endDate
-            wsTrace.Cells(outputRow, 7).Value = agentName
-            
-            outputRow = outputRow + 1
+            For Each d In sousDossier.SubFolders
+                lstResultats.AddItem d.Name
+                lstResultats.List(lstResultats.ListCount - 1, 1) = d.Path
+            Next d
             
         End If
         
-        i = i + 2 ' Jump to next pair
+        Call ParcourirDossier(sousDossier)
         
-    Loop
-    
-    MsgBox "Trace generated successfully!", vbInformation
+    Next sousDossier
+
+End Sub
+
+
+Private Sub lstResultats_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+
+    If lstResultats.ListIndex <> -1 Then
+        Shell "explorer.exe """ & lstResultats.List(lstResultats.ListIndex, 1) & """", vbNormalFocus
+    End If
 
 End Sub
