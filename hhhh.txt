@@ -6,25 +6,34 @@ Private Sub ParcourirDossier(ByVal dossier As Object)
     
     For Each sousDossier In dossier.SubFolders
         
-        ' Si on trouve NON CONFORME
         If UCase(sousDossier.Name) = "NON CONFORME" Then
             
-            ' Parcourir Assurances-Biens, Décisionnel, etc.
-            For Each categorie In sousDossier.SubFolders
+            ' CAS SPECIAL ACM
+            If UCase(racineSelectionnee) = "ACM" Then
                 
-                ' Parcourir les dossiers à l'intérieur de ces catégories
-                For Each dossierFinal In categorie.SubFolders
+                For Each categorie In sousDossier.SubFolders
+                    For Each dossierFinal In categorie.SubFolders
+                        
+                        lstResultats.AddItem dossierFinal.Name
+                        lstResultats.List(lstResultats.ListCount - 1, 1) = dossierFinal.Path
+                        
+                    Next dossierFinal
+                Next categorie
+            
+            ' TOUS LES AUTRES DOSSIERS
+            Else
+                
+                For Each dossierFinal In sousDossier.SubFolders
                     
                     lstResultats.AddItem dossierFinal.Name
                     lstResultats.List(lstResultats.ListCount - 1, 1) = dossierFinal.Path
                     
                 Next dossierFinal
                 
-            Next categorie
+            End If
             
         End If
         
-        ' Continuer récursivement
         Call ParcourirDossier(sousDossier)
         
     Next sousDossier
