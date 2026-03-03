@@ -1,91 +1,14 @@
-Private Sub btnDeplacer_Click()
+Select Case structType
 
-    On Error GoTo GestionErreur
-    
-    Dim fso As Object
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    Dim dossierSource As String
-    Dim dstPath As String
-    Dim nomDossier As String
-    Dim destinationFinale As String
-    Dim statutFinal As String
-    
-    ' ==============================
-    ' 1️⃣ Sélection dossier source
-    ' ==============================
-    
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier à déplacer"
-        If .Show <> -1 Then Exit Sub
-        dossierSource = .SelectedItems(1)
-    End With
-    
-    If Right(dossierSource, 1) = "\" Then
-        dossierSource = Left(dossierSource, Len(dossierSource) - 1)
-    End If
-    
-    ' ==============================
-    ' 2️⃣ Déterminer statut final
-    ' ==============================
-    
-    If optTraites.Value = True Then
-        statutFinal = "TRAITES"
-    ElseIf optNonConforme.Value = True Then
-        statutFinal = "NON CONFORME"
-    Else
-        MsgBox "Veuillez sélectionner TRAITES ou NON CONFORME."
-        Exit Sub
-    End If
-    
-    ' ==============================
-    ' 3️⃣ Construire destination
-    ' ==============================
-    
-    Select Case structType
-    
-        Case SIMPLE
-            dstPath = ROOT_PATH & "\" & cmbDomaine & "\" & statutFinal
-            
-        Case Complex
-            dstPath = ROOT_PATH & "\" & cmbDomaine & "\" & _
-                      cmbSousDomaine & "\" & statutFinal
-                      
-        Case THREE_LEVEL
-            dstPath = ROOT_PATH & "\" & cmbDomaine & "\" & _
-                      cmbSousDomaine & "\" & statutFinal
-                      
-    End Select
-    
-    ' ==============================
-    ' 4️⃣ Construction finale
-    ' ==============================
-    
-    nomDossier = fso.GetFolder(dossierSource).Name
-    destinationFinale = dstPath & "\" & nomDossier
-    
-    ' Vérifier si existe déjà
-    If fso.FolderExists(destinationFinale) Then
-        MsgBox "Le dossier existe déjà à destination.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' ==============================
-    ' 5️⃣ Copier puis supprimer
-    ' ==============================
-    
-    fso.CopyFolder dossierSource, destinationFinale, True
-    
-    If fso.FolderExists(destinationFinale) Then
-        fso.DeleteFolder dossierSource, True
-        MsgBox "Dossier déplacé vers " & statutFinal, vbInformation
-    Else
-        MsgBox "Erreur lors de la copie.", vbCritical
-    End If
-    
-    Exit Sub
+    Case SIMPLE
+        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & statutFinal
+        
+    Case Complex
+        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
+                  statutFinal & "\" & cmbSousDomaine.Value
+                  
+    Case THREE_LEVEL
+        dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
+                  statutFinal & "\" & cmbSousDomaine.Value
 
-GestionErreur:
-    MsgBox "Erreur : " & Err.Number & " - " & Err.Description, vbCritical
-
-End Sub
+End Select
