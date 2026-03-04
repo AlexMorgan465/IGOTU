@@ -1,41 +1,77 @@
-Private Sub ParcourirDossier(ByVal dossier As Object)
+Private Sub CommandButton2_Click()
 
-    Dim sousDossier As Object
-    Dim categorie As Object
-    Dim dossierFinal As Object
+    On Error GoTo GestionErreur
     
-    For Each sousDossier In dossier.SubFolders
-        
-        If UCase(sousDossier.Name) = "NON CONFORME" Then
+    Dim FSO As Object
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    Dim dossierSource As String
+    Dim dstPath As String
+    Dim nomDossier As String
+    Dim destinationFinale As String
+    Dim statutFinal As String
+    Dim structType As StructureType
+    Dim srcPath As String
+    Dim fileName As String
+    
+    ' Vérifier sélection
+    If lstResultats.ListIndex = -1 Or lstResultats.Value = "DOSSIER VIDE" Then
+        MsgBox "Sélectionnez un fichier", vbExclamation
+        Exit Sub
+    End If
+    
+    fileName = lstResultats.Value
+    structType = GetDomainStructure(cmbDomaine.Value)
+    
+    ' Sélection dossier source
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Sélectionner le dossier à déplacer"
+        If .Show <> -1 Then Exit Sub
+        dossierSource = .SelectedItems(1)
+    End With
+    
+    ' Supprimer \ final
+    If Right(dossierSource, 1) = "\" Then
+        dossierSource = Left(dossierSource, Len(dossierSource) - 1)
+    End If
+    
+    ' Construction source
+    Select Case structType
+        Case SIMPLE
+            srcPath = ROOT_PATH & "\" & cmbDomaine.Value & "\EN COURS"
             
-            ' CAS SPECIAL ACM
-            If UCase(racineSelectionnee) = "ACM" Then
-                
-                For Each categorie In sousDossier.SubFolders
-                    For Each dossierFinal In categorie.SubFolders
-                        
-                        lstResultats.AddItem dossierFinal.Name
-                        lstResultats.List(lstResultats.ListCount - 1, 1) = dossierFinal.Path
-                        
-                    Next dossierFinal
-                Next categorie
-            
-            ' TOUS LES AUTRES DOSSIERS
-            Else
-                
-                For Each dossierFinal In sousDossier.SubFolders
-                    
-                    lstResultats.AddItem dossierFinal.Name
-                    lstResultats.List(lstResultats.ListCount - 1, 1) = dossierFinal.Path
-                    
-                Next dossierFinal
-                
-            End If
-            
-        End If
-        
-        Call ParcourirDossier(sousDossier)
-        
-    Next sousDossier
+        Case COMPLEX
+            srcPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
+                      cmbSousDomaine.Value & "\EN COURS"
+    End Select
+    
+    srcPath = srcPath & "\" & fileName
+    
+    ' Construction destination
+    dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\TRAITES"
+    
+    nomDossier = FSO.GetFolder(dossierSource).Name
+    destinationFinale = dstPath & "\" & nomDossier
+    
+    ' Vérifier si existe déjà
+    If FSO.FolderExists(destinationFinale) Then
+        MsgBox "Le dossier existe déjà à destination.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Copier
+    FSO.CopyFolder dossierSource, destinationFinale, True
+    
+    If FSO.FolderExists(destinationFinale) Then
+        FSO.DeleteFolder dossierSource, True
+        MsgBox "Dossier déplacé avec succès.", vbInformation
+    Else
+        MsgBox "Erreur lors de la copie.", vbCritical
+    End If
+    
+    Exit Sub
+
+GestionErreur:
+    MsgBox "Erreur - " & Err.Number & " - " & Err.Description, vbCritical
 
 End Sub
