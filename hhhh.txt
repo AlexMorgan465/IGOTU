@@ -1,77 +1,163 @@
-Private Sub CommandButton2_Click()
+Option Explicit
 
-    On Error GoTo GestionErreur
+Dim FSO As Object
+Dim basePath As String
+
+Private Sub UserForm_Initialize()
+
+    basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
     
-    Dim FSO As Object
+    cboRacine.AddItem "ACM"
+    cboRacine.AddItem "Bouygues telecom"
+    cboRacine.AddItem "CIC CIB ASSET SERVICING"
+    cboRacine.AddItem "CONTRTHEQUE"
+    cboRacine.AddItem "DIRCO"
+    
+    lstResultats.ColumnCount = 2
+    lstResultats.ColumnWidths = "300 pt;0 pt"
+
+End Sub
+
+
+Private Sub cboRacine_Change()
+
+    Dim cheminACM As String
+    Dim dossier As Object
+    Dim sousDossier As Object
+    
+    cboSousDossier.Clear
+    
     Set FSO = CreateObject("Scripting.FileSystemObject")
     
-    Dim dossierSource As String
-    Dim dstPath As String
-    Dim nomDossier As String
-    Dim destinationFinale As String
-    Dim statutFinal As String
-    Dim structType As StructureType
-    Dim srcPath As String
-    Dim fileName As String
-    
-    ' Vérifier sélection
-    If lstResultats.ListIndex = -1 Or lstResultats.Value = "DOSSIER VIDE" Then
-        MsgBox "Sélectionnez un fichier", vbExclamation
-        Exit Sub
-    End If
-    
-    fileName = lstResultats.Value
-    structType = GetDomainStructure(cmbDomaine.Value)
-    
-    ' Sélection dossier source
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Sélectionner le dossier à déplacer"
-        If .Show <> -1 Then Exit Sub
-        dossierSource = .SelectedItems(1)
-    End With
-    
-    ' Supprimer \ final
-    If Right(dossierSource, 1) = "\" Then
-        dossierSource = Left(dossierSource, Len(dossierSource) - 1)
-    End If
-    
-    ' Construction source
-    Select Case structType
-        Case SIMPLE
-            srcPath = ROOT_PATH & "\" & cmbDomaine.Value & "\EN COURS"
+    ' ===== CAS ACM =====
+    If cboRacine.Value = "ACM" Then
+        
+        cheminACM = basePath & "ACM\NON CONFORME\"
+        
+        If FSO.FolderExists(cheminACM) Then
             
-        Case COMPLEX
-            srcPath = ROOT_PATH & "\" & cmbDomaine.Value & "\" & _
-                      cmbSousDomaine.Value & "\EN COURS"
-    End Select
+            Set dossier = FSO.GetFolder(cheminACM)
+            
+            ' Charger dynamiquement les types réels
+            For Each sousDossier In dossier.SubFolders
+                cboSousDossier.AddItem sousDossier.Name
+            Next sousDossier
+            
+        End If
+        
+    ' ===== AUTRES CAS =====
+    ElseIf cboRacine.Value = "DIRCO" Then
+        cboSousDossier.AddItem "FICHES CLIENTS"
+        
+    ElseIf cboRacine.Value = "CONTRTHEQUE" Then
+        cboSousDossier.AddItem "CONDITIONS GENERALES"
+        cboSousDossier.AddItem "Conventions"
+        cboSousDossier.AddItem "Document d’Information Tarifaire"
+        cboSousDossier.AddItem "Granties"
+        cboSousDossier.AddItem "Politique de Protection"
+        
+    Else
+        cboSousDossier.AddItem "(Aucun)"
+    End If
+
+End Sub
+
+
+Private Sub cmdRechercher_Click()
+
+    Dim cheminFinal As String
+    Dim dossier As Object
+    Dim d As Object
+    Dim sousDossier As Object
     
-    srcPath = srcPath & "\" & fileName
-    
-    ' Construction destination
-    dstPath = ROOT_PATH & "\" & cmbDomaine.Value & "\TRAITES"
-    
-    nomDossier = FSO.GetFolder(dossierSource).Name
-    destinationFinale = dstPath & "\" & nomDossier
-    
-    ' Vérifier si existe déjà
-    If FSO.FolderExists(destinationFinale) Then
-        MsgBox "Le dossier existe déjà à destination.", vbExclamation
+    If cboRacine.Value = "" Then
+        MsgBox "Sélectionnez un dossier racine"
         Exit Sub
     End If
     
-    ' Copier
-    FSO.CopyFolder dossierSource, destinationFinale, True
+    Set FSO = CreateObject("Scripting.FileSystemObject")
     
-    If FSO.FolderExists(destinationFinale) Then
-        FSO.DeleteFolder dossierSource, True
-        MsgBox "Dossier déplacé avec succès.", vbInformation
+    ' ===== CAS ACM =====
+    If cboRacine.Value = "ACM" Then
+        
+        If cboSousDossier.Value = "" Then
+            MsgBox "Sélectionnez un type ACM"
+            Exit Sub
+        End If
+        
+        cheminFinal = basePath & "ACM\NON CONFORME\" & cboSousDossier.Value
+        
+        If Not FSO.FolderExists(cheminFinal) Then
+            MsgBox "Dossier introuvable"
+            Exit Sub
+        End If
+        
+        Set dossier = FSO.GetFolder(cheminFinal)
+        
+        lstResultats.Clear
+        
+        ' Afficher les dossiers contenus dans le type choisi
+        For Each d In dossier.SubFolders
+            lstResultats.AddItem d.Name
+            lstResultats.List(lstResultats.ListCount - 1, 1) = d.Path
+        Next d
+        
     Else
-        MsgBox "Erreur lors de la copie.", vbCritical
+    
+        ' ===== AUTRES RACINES =====
+        cheminFinal = basePath & cboRacine.Value
+        
+        If cboSousDossier.Value <> "" And cboSousDossier.Value <> "(Aucun)" Then
+            cheminFinal = cheminFinal & "\" & cboSousDossier.Value
+        End If
+        
+        If Not FSO.FolderExists(cheminFinal) Then
+            MsgBox "Dossier introuvable"
+            Exit Sub
+        End If
+        
+        lstResultats.Clear
+        
+        Set dossier = FSO.GetFolder(cheminFinal)
+        
+        Call RechercherNonConforme(dossier)
+        
     End If
     
-    Exit Sub
+    If lstResultats.ListCount = 0 Then
+        MsgBox "Aucun dossier trouvé"
+    End If
 
-GestionErreur:
-    MsgBox "Erreur - " & Err.Number & " - " & Err.Description, vbCritical
+End Sub
+
+
+Private Sub RechercherNonConforme(ByVal dossier As Object)
+
+    Dim sousDossier As Object
+    Dim d As Object
+    
+    For Each sousDossier In dossier.SubFolders
+        
+        If UCase(sousDossier.Name) = "NON CONFORME" Then
+            
+            For Each d In sousDossier.SubFolders
+                lstResultats.AddItem d.Name
+                lstResultats.List(lstResultats.ListCount - 1, 1) = d.Path
+            Next d
+            
+        End If
+        
+        Call RechercherNonConforme(sousDossier)
+        
+    Next sousDossier
+
+End Sub
+
+
+Private Sub lstResultats_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+
+    If lstResultats.ListIndex <> -1 Then
+        Shell "explorer.exe """ & lstResultats.List(lstResultats.ListIndex, 1) & """", vbNormalFocus
+    End If
 
 End Sub
