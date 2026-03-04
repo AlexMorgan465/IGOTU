@@ -1,163 +1,104 @@
-Option Explicit
+Private Sub CommandButton2_Click()
 
-Dim FSO As Object
-Dim basePath As String
-
-Private Sub UserForm_Initialize()
-
-    basePath = "\\UF11-a03\eids-eaa-pdf-statiques\Accessibilité\"
+    Dim wsDest As Worksheet
+    Dim wsSource As Worksheet
+    Dim wbSource As Workbook
     
-    cboRacine.AddItem "ACM"
-    cboRacine.AddItem "Bouygues telecom"
-    cboRacine.AddItem "CIC CIB ASSET SERVICING"
-    cboRacine.AddItem "CONTRTHEQUE"
-    cboRacine.AddItem "DIRCO"
+    Dim lastRow As Long, lastCol As Long
+    Dim formatCol As Long
+    Dim i As Long, destRow As Long
     
-    lstResultats.ColumnCount = 2
-    lstResultats.ColumnWidths = "300 pt;0 pt"
-
-End Sub
-
-
-Private Sub cboRacine_Change()
-
-    Dim cheminACM As String
-    Dim dossier As Object
-    Dim sousDossier As Object
+    Dim fso As Object
+    Dim folder As Object
+    Dim subfolder As Object
+    Dim fichier As Object
     
-    cboSousDossier.Clear
+    Dim DossierChemin As String
+    Dim sheetNames As Variant
+    Dim shName As Variant
     
-    Set FSO = CreateObject("Scripting.FileSystemObject")
+    ' === CHEMIN DOSSIER ===
+    DossierChemin = "\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Cofidis"
     
-    ' ===== CAS ACM =====
-    If cboRacine.Value = "ACM" Then
+    ' === DESTINATION ===
+    Set wsDest = ThisWorkbook.Worksheets(mois.Value)
+    wsDest.Cells.Clear
+    destRow = 1
+    
+    ' === FILE SYSTEM OBJECT ===
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set folder = fso.GetFolder(DossierChemin)
+    
+    ' === LISTE DES FEUILLES A TRAITER ===
+    sheetNames = Array("OCAOCR", "ETUDEINC", "SOLVA")
+    
+    ' === BOUCLE SUR LES SOUS-DOSSIERS ===
+    For Each subfolder In folder.SubFolders
         
-        cheminACM = basePath & "ACM\NON CONFORME\"
-        
-        If FSO.FolderExists(cheminACM) Then
+        ' === BOUCLE SUR LES FICHIERS ===
+        For Each fichier In subfolder.Files
             
-            Set dossier = FSO.GetFolder(cheminACM)
+            If LCase(fso.GetExtensionName(fichier.Name)) Like "xls*" Then
+                
+                Set wbSource = Workbooks.Open(fichier.Path, ReadOnly:=True)
+                
+                ' === BOUCLE SUR LES 3 FEUILLES ===
+                For Each shName In sheetNames
+                    
+                    On Error Resume Next
+                    Set wsSource = wbSource.Worksheets(shName)
+                    On Error GoTo 0
+                    
+                    If Not wsSource Is Nothing Then
+                        
+                        lastCol = wsSource.Cells(1, wsSource.Columns.Count).End(xlToLeft).Column
+                        lastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
+                        
+                        ' === TROUVER COLONNE "fichier" ===
+                        formatCol = 0
+                        For i = 1 To lastCol
+                            If LCase(wsSource.Cells(1, i).Value) = "fichier" Then
+                                formatCol = i
+                                Exit For
+                            End If
+                        Next i
+                        
+                        If formatCol > 0 Then
+                            
+                            ' === COPIER EN-TETE UNE SEULE FOIS ===
+                            If destRow = 1 Then
+                                wsSource.Rows(1).Copy wsDest.Rows(destRow)
+                                destRow = destRow + 1
+                            End If
+                            
+                            ' === COPIER LIGNES CORRESPONDANTES ===
+                            For i = 2 To lastRow
+                                
+                                If InStr(1, LCase(wsSource.Cells(i, formatCol).Value), "i") > 0 Then
+                                    
+                                    wsSource.Rows(i).Copy wsDest.Rows(destRow)
+                                    destRow = destRow + 1
+                                    
+                                End If
+                                
+                            Next i
+                            
+                        End If
+                        
+                    End If
+                    
+                    Set wsSource = Nothing
+                    
+                Next shName
+                
+                wbSource.Close False
+                
+            End If
             
-            ' Charger dynamiquement les types réels
-            For Each sousDossier In dossier.SubFolders
-                cboSousDossier.AddItem sousDossier.Name
-            Next sousDossier
-            
-        End If
+        Next fichier
         
-    ' ===== AUTRES CAS =====
-    ElseIf cboRacine.Value = "DIRCO" Then
-        cboSousDossier.AddItem "FICHES CLIENTS"
-        
-    ElseIf cboRacine.Value = "CONTRTHEQUE" Then
-        cboSousDossier.AddItem "CONDITIONS GENERALES"
-        cboSousDossier.AddItem "Conventions"
-        cboSousDossier.AddItem "Document d’Information Tarifaire"
-        cboSousDossier.AddItem "Granties"
-        cboSousDossier.AddItem "Politique de Protection"
-        
-    Else
-        cboSousDossier.AddItem "(Aucun)"
-    End If
-
-End Sub
-
-
-Private Sub cmdRechercher_Click()
-
-    Dim cheminFinal As String
-    Dim dossier As Object
-    Dim d As Object
-    Dim sousDossier As Object
+    Next subfolder
     
-    If cboRacine.Value = "" Then
-        MsgBox "Sélectionnez un dossier racine"
-        Exit Sub
-    End If
+    MsgBox "Extraction terminée", vbInformation
     
-    Set FSO = CreateObject("Scripting.FileSystemObject")
-    
-    ' ===== CAS ACM =====
-    If cboRacine.Value = "ACM" Then
-        
-        If cboSousDossier.Value = "" Then
-            MsgBox "Sélectionnez un type ACM"
-            Exit Sub
-        End If
-        
-        cheminFinal = basePath & "ACM\NON CONFORME\" & cboSousDossier.Value
-        
-        If Not FSO.FolderExists(cheminFinal) Then
-            MsgBox "Dossier introuvable"
-            Exit Sub
-        End If
-        
-        Set dossier = FSO.GetFolder(cheminFinal)
-        
-        lstResultats.Clear
-        
-        ' Afficher les dossiers contenus dans le type choisi
-        For Each d In dossier.SubFolders
-            lstResultats.AddItem d.Name
-            lstResultats.List(lstResultats.ListCount - 1, 1) = d.Path
-        Next d
-        
-    Else
-    
-        ' ===== AUTRES RACINES =====
-        cheminFinal = basePath & cboRacine.Value
-        
-        If cboSousDossier.Value <> "" And cboSousDossier.Value <> "(Aucun)" Then
-            cheminFinal = cheminFinal & "\" & cboSousDossier.Value
-        End If
-        
-        If Not FSO.FolderExists(cheminFinal) Then
-            MsgBox "Dossier introuvable"
-            Exit Sub
-        End If
-        
-        lstResultats.Clear
-        
-        Set dossier = FSO.GetFolder(cheminFinal)
-        
-        Call RechercherNonConforme(dossier)
-        
-    End If
-    
-    If lstResultats.ListCount = 0 Then
-        MsgBox "Aucun dossier trouvé"
-    End If
-
-End Sub
-
-
-Private Sub RechercherNonConforme(ByVal dossier As Object)
-
-    Dim sousDossier As Object
-    Dim d As Object
-    
-    For Each sousDossier In dossier.SubFolders
-        
-        If UCase(sousDossier.Name) = "NON CONFORME" Then
-            
-            For Each d In sousDossier.SubFolders
-                lstResultats.AddItem d.Name
-                lstResultats.List(lstResultats.ListCount - 1, 1) = d.Path
-            Next d
-            
-        End If
-        
-        Call RechercherNonConforme(sousDossier)
-        
-    Next sousDossier
-
-End Sub
-
-
-Private Sub lstResultats_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-
-    If lstResultats.ListIndex <> -1 Then
-        Shell "explorer.exe """ & lstResultats.List(lstResultats.ListIndex, 1) & """", vbNormalFocus
-    End If
-
 End Sub
