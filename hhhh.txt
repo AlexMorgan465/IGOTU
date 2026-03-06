@@ -1,21 +1,226 @@
-Private Sub cmdSave_Click()
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Contrôle Audit PDF Accessibilité</title>
 
-    On Error GoTo ErrHandler
-    
-    ' Vérifie si le classeur a déjà été enregistré
-    If ThisWorkbook.Path = "" Then
-        MsgBox "Le classeur n'a pas encore été enregistré. Utilisez 'Enregistrer sous'.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Sauvegarde
-    ThisWorkbook.Save
-    
-    MsgBox "Classeur sauvegardé avec succès.", vbInformation
-    
-    Exit Sub
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-ErrHandler:
-    MsgBox "Erreur lors de la sauvegarde : " & Err.Description, vbCritical
+<style>
 
-End Sub
+body{
+font-family: Arial;
+background:#f4f6f8;
+padding:30px;
+}
+
+.container{
+background:white;
+padding:25px;
+border-radius:10px;
+max-width:900px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+color:#2c3e50;
+}
+
+.form-group{
+margin-bottom:15px;
+}
+
+label{
+font-weight:bold;
+display:block;
+margin-bottom:5px;
+}
+
+input{
+width:100%;
+padding:8px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 20px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.import{
+background:#3498db;
+color:white;
+}
+
+.export{
+background:#27ae60;
+color:white;
+}
+
+.result{
+margin-top:20px;
+padding:15px;
+background:#ecf0f1;
+border-radius:6px;
+}
+
+.score{
+font-size:22px;
+font-weight:bold;
+color:#2c3e50;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Contrôle Audit PDF</h1>
+
+<div class="form-group">
+<label>Jour</label>
+<input type="number" id="jour">
+</div>
+
+<div class="form-group">
+<label>Semaine</label>
+<input type="number" id="semaine">
+</div>
+
+<div class="form-group">
+<label>Mois</label>
+<input type="number" id="mois">
+</div>
+
+<div class="form-group">
+<label>Année</label>
+<input type="number" id="annee">
+</div>
+
+<div class="form-group">
+<label>Évaluateur</label>
+<input type="text" id="evaluateur">
+</div>
+
+<div class="form-group">
+<label>Importer la grille d'audit</label>
+<input type="file" id="fileInput">
+</div>
+
+<button class="import" onclick="analyser()">Analyser la grille</button>
+
+<div class="result" id="resultat" style="display:none">
+<p>Critères analysés : <span id="nb"></span></p>
+<p>Score total : <span class="score" id="score"></span>/100</p>
+
+<button class="export" onclick="exportExcel()">Exporter le résumé Excel</button>
+</div>
+
+</div>
+
+
+<script>
+
+let scoreFinal = 0
+let nbCritere = 0
+
+function analyser(){
+
+const file = document.getElementById("fileInput").files[0]
+
+if(!file){
+alert("Importer une grille Excel")
+return
+}
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+const data = new Uint8Array(e.target.result)
+const workbook = XLSX.read(data,{type:'array'})
+const sheet = workbook.Sheets[workbook.SheetNames[0]]
+
+const json = XLSX.utils.sheet_to_json(sheet)
+
+let score = 0
+let scoreMax = 0
+
+json.forEach(row =>{
+
+let status = row.Status || row.status || ""
+
+let bloquant = row.Bloquant || row.bloquant || "Non"
+
+let poids = bloquant === "Oui" ? 5 : 2
+
+scoreMax += poids
+nbCritere++
+
+if(status === "Conforme")
+score += poids
+
+else if(status === "Partiellement conforme")
+score += poids*0.5
+
+})
+
+scoreFinal = Math.round((score/scoreMax)*100)
+
+document.getElementById("nb").innerText = nbCritere
+document.getElementById("score").innerText = scoreFinal
+
+document.getElementById("resultat").style.display="block"
+
+}
+
+reader.readAsArrayBuffer(file)
+
+}
+
+
+
+function exportExcel(){
+
+const jour = document.getElementById("jour").value
+const semaine = document.getElementById("semaine").value
+const mois = document.getElementById("mois").value
+const annee = document.getElementById("annee").value
+const evaluateur = document.getElementById("evaluateur").value
+
+const data = [
+
+{
+Jour:jour,
+Semaine:semaine,
+Mois:mois,
+Annee:annee,
+Evaluateur:evaluateur,
+Nombre_de_criteres:nbCritere,
+Score:scoreFinal
+}
+
+]
+
+const ws = XLSX.utils.json_to_sheet(data)
+
+const wb = XLSX.utils.book_new()
+
+XLSX.utils.book_append_sheet(wb,ws,"Résumé contrôle")
+
+XLSX.writeFile(wb,"resume_controle_audit.xlsx")
+
+}
+
+</script>
+
+</body>
+</html>
