@@ -310,11 +310,6 @@
             opacity: 0.9;
         }
         
-        .note-excellent { color: #27ae60; }
-        .note-bon { color: #3498db; }
-        .note-moyen { color: #f39c12; }
-        .note-ameliorer { color: #e74c3c; }
-        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -387,7 +382,7 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-universal-access"></i> Formulaire de Conformité Accessibilité</h1>
-            <p class="header-description">Cet outil permet d'évaluer la conformité d'un document aux critères d'accessibilité. Remplissez les informations du document et évaluez chaque critère. Les champs "Non conforme" nécessitent une justification.</p>
+            <p class="header-description">Cet outil permet d'évaluer la conformité d'un document aux critères d'accessibilité. Remplissez les informations du document et évaluez chaque critère.</p>
         </header>
         
         <section class="document-info">
@@ -395,7 +390,7 @@
             <div class="info-row">
                 <div class="form-group">
                     <label for="doc-name">Nom du document *</label>
-                    <input type="text" id="doc-name" placeholder="Ex: Rapport annuel 2023 - version accessible">
+                    <input type="text" id="doc-name" placeholder="Ex: Rapport annuel 2023">
                 </div>
                 <div class="form-group">
                     <label for="doc-type">Type de document</label>
@@ -422,7 +417,7 @@
             </div>
             <div class="info-row">
                 <div class="form-group">
-                    <label for="evalue">Évalué (Agent) <i class="fas fa-user-check" style="color: #4a6491;"></i></label>
+                    <label for="evalue">Évalué (Agent) <i class="fas fa-user-check"></i></label>
                     <input type="text" id="evalue" placeholder="Nom de l'agent évalué">
                 </div>
                 <div class="form-group">
@@ -433,29 +428,23 @@
         </section>
         
         <section class="compliance-table">
-            <table>
+            <table id="compliance-table">
                 <thead>
                     <tr>
                         <th width="20%">Thème</th>
                         <th width="10%">Critère</th>
                         <th width="40%">Intitulé</th>
                         <th width="15%">Conformité</th>
-                        <th width="15%">Commentaire (obligatoire si non conforme)</th>
+                        <th width="15%">Commentaire</th>
                     </tr>
                 </thead>
-                <tbody id="compliance-body">
-                    <!-- Les données seront générées par JavaScript -->
-                </tbody>
+                <tbody id="compliance-body"></tbody>
             </table>
         </section>
         
-        <div class="status-summary" id="status-summary">
-            <!-- Les statistiques seront mises à jour par JavaScript -->
-        </div>
+        <div class="status-summary" id="status-summary"></div>
         
-        <div class="quality-note" id="qualityNote">
-            <!-- La note de qualité sera générée ici -->
-        </div>
+        <div class="quality-note" id="qualityNote"></div>
         
         <div class="loading" id="loading">
             <i class="fas fa-spinner"></i> Génération du fichier Excel...
@@ -464,26 +453,18 @@
         <div class="instructions">
             <h3><i class="fas fa-info-circle"></i> Instructions</h3>
             <ul>
-                <li>Remplissez toutes les informations du document en haut du formulaire.</li>
-                <li>Pour chaque critère, sélectionnez l'état de conformité : "Conforme", "Non conforme" ou "Non applicable".</li>
-                <li>Si vous sélectionnez "Non conforme", vous devez obligatoirement ajouter un commentaire de justification.</li>
-                <li>L'export Excel générera un fichier .xlsx avec les thèmes fusionnés et colorés automatiquement.</li>
-                <li>Les informations du document apparaîtront uniquement dans la page Résumé.</li>
-                <li>Une note de qualité sur 100 est calculée automatiquement.</li>
-                <li><strong>Seuil de conformité :</strong> Note ≥ 85% = Vert, Note < 85% = Rouge</li>
+                <li>Remplissez toutes les informations du document.</li>
+                <li>Pour chaque critère, sélectionnez l'état de conformité.</li>
+                <li>Si "Non conforme", ajoutez un commentaire obligatoire.</li>
+                <li>L'export Excel génère un fichier .xlsx formaté.</li>
+                <li>Note sur 100 avec seuil à 85% (Rouge < 85%, Vert ≥ 85%).</li>
             </ul>
         </div>
         
         <div class="actions">
-            <button class="reset-btn" id="reset-btn">
-                <i class="fas fa-redo"></i> Réinitialiser le formulaire
-            </button>
-            <button class="save-btn" id="save-btn">
-                <i class="fas fa-save"></i> Sauvegarder la progression
-            </button>
-            <button class="export-btn" id="export-btn">
-                <i class="fas fa-file-excel"></i> Exporter vers Excel
-            </button>
+            <button class="reset-btn" id="reset-btn"><i class="fas fa-redo"></i> Réinitialiser</button>
+            <button class="save-btn" id="save-btn"><i class="fas fa-save"></i> Sauvegarder</button>
+            <button class="export-btn" id="export-btn"><i class="fas fa-file-excel"></i> Exporter Excel</button>
         </div>
         
         <div class="footer">
@@ -492,948 +473,608 @@
     </div>
 
     <script>
-        // Données des critères d'accessibilité avec thèmes en majuscules
-        const criteriaData = [
-            { theme: "1. ÉLÉMENTS GRAPHIQUES", critere: "1.1", intitule: "Chaque image décorative est-elle correctement ignorée par les technologies d'assistance ?", themeNumber: 1 },
-            { theme: "", critere: "1.2", intitule: "Chaque image porteuse d'information a-t-elle une alternative textuelle ?", themeNumber: 1 },
-            { theme: "", critere: "1.3", intitule: "Pour chaque image porteuse d'information ayant une alternative textuelle, cette alternative est-elle pertinente ?", themeNumber: 1 },
-            { theme: "", critere: "1.4", intitule: "Chaque image porteuse d'information a-t-elle, si nécessaire, une description détaillée ?", themeNumber: 1 },
-            { theme: "", critere: "1.5", intitule: "Pour chaque image porteuse d'information ayant une description détaillée, cette description est-elle pertinente ?", themeNumber: 1 },
-            { theme: "", critere: "1.6", intitule: "Chaque légende d'image, si nécessaire, est-elle correctement liée à l'image correspondante ?", themeNumber: 1 },
-            { theme: "", critere: "1.7", intitule: "Chaque image de texte porteuse d'information doit être remplacée par du texte stylé. Cette règle est-elle respectée ?", themeNumber: 1 },
-            { theme: "2. COULEURS", critere: "2.1", intitule: "L'information ne doit pas être donnée uniquement par la couleur. Cette règle est-elle respectée ?", themeNumber: 2 },
-            { theme: "", critere: "2.2", intitule: "Le contraste entre la couleur du texte et la couleur de son arrière-plan est-il suffisamment élevé ?", themeNumber: 2 },
-            { theme: "", critere: "2.3", intitule: "Les couleurs utilisées dans les éléments graphiques porteurs d'information sont-elles suffisamment contrastées ?", themeNumber: 2 },
-            { theme: "3. TABLEAUX", critere: "3.1", intitule: "Chaque tableau de données complexe a-t-il une alternative ?", themeNumber: 3 },
-            { theme: "", critere: "3.2", intitule: "Pour chaque tableau de données complexe ayant une alternative, cette alternative est-elle pertinente ?", themeNumber: 3 },
-            { theme: "", critere: "3.3", intitule: "Pour chaque tableau de données, les en-têtes sont-elles correctement déclarées ?", themeNumber: 3 },
-            { theme: "", critere: "3.4", intitule: "Pour chaque tableau de présentation, le contenu linéarisé reste-t-il compréhensible ?", themeNumber: 3 },
-            { theme: "", critere: "3.5", intitule: "Chaque tableau de présentation ne doit pas utiliser d'éléments spécifiques aux tableaux de données. Cette règle est-elle respectée ?", themeNumber: 3 },
-            { theme: "4. LIENS", critere: "4.1", intitule: "Chaque lien est-il explicite ?", themeNumber: 4 },
-            { theme: "", critere: "4.2", intitule: "Chaque lien a-t-il un nom accessible ?", themeNumber: 4 },
-            { theme: "5. STRUCTURE DE L'INFORMATION", critere: "5.1", intitule: "L'information est-elle structurée par l'utilisation appropriée de titres ?", themeNumber: 5 },
-            { theme: "", critere: "5.2", intitule: "Tout contenu présenté sous forme de liste utilise-t-il un style de liste ?", themeNumber: 5 },
-            { theme: "", critere: "5.3", intitule: "Les éléments de structure ne doivent pas être utilisés uniquement à des fins de mise en page. Cette règle est-elle respectée ?", themeNumber: 5 },
-            { theme: "6. PRÉSENTATION DE L'INFORMATION", critere: "6.1", intitule: "L'ordre de restitution du contenu est-il cohérent ?", themeNumber: 6 },
-            { theme: "", critere: "6.2", intitule: "L'information ne doit pas être véhiculée uniquement par la forme, la taille ou la position. Cette règle est-elle respectée ?", themeNumber: 6 },
-            { theme: "", critere: "6.3", intitule: "Chaque lien, indiqué uniquement par la couleur et dont la nature n'est pas évidente, est-il visible par rapport au texte environnant ?", themeNumber: 6 },
-            { theme: "7. NAVIGATION", critere: "7.1", intitule: "Le document possède-t-il une table des matières (hors cas particuliers) ?", themeNumber: 7 },
-            { theme: "8. ÉLÉMENTS OBLIGATOIRES", critere: "8.1", intitule: "Le document possède-t-il un titre de document ?", themeNumber: 8 },
-            { theme: "", critere: "8.2", intitule: "Le titre de document est-il pertinent (sauf cas particuliers) ?", themeNumber: 8 },
-            { theme: "9. CONSULTATION", critere: "9.1", intitule: "Chaque forme complexe décorative est-elle correctement ignorée par les technologies d'assistance ?", themeNumber: 9 },
-            { theme: "", critere: "9.2", intitule: "Chaque forme complexe porteuse d'information a-t-elle une alternative textuelle ?", themeNumber: 9 },
-            { theme: "", critere: "9.3", intitule: "Pour chaque forme complexe porteuse d'information ayant une alternative textuelle, cette alternative est-elle pertinente ?", themeNumber: 9 },
-            { theme: "", critere: "9.4", intitule: "Chaque forme complexe porteuse d'information a-t-elle, si nécessaire, une description détaillée ?", themeNumber: 9 },
-            { theme: "", critere: "9.5", intitule: "Pour chaque forme complexe porteuse d'information ayant une description détaillée, cette description est-elle pertinente ?", themeNumber: 9 },
-            { theme: "", critere: "9.6", intitule: "Chaque légende de forme complexe, si nécessaire, est-elle correctement liée à l'image correspondante ?", themeNumber: 9 },
-            { theme: "", critere: "9.7", intitule: "Chaque contenu cryptique (ASCII art, émoticône, syntaxe cryptique) a-t-il une alternative ?", themeNumber: 9 },
-            { theme: "", critere: "9.8", intitule: "Pour chaque contenu cryptique ayant une alternative, cette alternative est-elle pertinente ?", themeNumber: 9 },
-            { theme: "", critere: "9.9", intitule: "Chaque contenu clignotant ou en mouvement doit avoir une durée d'activation ≤5 secondes. Cette règle est-elle respectée ?", themeNumber: 9 },
-            { theme: "10. FORMULAIRE INTERACTIF", critere: "10.1", intitule: "Chaque champ de formulaire a-t-il un libellé ?", themeNumber: 10 },
-            { theme: "", critere: "10.2", intitule: "Chaque libellé associé à un champ de formulaire est-il pertinent ?", themeNumber: 10 },
-            { theme: "", critere: "10.3", intitule: "Chaque libellé associé à un champ de formulaire ayant la même fonction et répété plusieurs fois dans le même document est-il cohérent ?", themeNumber: 10 },
-            { theme: "", critere: "10.4", intitule: "Chaque libellé et son champ associé sont-ils situés l'un à côté de l'autre ?", themeNumber: 10 },
-            { theme: "", critere: "10.5", intitule: "Les champs de formulaire obligatoires sont-ils correctement identifiés ?", themeNumber: 10 },
-            { theme: "", critere: "10.6", intitule: "Pour chaque champ de formulaire obligatoire, le type et/ou le format de données attendus sont-ils disponibles ?", themeNumber: 10 },
-            { theme: "", critere: "10.7", intitule: "Chaque message d'erreur de saisie est-il correctement restitué ?", themeNumber: 10 },
-            { theme: "", critere: "10.8", intitule: "La gestion des erreurs est-elle accompagnée, si nécessaire, de suggestions sur les types, formats ou valeurs de données attendus ?", themeNumber: 10 },
-            { theme: "", critere: "10.9", intitule: "Chaque bouton de formulaire a-t-il un libellé ?", themeNumber: 10 },
-            { theme: "", critere: "10.10", intitule: "Le libellé de chaque bouton de formulaire est-il pertinent ?", themeNumber: 10 },
-            { theme: "", critere: "10.11", intitule: "Pour chaque formulaire modifiant ou supprimant des données, les données saisies peuvent-elles être modifiées, mises à jour ou récupérées par l'utilisateur ?", themeNumber: 10 }
-        ];
+        (function() {
+            // ==================== DONNÉES ====================
+            const CRITERIA_DATA = [
+                { theme: "1. ÉLÉMENTS GRAPHIQUES", critere: "1.1", intitule: "Chaque image décorative est-elle correctement ignorée par les technologies d'assistance ?", themeNumber: 1 },
+                { theme: "", critere: "1.2", intitule: "Chaque image porteuse d'information a-t-elle une alternative textuelle ?", themeNumber: 1 },
+                { theme: "", critere: "1.3", intitule: "Pour chaque image porteuse d'information ayant une alternative textuelle, cette alternative est-elle pertinente ?", themeNumber: 1 },
+                { theme: "", critere: "1.4", intitule: "Chaque image porteuse d'information a-t-elle, si nécessaire, une description détaillée ?", themeNumber: 1 },
+                { theme: "", critere: "1.5", intitule: "Pour chaque image porteuse d'information ayant une description détaillée, cette description est-elle pertinente ?", themeNumber: 1 },
+                { theme: "", critere: "1.6", intitule: "Chaque légende d'image, si nécessaire, est-elle correctement liée à l'image correspondante ?", themeNumber: 1 },
+                { theme: "", critere: "1.7", intitule: "Chaque image de texte porteuse d'information doit être remplacée par du texte stylé. Cette règle est-elle respectée ?", themeNumber: 1 },
+                { theme: "2. COULEURS", critere: "2.1", intitule: "L'information ne doit pas être donnée uniquement par la couleur. Cette règle est-elle respectée ?", themeNumber: 2 },
+                { theme: "", critere: "2.2", intitule: "Le contraste entre la couleur du texte et la couleur de son arrière-plan est-il suffisamment élevé ?", themeNumber: 2 },
+                { theme: "", critere: "2.3", intitule: "Les couleurs utilisées dans les éléments graphiques porteurs d'information sont-elles suffisamment contrastées ?", themeNumber: 2 },
+                { theme: "3. TABLEAUX", critere: "3.1", intitule: "Chaque tableau de données complexe a-t-il une alternative ?", themeNumber: 3 },
+                { theme: "", critere: "3.2", intitule: "Pour chaque tableau de données complexe ayant une alternative, cette alternative est-elle pertinente ?", themeNumber: 3 },
+                { theme: "", critere: "3.3", intitule: "Pour chaque tableau de données, les en-têtes sont-elles correctement déclarées ?", themeNumber: 3 },
+                { theme: "", critere: "3.4", intitule: "Pour chaque tableau de présentation, le contenu linéarisé reste-t-il compréhensible ?", themeNumber: 3 },
+                { theme: "", critere: "3.5", intitule: "Chaque tableau de présentation ne doit pas utiliser d'éléments spécifiques aux tableaux de données. Cette règle est-elle respectée ?", themeNumber: 3 },
+                { theme: "4. LIENS", critere: "4.1", intitule: "Chaque lien est-il explicite ?", themeNumber: 4 },
+                { theme: "", critere: "4.2", intitule: "Chaque lien a-t-il un nom accessible ?", themeNumber: 4 },
+                { theme: "5. STRUCTURE DE L'INFORMATION", critere: "5.1", intitule: "L'information est-elle structurée par l'utilisation appropriée de titres ?", themeNumber: 5 },
+                { theme: "", critere: "5.2", intitule: "Tout contenu présenté sous forme de liste utilise-t-il un style de liste ?", themeNumber: 5 },
+                { theme: "", critere: "5.3", intitule: "Les éléments de structure ne doivent pas être utilisés uniquement à des fins de mise en page. Cette règle est-elle respectée ?", themeNumber: 5 },
+                { theme: "6. PRÉSENTATION DE L'INFORMATION", critere: "6.1", intitule: "L'ordre de restitution du contenu est-il cohérent ?", themeNumber: 6 },
+                { theme: "", critere: "6.2", intitule: "L'information ne doit pas être véhiculée uniquement par la forme, la taille ou la position. Cette règle est-elle respectée ?", themeNumber: 6 },
+                { theme: "", critere: "6.3", intitule: "Chaque lien, indiqué uniquement par la couleur et dont la nature n'est pas évidente, est-il visible par rapport au texte environnant ?", themeNumber: 6 },
+                { theme: "7. NAVIGATION", critere: "7.1", intitule: "Le document possède-t-il une table des matières (hors cas particuliers) ?", themeNumber: 7 },
+                { theme: "8. ÉLÉMENTS OBLIGATOIRES", critere: "8.1", intitule: "Le document possède-t-il un titre de document ?", themeNumber: 8 },
+                { theme: "", critere: "8.2", intitule: "Le titre de document est-il pertinent (sauf cas particuliers) ?", themeNumber: 8 },
+                { theme: "9. CONSULTATION", critere: "9.1", intitule: "Chaque forme complexe décorative est-elle correctement ignorée par les technologies d'assistance ?", themeNumber: 9 },
+                { theme: "", critere: "9.2", intitule: "Chaque forme complexe porteuse d'information a-t-elle une alternative textuelle ?", themeNumber: 9 },
+                { theme: "", critere: "9.3", intitule: "Pour chaque forme complexe porteuse d'information ayant une alternative textuelle, cette alternative est-elle pertinente ?", themeNumber: 9 },
+                { theme: "", critere: "9.4", intitule: "Chaque forme complexe porteuse d'information a-t-elle, si nécessaire, une description détaillée ?", themeNumber: 9 },
+                { theme: "", critere: "9.5", intitule: "Pour chaque forme complexe porteuse d'information ayant une description détaillée, cette description est-elle pertinente ?", themeNumber: 9 },
+                { theme: "", critere: "9.6", intitule: "Chaque légende de forme complexe, si nécessaire, est-elle correctement liée à l'image correspondante ?", themeNumber: 9 },
+                { theme: "", critere: "9.7", intitule: "Chaque contenu cryptique (ASCII art, émoticône, syntaxe cryptique) a-t-il une alternative ?", themeNumber: 9 },
+                { theme: "", critere: "9.8", intitule: "Pour chaque contenu cryptique ayant une alternative, cette alternative est-elle pertinente ?", themeNumber: 9 },
+                { theme: "", critere: "9.9", intitule: "Chaque contenu clignotant ou en mouvement doit avoir une durée d'activation ≤5 secondes. Cette règle est-elle respectée ?", themeNumber: 9 },
+                { theme: "10. FORMULAIRE INTERACTIF", critere: "10.1", intitule: "Chaque champ de formulaire a-t-il un libellé ?", themeNumber: 10 },
+                { theme: "", critere: "10.2", intitule: "Chaque libellé associé à un champ de formulaire est-il pertinent ?", themeNumber: 10 },
+                { theme: "", critere: "10.3", intitule: "Chaque libellé associé à un champ de formulaire ayant la même fonction et répété plusieurs fois dans le même document est-il cohérent ?", themeNumber: 10 },
+                { theme: "", critere: "10.4", intitule: "Chaque libellé et son champ associé sont-ils situés l'un à côté de l'autre ?", themeNumber: 10 },
+                { theme: "", critere: "10.5", intitule: "Les champs de formulaire obligatoires sont-ils correctement identifiés ?", themeNumber: 10 },
+                { theme: "", critere: "10.6", intitule: "Pour chaque champ de formulaire obligatoire, le type et/ou le format de données attendus sont-ils disponibles ?", themeNumber: 10 },
+                { theme: "", critere: "10.7", intitule: "Chaque message d'erreur de saisie est-il correctement restitué ?", themeNumber: 10 },
+                { theme: "", critere: "10.8", intitule: "La gestion des erreurs est-elle accompagnée, si nécessaire, de suggestions sur les types, formats ou valeurs de données attendus ?", themeNumber: 10 },
+                { theme: "", critere: "10.9", intitule: "Chaque bouton de formulaire a-t-il un libellé ?", themeNumber: 10 },
+                { theme: "", critere: "10.10", intitule: "Le libellé de chaque bouton de formulaire est-il pertinent ?", themeNumber: 10 },
+                { theme: "", critere: "10.11", intitule: "Pour chaque formulaire modifiant ou supprimant des données, les données saisies peuvent-elles être modifiées, mises à jour ou récupérées par l'utilisateur ?", themeNumber: 10 }
+            ];
 
-        // Couleurs pour chaque thème dans Excel (couleurs pastel)
-        const themeColors = [
-            "FFE6E6", // Rouge clair pour thème 1
-            "FFF2E6", // Orange clair pour thème 2
-            "FFFFE6", // Jaune clair pour thème 3
-            "F0FFE6", // Vert clair pour thème 4
-            "E6FFFF", // Cyan clair pour thème 5
-            "E6F3FF", // Bleu clair pour thème 6
-            "F0E6FF", // Violet clair pour thème 7
-            "FFE6F3", // Rose clair pour thème 8
-            "E8E8E8", // Gris clair pour thème 9
-            "E6FFE6"  // Vert menthe pour thème 10
-        ];
+            const THEME_COLORS = [
+                "FFE6E6", "FFF2E6", "FFFFE6", "F0FFE6", "E6FFFF",
+                "E6F3FF", "F0E6FF", "FFE6F3", "E8E8E8", "E6FFE6"
+            ];
 
-        // Variables globales
-        let complianceData = {};
+            // ==================== ÉTAT GLOBAL ====================
+            let complianceData = {};
 
-        // Fonction pour calculer le numéro de semaine ISO
-        function getISOWeekNumber(date) {
-            if (!date) return '';
-            
-            const d = new Date(date);
-            d.setHours(0, 0, 0, 0);
-            
-            // Jeudi de la même semaine
-            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-            
-            // Premier janvier de l'année
-            const yearStart = new Date(d.getFullYear(), 0, 1);
-            
-            // Calcul du nombre de jours
-            const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-            
-            return weekNum;
-        }
-
-        // Mettre à jour le numéro de semaine
-        function updateWeekNumber() {
-            const dateInput = document.getElementById('doc-date');
-            const weekInput = document.getElementById('week-number');
-            
-            if (dateInput.value) {
-                const weekNum = getISOWeekNumber(dateInput.value);
-                weekInput.value = `Semaine ${weekNum}`;
-            } else {
-                weekInput.value = '';
+            // ==================== FONCTIONS UTILITAIRES ====================
+            function getISOWeekNumber(dateStr) {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                d.setHours(0, 0, 0, 0);
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                const yearStart = new Date(d.getFullYear(), 0, 1);
+                return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
             }
-        }
 
-        // Calculer la note de qualité (sur 100)
-        function calculateQualityNote() {
-            const counts = {
-                c: 0,
-                nc: 0,
-                na: 0,
-                total: 0
-            };
-            
-            Object.values(complianceData).forEach(item => {
-                counts.total++;
-                if (item.status === 'c') counts.c++;
-                else if (item.status === 'nc') counts.nc++;
-                else if (item.status === 'na') counts.na++;
-            });
-            
-            const evaluatedCount = counts.c + counts.nc;
-            if (evaluatedCount === 0) return 0;
-            
-            // Note sur 100 basée sur le pourcentage de conformité
-            const conformitePourcentage = (counts.c / evaluatedCount) * 100;
-            
-            return conformitePourcentage;
-        }
-
-        // Obtenir la couleur de la note en fonction du seuil
-        function getNoteColor(conformitePourcentage) {
-            if (conformitePourcentage >= 85) {
-                return "27ae60"; // Vert
-            } else {
-                return "e74c3c"; // Rouge
+            function updateWeekNumber() {
+                const dateInput = document.getElementById('doc-date');
+                const weekInput = document.getElementById('week-number');
+                weekInput.value = dateInput.value ? `Semaine ${getISOWeekNumber(dateInput.value)}` : '';
             }
-        }
 
-        // Mettre à jour l'affichage de la note de qualité
-        function updateQualityNote() {
-            const note = calculateQualityNote();
-            const counts = {
-                c: 0,
-                nc: 0,
-                na: 0
-            };
-            
-            Object.values(complianceData).forEach(item => {
-                if (item.status === 'c') counts.c++;
-                else if (item.status === 'nc') counts.nc++;
-                else if (item.status === 'na') counts.na++;
-            });
-            
-            const evaluatedCount = counts.c + counts.nc;
-            const noteColor = getNoteColor(note);
-            
-            let appreciation = '';
-            if (note >= 85) {
-                appreciation = 'Excellent - Conforme';
-            } else {
-                appreciation = 'À améliorer - Non conforme';
+            function calculateStats() {
+                const counts = { c: 0, nc: 0, na: 0, nr: 0 };
+                Object.values(complianceData).forEach(item => {
+                    if (item.status === 'c') counts.c++;
+                    else if (item.status === 'nc') counts.nc++;
+                    else if (item.status === 'na') counts.na++;
+                    else counts.nr++;
+                });
+                counts.total = CRITERIA_DATA.length;
+                return counts;
             }
-            
-            const qualityHTML = `
-                <h2><i class="fas fa-star"></i> Note de qualité</h2>
-                <div class="note-value" style="color: #${noteColor};">${note.toFixed(1)}/100</div>
-                <div class="note-details">
-                    <p>${appreciation} - ${counts.c} conforme(s) sur ${evaluatedCount} critères évalués</p>
-                    <p>${counts.nc} non conforme(s) | ${counts.na} non applicable(s)</p>
-                    <p><strong>Seuil de conformité :</strong> ≥ 85% = Vert | < 85% = Rouge</p>
-                </div>
-            `;
-            
-            document.getElementById('qualityNote').innerHTML = qualityHTML;
-        }
 
-        // Initialiser l'application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Afficher la date actuelle
-            const currentDateElement = document.getElementById('current-date');
-            const now = new Date();
-            currentDateElement.textContent = now.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            
-            // Définir la date d'aujourd'hui par défaut
-            const docDateInput = document.getElementById('doc-date');
-            docDateInput.valueAsDate = now;
-            
-            // Mettre à jour le numéro de semaine
-            updateWeekNumber();
-            
-            // Générer le tableau de conformité
-            generateComplianceTable();
-            
-            // Initialiser les données de conformité
-            initializeComplianceData();
-            
-            // Charger les données sauvegardées s'il y en a
-            loadSavedData();
-            
-            // Mettre à jour les statistiques
-            updateStatusSummary();
-            
-            // Mettre à jour la note de qualité
-            updateQualityNote();
-            
-            // Ajouter les écouteurs d'événements
-            setupEventListeners();
-        });
+            function calculateQualityNote() {
+                const counts = calculateStats();
+                const evaluated = counts.c + counts.nc;
+                return evaluated > 0 ? (counts.c / evaluated) * 100 : 0;
+            }
 
-        // Générer le tableau de conformité
-        function generateComplianceTable() {
-            const tbody = document.getElementById('compliance-body');
-            tbody.innerHTML = '';
-            
-            let currentTheme = "";
-            
-            criteriaData.forEach(item => {
-                // Ajouter une ligne de thème si nécessaire
-                if (item.theme && item.theme !== currentTheme) {
-                    currentTheme = item.theme;
-                    
-                    const themeRow = document.createElement('tr');
-                    themeRow.className = 'theme-row';
-                    themeRow.setAttribute('data-theme', item.themeNumber);
-                    
-                    // Ajouter une prévisualisation de couleur
-                    const color = "#" + themeColors[item.themeNumber - 1] || "#FFFFFF";
-                    
-                    themeRow.innerHTML = `
-                        <td colspan="5">
-                            <span class="color-preview" style="background-color: ${color};"></span>
-                            ${item.theme}
+            function getNoteColor(note) {
+                return note >= 85 ? "27ae60" : "e74c3c";
+            }
+
+            // ==================== MISE À JOUR DE L'INTERFACE ====================
+            function updateStatusSummary() {
+                const counts = calculateStats();
+                const total = counts.total;
+                document.getElementById('status-summary').innerHTML = `
+                    <div class="status-card"><h3>Conforme</h3><div class="status-value conforme">${counts.c}</div><p>${Math.round((counts.c/total)*100)}%</p></div>
+                    <div class="status-card"><h3>Non conforme</h3><div class="status-value non-conforme">${counts.nc}</div><p>${Math.round((counts.nc/total)*100)}%</p></div>
+                    <div class="status-card"><h3>Non applicable</h3><div class="status-value non-applicable">${counts.na}</div><p>${Math.round((counts.na/total)*100)}%</p></div>
+                    <div class="status-card"><h3>Non renseigné</h3><div class="status-value non-renseigne">${counts.nr}</div><p>${Math.round((counts.nr/total)*100)}%</p></div>
+                `;
+            }
+
+            function updateQualityNoteDisplay() {
+                const note = calculateQualityNote();
+                const counts = calculateStats();
+                const evaluated = counts.c + counts.nc;
+                const noteColor = getNoteColor(note);
+                const appreciation = note >= 85 ? 'Excellent - Conforme' : 'À améliorer - Non conforme';
+                
+                document.getElementById('qualityNote').innerHTML = `
+                    <h2><i class="fas fa-star"></i> Note de qualité</h2>
+                    <div class="note-value" style="color: #${noteColor};">${note.toFixed(1)}/100</div>
+                    <div class="note-details">
+                        <p>${appreciation} - ${counts.c} conforme(s) sur ${evaluated} critères évalués</p>
+                        <p>${counts.nc} non conforme(s) | ${counts.na} non applicable(s)</p>
+                        <p><strong>Seuil :</strong> ≥85% Vert | <85% Rouge</p>
+                    </div>
+                `;
+            }
+
+            // ==================== GÉNÉRATION DU TABLEAU ====================
+            function generateComplianceTable() {
+                const tbody = document.getElementById('compliance-body');
+                tbody.innerHTML = '';
+                let currentTheme = '';
+
+                CRITERIA_DATA.forEach(item => {
+                    if (item.theme && item.theme !== currentTheme) {
+                        currentTheme = item.theme;
+                        const themeRow = document.createElement('tr');
+                        themeRow.className = 'theme-row';
+                        themeRow.innerHTML = `<td colspan="5"><span class="color-preview" style="background-color: #${THEME_COLORS[item.themeNumber-1]};"></span>${item.theme}</td>`;
+                        tbody.appendChild(themeRow);
+                    }
+
+                    const row = document.createElement('tr');
+                    row.dataset.critere = item.critere;
+                    row.dataset.theme = item.themeNumber;
+                    row.style.backgroundColor = `#${THEME_COLORS[item.themeNumber-1]}80`;
+
+                    row.innerHTML = `
+                        <td>${item.theme || ''}</td>
+                        <td class="critere-num">${item.critere}</td>
+                        <td>${item.intitule}</td>
+                        <td class="compliance-select">
+                            <select class="compliance-status">
+                                <option value="">Sélectionner</option>
+                                <option value="c">Conforme</option>
+                                <option value="nc">Non conforme</option>
+                                <option value="na">Non applicable</option>
+                            </select>
+                        </td>
+                        <td class="comment-cell">
+                            <textarea class="comment-input" placeholder="Justification obligatoire si non conforme..." rows="2"></textarea>
                         </td>
                     `;
-                    tbody.appendChild(themeRow);
-                }
-                
-                // Créer la ligne du critère
-                const row = document.createElement('tr');
-                row.setAttribute('data-critere', item.critere);
-                row.setAttribute('data-theme', item.themeNumber);
-                
-                // Ajouter la couleur de fond pour les critères
-                const color = "#" + themeColors[item.themeNumber - 1] || "#FFFFFF";
-                row.style.backgroundColor = color + "80"; // 80 = 50% d'opacité
-                
-                row.innerHTML = `
-                    <td>${item.theme ? item.theme : ""}</td>
-                    <td class="critere-num">${item.critere}</td>
-                    <td>${item.intitule}</td>
-                    <td class="compliance-select">
-                        <select class="compliance-status">
-                            <option value="">Sélectionner</option>
-                            <option value="c">Conforme</option>
-                            <option value="nc">Non conforme</option>
-                            <option value="na">Non applicable</option>
-                        </select>
-                    </td>
-                    <td class="comment-cell">
-                        <textarea class="comment-input" placeholder="Justification obligatoire si non conforme..." rows="2"></textarea>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Initialiser les données de conformité
-        function initializeComplianceData() {
-            criteriaData.forEach(item => {
-                complianceData[item.critere] = {
-                    status: "",
-                    comment: "",
-                    themeNumber: item.themeNumber
-                };
-            });
-        }
-
-        // Configurer les écouteurs d'événements
-        function setupEventListeners() {
-            // Écouter les changements de statut de conformité
-            document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('compliance-status')) {
-                    const row = e.target.closest('tr');
-                    const critere = row.getAttribute('data-critere');
-                    const status = e.target.value;
-                    const commentInput = row.querySelector('.comment-input');
-                    
-                    // Mettre à jour les données
-                    complianceData[critere].status = status;
-                    
-                    // Gérer l'affichage du commentaire
-                    if (status === 'nc') {
-                        commentInput.classList.add('show');
-                        commentInput.required = true;
-                    } else {
-                        commentInput.classList.remove('show');
-                        commentInput.required = false;
-                        complianceData[critere].comment = '';
-                        commentInput.value = '';
-                    }
-                    
-                    // Mettre à jour les statistiques
-                    updateStatusSummary();
-                    
-                    // Mettre à jour la note de qualité
-                    updateQualityNote();
-                    
-                    // Sauvegarder automatiquement
-                    autoSave();
-                }
-            });
-            
-            // Écouter les changements de commentaires
-            document.addEventListener('input', function(e) {
-                if (e.target.classList.contains('comment-input')) {
-                    const row = e.target.closest('tr');
-                    const critere = row.getAttribute('data-critere');
-                    complianceData[critere].comment = e.target.value;
-                    
-                    // Sauvegarder automatiquement
-                    autoSave();
-                }
-            });
-            
-            // Mettre à jour le numéro de semaine quand la date change
-            document.getElementById('doc-date').addEventListener('change', updateWeekNumber);
-            
-            // Bouton d'exportation Excel
-            document.getElementById('export-btn').addEventListener('click', exportToExcel);
-            
-            // Bouton de réinitialisation
-            document.getElementById('reset-btn').addEventListener('click', resetForm);
-            
-            // Bouton de sauvegarde
-            document.getElementById('save-btn').addEventListener('click', saveData);
-            
-            // Écouter les changements dans les informations du document
-            const docInputs = ['doc-name', 'doc-type', 'doc-date', 'evaluator', 'evalue'];
-            docInputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', autoSave);
-            });
-        }
-
-        // Mettre à jour le résumé des statuts
-        function updateStatusSummary() {
-            const counts = {
-                c: 0,
-                nc: 0,
-                na: 0,
-                'non-renseigne': 0
-            };
-            
-            // Compter les statuts
-            Object.values(complianceData).forEach(item => {
-                if (item.status) {
-                    counts[item.status] = (counts[item.status] || 0) + 1;
-                } else {
-                    counts['non-renseigne']++;
-                }
-            });
-            
-            const total = criteriaData.length;
-            
-            // Mettre à jour l'affichage
-            const summaryHTML = `
-                <div class="status-card">
-                    <h3>Conforme</h3>
-                    <div class="status-value conforme">${counts.c}</div>
-                    <p>${Math.round((counts.c / total) * 100)}%</p>
-                </div>
-                <div class="status-card">
-                    <h3>Non conforme</h3>
-                    <div class="status-value non-conforme">${counts.nc}</div>
-                    <p>${Math.round((counts.nc / total) * 100)}%</p>
-                </div>
-                <div class="status-card">
-                    <h3>Non applicable</h3>
-                    <div class="status-value non-applicable">${counts.na}</div>
-                    <p>${Math.round((counts.na / total) * 100)}%</p>
-                </div>
-                <div class="status-card">
-                    <h3>Non renseigné</h3>
-                    <div class="status-value non-renseigne">${counts['non-renseigne']}</div>
-                    <p>${Math.round((counts['non-renseigne'] / total) * 100)}%</p>
-                </div>
-            `;
-            
-            document.getElementById('status-summary').innerHTML = summaryHTML;
-        }
-
-        // Fonction pour créer un fichier Excel bien formaté
-        function exportToExcel() {
-            // Vérifier que le nom du document est rempli
-            const docName = document.getElementById('doc-name').value;
-            if (!docName) {
-                alert('Veuillez saisir le nom du document avant d\'exporter.');
-                document.getElementById('doc-name').focus();
-                return;
-            }
-            
-            // Vérifier les commentaires pour les critères non conformes
-            let missingComments = false;
-            let missingCommentCritere = '';
-            
-            for (const [critere, data] of Object.entries(complianceData)) {
-                if (data.status === 'nc' && !data.comment.trim()) {
-                    missingComments = true;
-                    missingCommentCritere = critere;
-                    break;
-                }
-            }
-            
-            if (missingComments) {
-                alert(`Le critère ${missingCommentCritere} est marqué comme "Non conforme" mais ne comporte pas de commentaire de justification. Veuillez ajouter un commentaire avant d'exporter.`);
-                const row = document.querySelector(`[data-critere="${missingCommentCritere}"]`);
-                if (row) {
-                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    const commentInput = row.querySelector('.comment-input');
-                    commentInput.classList.add('show');
-                    commentInput.focus();
-                }
-                return;
-            }
-            
-            // Afficher l'indicateur de chargement
-            document.getElementById('loading').style.display = 'block';
-            
-            // Créer un nouveau classeur Excel
-            const wb = XLSX.utils.book_new();
-            wb.Props = {
-                Title: "Rapport de Conformité Accessibilité",
-                Subject: "Audit Accessibilité",
-                Author: "Formulaire Accessibilité",
-                CreatedDate: new Date()
-            };
-            
-            // Créer la feuille de données
-            const ws_data = [];
-            
-            // 1. Ajouter l'en-tête du tableau
-            ws_data.push(["Thème", "Critère", "Intitulé", "Conformité", "Commentaire"]);
-            
-            // 2. Ajouter les données des critères
-            let currentTheme = "";
-            let themeStartRow = 2; // Ligne de début du premier thème (après les en-têtes)
-            let currentThemeRow = themeStartRow;
-            let mergeRanges = []; // Pour stocker les plages de fusion
-            
-            criteriaData.forEach((item, index) => {
-                const data = complianceData[item.critere];
-                
-                // Déterminer le texte de conformité
-                let conformite = "";
-                switch(data.status) {
-                    case 'c': conformite = "Conforme"; break;
-                    case 'nc': conformite = "Non conforme"; break;
-                    case 'na': conformite = "Non applicable"; break;
-                    default: conformite = "Non renseigné";
-                }
-                
-                // Si c'est un nouveau thème
-                if (item.theme && item.theme !== currentTheme) {
-                    currentTheme = item.theme;
-                    currentThemeRow = ws_data.length + 1; // +1 car ws_data est 0-indexed mais Excel est 1-indexed
-                    
-                    // Ajouter le thème
-                    ws_data.push([currentTheme, item.critere, item.intitule, conformite, data.comment || ""]);
-                } else {
-                    // Sinon, ligne normale de critère
-                    ws_data.push(["", item.critere, item.intitule, conformite, data.comment || ""]);
-                }
-                
-                // Identifier la fin du thème pour les fusions
-                if (index === criteriaData.length - 1 || 
-                    (criteriaData[index + 1] && criteriaData[index + 1].theme)) {
-                    // C'est la dernière ligne du thème
-                    if (currentTheme !== "") {
-                        const themeEndRow = ws_data.length; // Dernière ligne du thème
-                        if (themeEndRow > currentThemeRow) {
-                            // Ajouter la plage de fusion pour ce thème (colonnes A)
-                            mergeRanges.push({
-                                s: {r: currentThemeRow - 1, c: 0}, // Début (0-indexed)
-                                e: {r: themeEndRow - 1, c: 0}      // Fin (0-indexed)
-                            });
-                        }
-                    }
-                }
-            });
-            
-            // Convertir les données en feuille de calcul
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            
-            // 3. Définir les largeurs de colonnes
-            const colWidths = [
-                { wch: 30 }, // Thème
-                { wch: 10 }, // Critère
-                { wch: 80 }, // Intitulé
-                { wch: 15 }, // Conformité
-                { wch: 50 }  // Commentaire
-            ];
-            ws['!cols'] = colWidths;
-            
-            // 4. Définir les plages de fusion
-            ws['!merges'] = mergeRanges;
-            
-            // 5. Appliquer le style aux cellules
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            
-            // Parcourir toutes les cellules
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (!ws[cell_ref]) continue;
-                    
-                    let cellStyle = {};
-                    
-                    // Style pour l'en-tête du tableau
-                    if (R === 0) {
-                        cellStyle = {
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "2C3E50" } },
-                            alignment: { horizontal: "center", vertical: "center" },
-                            border: {
-                                top: { style: "thin", color: { rgb: "000000" } },
-                                bottom: { style: "thin", color: { rgb: "000000" } },
-                                left: { style: "thin", color: { rgb: "000000" } },
-                                right: { style: "thin", color: { rgb: "000000" } }
-                            }
-                        };
-                    }
-                    
-                    // Style pour les thèmes
-                    else if (R >= 1 && ws[cell_ref] && ws[cell_ref].v && ws[cell_ref].v.toString().match(/^\d+\.\s/)) {
-                        cellStyle = {
-                            font: { bold: true, sz: 12, color: { rgb: "000000" } },
-                            alignment: { horizontal: "center", vertical: "center" },
-                            border: {
-                                top: { style: "medium", color: { rgb: "000000" } },
-                                bottom: { style: "thin", color: { rgb: "000000" } },
-                                left: { style: "thin", color: { rgb: "000000" } },
-                                right: { style: "thin", color: { rgb: "000000" } }
-                            }
-                        };
-                        
-                        // Appliquer la couleur du thème
-                        const themeNum = parseInt(ws[cell_ref].v.split('.')[0]);
-                        if (themeNum >= 1 && themeNum <= 10) {
-                            cellStyle.fill = { fgColor: { rgb: themeColors[themeNum - 1] } };
-                        }
-                    }
-                    
-                    // Style pour les cellules de critères
-                    else if (R > 0 && C >= 0 && C <= 4) {
-                        cellStyle = {
-                            border: {
-                                top: { style: "thin", color: { rgb: "CCCCCC" } },
-                                bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-                                left: { style: "thin", color: { rgb: "CCCCCC" } },
-                                right: { style: "thin", color: { rgb: "CCCCCC" } }
-                            },
-                            alignment: { 
-                                vertical: "top",
-                                wrapText: true 
-                            }
-                        };
-                        
-                        // Appliquer la couleur de fond basée sur le thème
-                        if (C === 0 && !ws[cell_ref].v) {
-                            // Pour les cellules vides dans la colonne thème, on cherche le thème parent
-                            let themeRow = R;
-                            while (themeRow >= 1 && (!ws[XLSX.utils.encode_cell({c:0, r:themeRow})] || 
-                                   !ws[XLSX.utils.encode_cell({c:0, r:themeRow})].v)) {
-                                themeRow--;
-                            }
-                            if (themeRow >= 1 && ws[XLSX.utils.encode_cell({c:0, r:themeRow})]) {
-                                const themeValue = ws[XLSX.utils.encode_cell({c:0, r:themeRow})].v;
-                                const themeNum = parseInt(themeValue.split('.')[0]);
-                                if (themeNum >= 1 && themeNum <= 10) {
-                                    cellStyle.fill = { fgColor: { rgb: themeColors[themeNum - 1] + "80" } }; // 80 = 50% d'opacité
-                                }
-                            }
-                        }
-                        
-                        // Style pour la colonne de conformité
-                        if (C === 3) {
-                            cellStyle.alignment = { horizontal: "center", vertical: "center" };
-                            if (ws[cell_ref].v === "Conforme") {
-                                cellStyle.font = { bold: true, color: { rgb: "006400" } }; // Vert foncé
-                            } else if (ws[cell_ref].v === "Non conforme") {
-                                cellStyle.font = { bold: true, color: { rgb: "8B0000" } }; // Rouge foncé
-                            } else if (ws[cell_ref].v === "Non applicable") {
-                                cellStyle.font = { color: { rgb: "696969" } }; // Gris
-                            }
-                        }
-                    }
-                    
-                    // Appliquer le style
-                    ws[cell_ref].s = cellStyle;
-                }
-            }
-            
-            // 6. Ajouter la feuille au classeur
-            XLSX.utils.book_append_sheet(wb, ws, "Conformité");
-            
-            // 7. Créer une feuille de résumé avec les informations du document et couleurs conditionnelles
-            createSummarySheet(wb);
-            
-            // 8. Générer le fichier Excel
-            setTimeout(() => {
-                const wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
-                
-                function s2ab(s) {
-                    const buf = new ArrayBuffer(s.length);
-                    const view = new Uint8Array(buf);
-                    for (let i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-                    return buf;
-                }
-                
-                // Télécharger le fichier
-                const blob = new Blob([s2ab(wbout)], {type:"application/octet-stream"});
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                
-                const safeFileName = docName.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
-                link.download = `RAPDF_${safeFileName}_${new Date().toISOString().slice(0,10)}.xlsx`;
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Masquer l'indicateur de chargement
-                document.getElementById('loading').style.display = 'none';
-                
-                // Confirmation
-                const nonConformeCount = Object.keys(complianceData).filter(c => complianceData[c].status === 'nc').length;
-                const note = calculateQualityNote();
-                const noteColor = getNoteColor(note);
-                alert(`Fichier Excel généré avec succès!\n\n${nonConformeCount} critère(s) sont marqués comme non conforme(s).\nNote de qualité: ${note.toFixed(1)}/100\n\nLe fichier inclut:\n✓ Les thèmes fusionnés\n✓ Les couleurs par thème\n✓ Le formatage professionnel\n✓ Une feuille de résumé avec toutes les informations\n✓ Couleurs conditionnelles (Rouge si <85%, Vert si ≥85%)`);
-            }, 500);
-        }
-
-        // Créer une feuille de résumé
-        function createSummarySheet(wb) {
-            const summaryData = [];
-            
-            // Titre
-            summaryData.push(["RAPPORT DE CONFORMITÉ ACCESSIBILITÉ"]);
-            summaryData.push([]);
-            
-            // Informations du document
-            summaryData.push(["INFORMATIONS DU DOCUMENT"]);
-            summaryData.push(["Nom du document:", document.getElementById('doc-name').value || "Non spécifié"]);
-            summaryData.push(["Type de document:", document.getElementById('doc-type').value || "Non spécifié"]);
-            summaryData.push(["Date d'évaluation:", document.getElementById('doc-date').value || "Non spécifiée"]);
-            summaryData.push(["Évaluateur:", document.getElementById('evaluator').value || "Non spécifié"]);
-            summaryData.push(["Évalué (Agent):", document.getElementById('evalue').value || "Non spécifié"]);
-            summaryData.push(["Numéro de semaine ISO:", document.getElementById('week-number').value || "Non calculé"]);
-            summaryData.push(["Date d'export:", new Date().toLocaleDateString('fr-FR')]);
-            summaryData.push([]);
-            
-            // Calculer les statistiques
-            const counts = { c: 0, nc: 0, na: 0, total: 0 };
-            Object.values(complianceData).forEach(item => {
-                counts.total++;
-                if (item.status === 'c') counts.c++;
-                else if (item.status === 'nc') counts.nc++;
-                else if (item.status === 'na') counts.na++;
-            });
-            
-            const evaluatedCount = counts.c + counts.nc;
-            const conformitePourcentage = evaluatedCount > 0 ? (counts.c / evaluatedCount * 100) : 0;
-            const noteColor = getNoteColor(conformitePourcentage);
-            
-            // Note de qualité (sur 100)
-            summaryData.push(["NOTE DE QUALITÉ"]);
-            summaryData.push(["Note sur 100:", `${conformitePourcentage.toFixed(1)}/100`]);
-            summaryData.push(["Pourcentage de conformité:", `${conformitePourcentage.toFixed(1)}%`]);
-            summaryData.push(["Statut:", conformitePourcentage >= 85 ? "CONFORME (≥85%)" : "NON CONFORME (<85%)"]);
-            summaryData.push([]);
-            
-            // Tableau de résumé
-            summaryData.push(["RÉSUMÉ DES RÉSULTATS"]);
-            summaryData.push(["Statut", "Nombre", "Pourcentage"]);
-            summaryData.push(["Conforme", counts.c, counts.total > 0 ? (counts.c / counts.total * 100).toFixed(1) + "%" : "0%"]);
-            summaryData.push(["Non conforme", counts.nc, counts.total > 0 ? (counts.nc / counts.total * 100).toFixed(1) + "%" : "0%"]);
-            summaryData.push(["Non applicable", counts.na, counts.total > 0 ? (counts.na / counts.total * 100).toFixed(1) + "%" : "0%"]);
-            summaryData.push(["Non renseigné", counts.total - (counts.c + counts.nc + counts.na), 
-                            counts.total > 0 ? ((counts.total - (counts.c + counts.nc + counts.na)) / counts.total * 100).toFixed(1) + "%" : "0%"]);
-            summaryData.push(["TOTAL", counts.total, "100%"]);
-            summaryData.push([]);
-            
-            // Détails par thème
-            summaryData.push(["DÉTAILS PAR THÈME"]);
-            summaryData.push(["Thème", "Conforme", "Non conforme", "Non applicable", "Non renseigné", "Total"]);
-            
-            const themeStats = {};
-            criteriaData.forEach(item => {
-                const themeNum = item.themeNumber;
-                if (!themeStats[themeNum]) {
-                    themeStats[themeNum] = { theme: item.theme || criteriaData.find(c => c.themeNumber === themeNum && c.theme).theme, c: 0, nc: 0, na: 0, nr: 0, total: 0 };
-                }
-                themeStats[themeNum].total++;
-                const status = complianceData[item.critere].status;
-                if (status === 'c') themeStats[themeNum].c++;
-                else if (status === 'nc') themeStats[themeNum].nc++;
-                else if (status === 'na') themeStats[themeNum].na++;
-                else themeStats[themeNum].nr++;
-            });
-            
-            // Ajouter les statistiques par thème
-            Object.values(themeStats).forEach(stat => {
-                if (stat.theme) {
-                    summaryData.push([stat.theme, stat.c, stat.nc, stat.na, stat.nr, stat.total]);
-                }
-            });
-            
-            // Créer la feuille de résumé
-            const ws_summary = XLSX.utils.aoa_to_sheet(summaryData);
-            
-            // Largeurs de colonnes
-            ws_summary['!cols'] = [
-                { wch: 40 },
-                { wch: 20 },
-                { wch: 15 },
-                { wch: 15 },
-                { wch: 15 },
-                { wch: 15 }
-            ];
-            
-            // Appliquer des styles
-            const range = XLSX.utils.decode_range(ws_summary['!ref']);
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (!ws_summary[cell_ref]) continue;
-                    
-                    let cellStyle = {};
-                    
-                    // Titre principal
-                    if (R === 0) {
-                        cellStyle = {
-                            font: { sz: 18, bold: true, color: { rgb: "2C3E50" } },
-                            alignment: { horizontal: "center" }
-                        };
-                    }
-                    
-                    // Titres de sections
-                    else if (R === 2 || R === 11 || R === 17) {
-                        cellStyle = {
-                            font: { sz: 14, bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "4A6491" } }
-                        };
-                    }
-                    
-                    // En-têtes des tableaux
-                    else if (R === 3 || R === 12 || R === 18) {
-                        cellStyle = {
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "2C3E50" } },
-                            border: {
-                                top: { style: "thin", color: { rgb: "000000" } },
-                                bottom: { style: "thin", color: { rgb: "000000" } },
-                                left: { style: "thin", color: { rgb: "000000" } },
-                                right: { style: "thin", color: { rgb: "000000" } }
-                            }
-                        };
-                    }
-                    
-                    // Données
-                    else if (R > 3 && R <= 9 || R > 12 && R <= 15 || R > 18) {
-                        cellStyle = {
-                            border: {
-                                bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-                                left: { style: "thin", color: { rgb: "CCCCCC" } },
-                                right: { style: "thin", color: { rgb: "CCCCCC" } }
-                            }
-                        };
-                        
-                        // Couleur conditionnelle pour la ligne de note (R=5)
-                        if (R === 5 && C === 1) {
-                            // Cellule de la note
-                            const noteValue = ws_summary[cell_ref].v;
-                            if (noteValue && typeof noteValue === 'string') {
-                                const note = parseFloat(noteValue);
-                                if (!isNaN(note)) {
-                                    if (note >= 85) {
-                                        cellStyle.font = { bold: true, color: { rgb: "27ae60" } }; // Vert
-                                    } else {
-                                        cellStyle.font = { bold: true, color: { rgb: "e74c3c" } }; // Rouge
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Couleur conditionnelle pour la ligne de statut (R=7)
-                        if (R === 7 && C === 1) {
-                            const statutValue = ws_summary[cell_ref].v;
-                            if (statutValue && typeof statutValue === 'string') {
-                                if (statutValue.includes("CONFORME")) {
-                                    cellStyle.font = { bold: true, color: { rgb: "27ae60" } }; // Vert
-                                } else {
-                                    cellStyle.font = { bold: true, color: { rgb: "e74c3c" } }; // Rouge
-                                }
-                            }
-                        }
-                    }
-                    
-                    ws_summary[cell_ref].s = cellStyle;
-                }
-            }
-            
-            // Ajouter la feuille au classeur
-            XLSX.utils.book_append_sheet(wb, ws_summary, "Résumé");
-        }
-
-        // Réinitialiser le formulaire
-        function resetForm() {
-            if (confirm("Êtes-vous sûr de vouloir réinitialiser tout le formulaire ? Toutes les données seront perdues.")) {
-                // Réinitialiser les informations du document
-                document.getElementById('doc-name').value = '';
-                document.getElementById('doc-type').value = '';
-                document.getElementById('evaluator').value = '';
-                document.getElementById('evalue').value = '';
-                document.getElementById('doc-date').valueAsDate = new Date();
-                updateWeekNumber();
-                
-                // Réinitialiser les données de conformité
-                initializeComplianceData();
-                
-                // Réinitialiser l'interface
-                document.querySelectorAll('.compliance-status').forEach(select => {
-                    select.value = '';
+                    tbody.appendChild(row);
                 });
-                
-                document.querySelectorAll('.comment-input').forEach(input => {
-                    input.value = '';
-                    input.classList.remove('show');
-                });
-                
-                // Mettre à jour les statistiques
-                updateStatusSummary();
-                
-                // Mettre à jour la note de qualité
-                updateQualityNote();
-                
-                // Supprimer les données sauvegardées
-                localStorage.removeItem('accessibilityComplianceData');
-                
-                alert("Formulaire réinitialisé avec succès.");
             }
-        }
 
-        // Sauvegarder les données
-        function saveData() {
-            const docName = document.getElementById('doc-name').value;
-            if (!docName) {
-                alert('Veuillez saisir le nom du document avant de sauvegarder.');
-                document.getElementById('doc-name').focus();
-                return;
-            }
-            
-            const saveData = {
-                documentInfo: {
-                    name: docName,
-                    type: document.getElementById('doc-type').value,
-                    date: document.getElementById('doc-date').value,
-                    evaluator: document.getElementById('evaluator').value,
-                    evalue: document.getElementById('evalue').value,
-                    weekNumber: document.getElementById('week-number').value
-                },
-                complianceData: complianceData,
-                timestamp: new Date().toISOString()
-            };
-            
-            localStorage.setItem('accessibilityComplianceData', JSON.stringify(saveData));
-            alert('Données sauvegardées avec succès. Vous pouvez recharger cette page à tout moment pour continuer.');
-        }
+            // ==================== CHARGEMENT/SAUVEGARDE ====================
+            function loadFromStorage() {
+                const saved = localStorage.getItem('accessibilityComplianceData');
+                if (!saved) return;
 
-        // Charger les données sauvegardées
-        function loadSavedData() {
-            const savedData = localStorage.getItem('accessibilityComplianceData');
-            if (savedData) {
                 try {
-                    const data = JSON.parse(savedData);
-                    
-                    // Charger les informations du document
+                    const data = JSON.parse(saved);
                     if (data.documentInfo) {
                         document.getElementById('doc-name').value = data.documentInfo.name || '';
                         document.getElementById('doc-type').value = data.documentInfo.type || '';
                         document.getElementById('doc-date').value = data.documentInfo.date || '';
                         document.getElementById('evaluator').value = data.documentInfo.evaluator || '';
                         document.getElementById('evalue').value = data.documentInfo.evalue || '';
-                        
-                        // Mettre à jour le numéro de semaine
                         updateWeekNumber();
                     }
-                    
-                    // Charger les données de conformité
+
                     if (data.complianceData) {
-                        Object.assign(complianceData, data.complianceData);
-                        
-                        // Mettre à jour l'interface
-                        Object.entries(complianceData).forEach(([critere, itemData]) => {
-                            const row = document.querySelector(`[data-critere="${critere}"]`);
-                            if (row) {
-                                const statusSelect = row.querySelector('.compliance-status');
-                                const commentInput = row.querySelector('.comment-input');
-                                
-                                if (statusSelect) {
-                                    statusSelect.value = itemData.status || '';
-                                    
-                                    if (itemData.status === 'nc') {
-                                        commentInput.classList.add('show');
-                                    }
-                                }
-                                
-                                if (commentInput && itemData.comment) {
-                                    commentInput.value = itemData.comment;
-                                }
+                        complianceData = data.complianceData;
+                        document.querySelectorAll('[data-critere]').forEach(row => {
+                            const critere = row.dataset.critere;
+                            const itemData = complianceData[critere];
+                            if (!itemData) return;
+
+                            const select = row.querySelector('.compliance-status');
+                            const comment = row.querySelector('.comment-input');
+                            
+                            if (select) select.value = itemData.status || '';
+                            if (comment) {
+                                comment.value = itemData.comment || '';
+                                if (itemData.status === 'nc') comment.classList.add('show');
                             }
                         });
-                        
-                        // Mettre à jour les statistiques
                         updateStatusSummary();
-                        
-                        // Mettre à jour la note de qualité
-                        updateQualityNote();
+                        updateQualityNoteDisplay();
                     }
                 } catch (e) {
-                    console.error('Erreur lors du chargement des données sauvegardées:', e);
+                    console.error('Erreur de chargement:', e);
                 }
             }
-        }
 
-        // Sauvegarde automatique
-        function autoSave() {
-            // Sauvegarde simplifiée - on pourrait implémenter une sauvegarde automatique ici
-        }
+            function saveToStorage() {
+                const docName = document.getElementById('doc-name').value;
+                if (!docName) {
+                    alert('Veuillez saisir le nom du document');
+                    document.getElementById('doc-name').focus();
+                    return false;
+                }
+
+                const saveData = {
+                    documentInfo: {
+                        name: docName,
+                        type: document.getElementById('doc-type').value,
+                        date: document.getElementById('doc-date').value,
+                        evaluator: document.getElementById('evaluator').value,
+                        evalue: document.getElementById('evalue').value,
+                        weekNumber: document.getElementById('week-number').value
+                    },
+                    complianceData: complianceData,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('accessibilityComplianceData', JSON.stringify(saveData));
+                return true;
+            }
+
+            // ==================== EXPORT EXCEL ====================
+            function createSummarySheet(wb) {
+                const docName = document.getElementById('doc-name').value || "Non spécifié";
+                const docType = document.getElementById('doc-type').value || "Non spécifié";
+                const docDate = document.getElementById('doc-date').value || "Non spécifiée";
+                const evaluator = document.getElementById('evaluator').value || "Non spécifié";
+                const evalue = document.getElementById('evalue').value || "Non spécifié";
+                const weekNumber = document.getElementById('week-number').value || "Non calculé";
+
+                const counts = calculateStats();
+                const evaluated = counts.c + counts.nc;
+                const note = evaluated > 0 ? (counts.c / evaluated) * 100 : 0;
+                const status = note >= 85 ? "CONFORME (≥85%)" : "NON CONFORME (<85%)";
+
+                // Construction des données
+                const summaryData = [
+                    ["RAPPORT DE CONFORMITÉ ACCESSIBILITÉ"],
+                    [],
+                    ["INFORMATIONS DU DOCUMENT"],
+                    ["Nom du document:", docName],
+                    ["Type de document:", docType],
+                    ["Date d'évaluation:", docDate],
+                    ["Évaluateur:", evaluator],
+                    ["Évalué (Agent):", evalue],
+                    ["Numéro de semaine ISO:", weekNumber],
+                    ["Date d'export:", new Date().toLocaleDateString('fr-FR')],
+                    [],
+                    ["NOTE DE QUALITÉ"],
+                    ["Note sur 100:", `${note.toFixed(1)}/100`],
+                    ["Pourcentage de conformité:", `${note.toFixed(1)}%`],
+                    ["Statut:", status],
+                    [],
+                    ["RÉSUMÉ DES RÉSULTATS"],
+                    ["Statut", "Nombre", "Pourcentage"],
+                    ["Conforme", counts.c, counts.total > 0 ? (counts.c / counts.total * 100).toFixed(1) + "%" : "0%"],
+                    ["Non conforme", counts.nc, counts.total > 0 ? (counts.nc / counts.total * 100).toFixed(1) + "%" : "0%"],
+                    ["Non applicable", counts.na, counts.total > 0 ? (counts.na / counts.total * 100).toFixed(1) + "%" : "0%"],
+                    ["Non renseigné", counts.nr, counts.total > 0 ? (counts.nr / counts.total * 100).toFixed(1) + "%" : "0%"],
+                    ["TOTAL", counts.total, "100%"],
+                    [],
+                    ["DÉTAILS PAR THÈME"],
+                    ["Thème", "Conforme", "Non conforme", "Non applicable", "Non renseigné", "Total"]
+                ];
+
+                // Stats par thème
+                const themeStats = {};
+                CRITERIA_DATA.forEach(item => {
+                    if (!themeStats[item.themeNumber]) {
+                        themeStats[item.themeNumber] = {
+                            theme: item.theme || `Thème ${item.themeNumber}`,
+                            c: 0, nc: 0, na: 0, nr: 0, total: 0
+                        };
+                    }
+                    const stat = themeStats[item.themeNumber];
+                    stat.total++;
+                    const status = complianceData[item.critere]?.status;
+                    if (status === 'c') stat.c++;
+                    else if (status === 'nc') stat.nc++;
+                    else if (status === 'na') stat.na++;
+                    else stat.nr++;
+                });
+
+                Object.values(themeStats).forEach(stat => {
+                    summaryData.push([stat.theme, stat.c, stat.nc, stat.na, stat.nr, stat.total]);
+                });
+
+                // Création de la feuille
+                const ws = XLSX.utils.aoa_to_sheet(summaryData);
+
+                // Largeurs de colonnes
+                ws['!cols'] = [
+                    { wch: 40 }, { wch: 20 }, { wch: 15 }, 
+                    { wch: 15 }, { wch: 15 }, { wch: 15 }
+                ];
+
+                // Fusions
+                ws['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+                    { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } },
+                    { s: { r: 11, c: 0 }, e: { r: 11, c: 5 } },
+                    { s: { r: 16, c: 0 }, e: { r: 16, c: 5 } },
+                    { s: { r: 24, c: 0 }, e: { r: 24, c: 5 } }
+                ];
+
+                // Application des styles
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let R = range.s.r; R <= range.e.r; R++) {
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const cell = ws[XLSX.utils.encode_cell({ c: C, r: R })];
+                        if (!cell) continue;
+
+                        const style = { font: {}, fill: {}, alignment: {}, border: {} };
+
+                        // Titre principal
+                        if (R === 0) {
+                            style.font = { sz: 18, bold: true, color: { rgb: "2C3E50" } };
+                            style.alignment = { horizontal: "center" };
+                        }
+                        // En-têtes de sections
+                        else if ([2, 11, 16, 24].includes(R)) {
+                            style.font = { sz: 14, bold: true, color: { rgb: "FFFFFF" } };
+                            style.fill = { fgColor: { rgb: "4A6491" } };
+                        }
+                        // En-têtes de tableaux
+                        else if ([3, 12, 17, 25].includes(R)) {
+                            style.font = { bold: true, color: { rgb: "FFFFFF" } };
+                            style.fill = { fgColor: { rgb: "2C3E50" } };
+                            style.border = {
+                                top: { style: "thin", color: { rgb: "000000" } },
+                                bottom: { style: "thin", color: { rgb: "000000" } },
+                                left: { style: "thin", color: { rgb: "000000" } },
+                                right: { style: "thin", color: { rgb: "000000" } }
+                            };
+                        }
+                        // Lignes de données
+                        else if (R > 3) {
+                            style.border = {
+                                bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                                left: { style: "thin", color: { rgb: "CCCCCC" } },
+                                right: { style: "thin", color: { rgb: "CCCCCC" } }
+                            };
+
+                            // Couleur conditionnelle pour la note
+                            if (R === 13 && C === 1) {
+                                style.font = { bold: true, color: { rgb: note >= 85 ? "27ae60" : "e74c3c" } };
+                            }
+                            // Couleur conditionnelle pour le statut
+                            if (R === 15 && C === 1) {
+                                style.font = { bold: true, color: { rgb: note >= 85 ? "27ae60" : "e74c3c" } };
+                            }
+                        }
+
+                        cell.s = style;
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(wb, ws, "Résumé");
+            }
+
+            function exportToExcel() {
+                // Vérifications
+                const docName = document.getElementById('doc-name').value;
+                if (!docName) {
+                    alert('Veuillez saisir le nom du document');
+                    document.getElementById('doc-name').focus();
+                    return;
+                }
+
+                for (const [critere, data] of Object.entries(complianceData)) {
+                    if (data.status === 'nc' && !data.comment?.trim()) {
+                        alert(`Le critère ${critere} est "Non conforme" sans commentaire`);
+                        const row = document.querySelector(`[data-critere="${critere}"]`);
+                        if (row) {
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            row.querySelector('.comment-input').classList.add('show').focus();
+                        }
+                        return;
+                    }
+                }
+
+                // Création du classeur
+                document.getElementById('loading').style.display = 'block';
+                const wb = XLSX.utils.book_new();
+
+                // Feuille Conformité
+                const wsData = [["Thème", "Critère", "Intitulé", "Conformité", "Commentaire"]];
+                const mergeRanges = [];
+                let currentTheme = "";
+                let currentThemeRow = 2;
+
+                CRITERIA_DATA.forEach((item, index) => {
+                    const data = complianceData[item.critere] || {};
+                    const conformite = data.status === 'c' ? "Conforme" : 
+                                      data.status === 'nc' ? "Non conforme" : 
+                                      data.status === 'na' ? "Non applicable" : "Non renseigné";
+
+                    if (item.theme && item.theme !== currentTheme) {
+                        currentTheme = item.theme;
+                        currentThemeRow = wsData.length + 1;
+                        wsData.push([currentTheme, item.critere, item.intitule, conformite, data.comment || ""]);
+                    } else {
+                        wsData.push(["", item.critere, item.intitule, conformite, data.comment || ""]);
+                    }
+
+                    if (index === CRITERIA_DATA.length - 1 || 
+                        (CRITERIA_DATA[index + 1] && CRITERIA_DATA[index + 1].theme)) {
+                        if (currentTheme && wsData.length > currentThemeRow) {
+                            mergeRanges.push({
+                                s: { r: currentThemeRow - 1, c: 0 },
+                                e: { r: wsData.length - 1, c: 0 }
+                            });
+                        }
+                    }
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                ws['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 80 }, { wch: 15 }, { wch: 50 }];
+                ws['!merges'] = mergeRanges;
+
+                // Styles pour la feuille Conformité
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let R = range.s.r; R <= range.e.r; R++) {
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const cell = ws[XLSX.utils.encode_cell({ c: C, r: R })];
+                        if (!cell) continue;
+
+                        const style = { font: {}, fill: {}, alignment: {}, border: {} };
+
+                        if (R === 0) {
+                            style.font = { bold: true, color: { rgb: "FFFFFF" } };
+                            style.fill = { fgColor: { rgb: "2C3E50" } };
+                            style.alignment = { horizontal: "center", vertical: "center" };
+                            style.border = {
+                                top: { style: "thin", color: { rgb: "000000" } },
+                                bottom: { style: "thin", color: { rgb: "000000" } },
+                                left: { style: "thin", color: { rgb: "000000" } },
+                                right: { style: "thin", color: { rgb: "000000" } }
+                            };
+                        }
+                        else if (R >= 1 && cell.v && cell.v.toString().match(/^\d+\.\s/)) {
+                            style.font = { bold: true, sz: 12, color: { rgb: "000000" } };
+                            style.alignment = { horizontal: "center", vertical: "center" };
+                            style.border = {
+                                top: { style: "medium", color: { rgb: "000000" } },
+                                bottom: { style: "thin", color: { rgb: "000000" } },
+                                left: { style: "thin", color: { rgb: "000000" } },
+                                right: { style: "thin", color: { rgb: "000000" } }
+                            };
+                            const themeNum = parseInt(cell.v.split('.')[0]);
+                            if (themeNum >= 1 && themeNum <= 10) {
+                                style.fill = { fgColor: { rgb: THEME_COLORS[themeNum - 1] } };
+                            }
+                        }
+                        else if (R > 0 && C <= 4) {
+                            style.border = {
+                                top: { style: "thin", color: { rgb: "CCCCCC" } },
+                                bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                                left: { style: "thin", color: { rgb: "CCCCCC" } },
+                                right: { style: "thin", color: { rgb: "CCCCCC" } }
+                            };
+                            style.alignment = { vertical: "top", wrapText: true };
+
+                            if (C === 3) {
+                                style.alignment.horizontal = "center";
+                                if (cell.v === "Conforme") style.font = { bold: true, color: { rgb: "006400" } };
+                                else if (cell.v === "Non conforme") style.font = { bold: true, color: { rgb: "8B0000" } };
+                                else if (cell.v === "Non applicable") style.font = { color: { rgb: "696969" } };
+                            }
+                        }
+
+                        cell.s = style;
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(wb, ws, "Conformité");
+                createSummarySheet(wb);
+
+                // Export
+                setTimeout(() => {
+                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+                    const buf = new ArrayBuffer(wbout.length);
+                    const view = new Uint8Array(buf);
+                    for (let i = 0; i < wbout.length; i++) view[i] = wbout.charCodeAt(i) & 0xFF;
+
+                    const blob = new Blob([buf], { type: "application/octet-stream" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `RAPDF_${docName.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                    link.click();
+
+                    document.getElementById('loading').style.display = 'none';
+                    alert(`Export réussi !\nNote: ${calculateQualityNote().toFixed(1)}/100`);
+                }, 500);
+            }
+
+            // ==================== INITIALISATION ====================
+            function init() {
+                // Date du jour
+                document.getElementById('current-date').textContent = 
+                    new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                const today = new Date();
+                document.getElementById('doc-date').valueAsDate = today;
+                updateWeekNumber();
+
+                // Génération du tableau
+                generateComplianceTable();
+
+                // Initialisation des données
+                CRITERIA_DATA.forEach(item => {
+                    complianceData[item.critere] = { status: "", comment: "", themeNumber: item.themeNumber };
+                });
+
+                // Chargement des données sauvegardées
+                loadFromStorage();
+
+                // Mise à jour de l'interface
+                updateStatusSummary();
+                updateQualityNoteDisplay();
+
+                // Écouteurs d'événements
+                document.addEventListener('change', e => {
+                    if (e.target.classList.contains('compliance-status')) {
+                        const row = e.target.closest('tr');
+                        const critere = row.dataset.critere;
+                        const status = e.target.value;
+                        const commentInput = row.querySelector('.comment-input');
+
+                        complianceData[critere].status = status;
+
+                        if (status === 'nc') {
+                            commentInput.classList.add('show');
+                        } else {
+                            commentInput.classList.remove('show');
+                            commentInput.value = '';
+                            complianceData[critere].comment = '';
+                        }
+
+                        updateStatusSummary();
+                        updateQualityNoteDisplay();
+                    }
+                });
+
+                document.addEventListener('input', e => {
+                    if (e.target.classList.contains('comment-input')) {
+                        const row = e.target.closest('tr');
+                        const critere = row.dataset.critere;
+                        complianceData[critere].comment = e.target.value;
+                    }
+                });
+
+                document.getElementById('doc-date').addEventListener('change', updateWeekNumber);
+
+                document.getElementById('export-btn').addEventListener('click', exportToExcel);
+                
+                document.getElementById('reset-btn').addEventListener('click', () => {
+                    if (confirm('Réinitialiser toutes les données ?')) {
+                        document.getElementById('doc-name').value = '';
+                        document.getElementById('doc-type').value = '';
+                        document.getElementById('evaluator').value = '';
+                        document.getElementById('evalue').value = '';
+                        document.getElementById('doc-date').valueAsDate = new Date();
+                        updateWeekNumber();
+
+                        complianceData = {};
+                        CRITERIA_DATA.forEach(item => {
+                            complianceData[item.critere] = { status: "", comment: "", themeNumber: item.themeNumber };
+                        });
+
+                        document.querySelectorAll('.compliance-status').forEach(s => s.value = '');
+                        document.querySelectorAll('.comment-input').forEach(i => {
+                            i.value = '';
+                            i.classList.remove('show');
+                        });
+
+                        localStorage.removeItem('accessibilityComplianceData');
+                        updateStatusSummary();
+                        updateQualityNoteDisplay();
+                        alert('Formulaire réinitialisé');
+                    }
+                });
+
+                document.getElementById('save-btn').addEventListener('click', () => {
+                    if (saveToStorage()) alert('Données sauvegardées');
+                });
+            }
+
+            // Démarrage
+            document.addEventListener('DOMContentLoaded', init);
+        })();
     </script>
 </body>
 </html>
