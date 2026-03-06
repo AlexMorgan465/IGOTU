@@ -310,6 +310,11 @@
             opacity: 0.9;
         }
         
+        .note-excellent { color: #27ae60; }
+        .note-bon { color: #3498db; }
+        .note-moyen { color: #f39c12; }
+        .note-ameliorer { color: #e74c3c; }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -464,7 +469,8 @@
                 <li>Si vous sélectionnez "Non conforme", vous devez obligatoirement ajouter un commentaire de justification.</li>
                 <li>L'export Excel générera un fichier .xlsx avec les thèmes fusionnés et colorés automatiquement.</li>
                 <li>Les informations du document apparaîtront uniquement dans la page Résumé.</li>
-                <li>Une note de qualité sur 20 est calculée automatiquement.</li>
+                <li>Une note de qualité sur 100 est calculée automatiquement.</li>
+                <li><strong>Seuil de conformité :</strong> Note ≥ 85% = Vert, Note < 85% = Rouge</li>
             </ul>
         </div>
         
@@ -585,7 +591,7 @@
             }
         }
 
-        // Calculer la note de qualité
+        // Calculer la note de qualité (sur 100)
         function calculateQualityNote() {
             const counts = {
                 c: 0,
@@ -604,11 +610,19 @@
             const evaluatedCount = counts.c + counts.nc;
             if (evaluatedCount === 0) return 0;
             
-            // Note sur 20 basée sur le pourcentage de conformité
+            // Note sur 100 basée sur le pourcentage de conformité
             const conformitePourcentage = (counts.c / evaluatedCount) * 100;
-            const note = (conformitePourcentage / 100) * 20;
             
-            return note.toFixed(1);
+            return conformitePourcentage;
+        }
+
+        // Obtenir la couleur de la note en fonction du seuil
+        function getNoteColor(conformitePourcentage) {
+            if (conformitePourcentage >= 85) {
+                return "27ae60"; // Vert
+            } else {
+                return "e74c3c"; // Rouge
+            }
         }
 
         // Mettre à jour l'affichage de la note de qualité
@@ -627,27 +641,22 @@
             });
             
             const evaluatedCount = counts.c + counts.nc;
+            const noteColor = getNoteColor(note);
             
-            let noteColor = '#27ae60';
-            let appreciation = 'Excellent';
-            
-            if (note < 10) {
-                noteColor = '#e74c3c';
-                appreciation = 'À améliorer';
-            } else if (note < 14) {
-                noteColor = '#f39c12';
-                appreciation = 'Moyen';
-            } else if (note < 17) {
-                noteColor = '#3498db';
-                appreciation = 'Bon';
+            let appreciation = '';
+            if (note >= 85) {
+                appreciation = 'Excellent - Conforme';
+            } else {
+                appreciation = 'À améliorer - Non conforme';
             }
             
             const qualityHTML = `
                 <h2><i class="fas fa-star"></i> Note de qualité</h2>
-                <div class="note-value" style="color: ${noteColor};">${note}/20</div>
+                <div class="note-value" style="color: #${noteColor};">${note.toFixed(1)}/100</div>
                 <div class="note-details">
                     <p>${appreciation} - ${counts.c} conforme(s) sur ${evaluatedCount} critères évalués</p>
                     <p>${counts.nc} non conforme(s) | ${counts.na} non applicable(s)</p>
+                    <p><strong>Seuil de conformité :</strong> ≥ 85% = Vert | < 85% = Rouge</p>
                 </div>
             `;
             
@@ -922,13 +931,10 @@
             // Créer la feuille de données
             const ws_data = [];
             
-            // 1. Ajouter les informations du document (uniquement dans la feuille Résumé)
-            // Pas d'ajout ici car elles seront dans la feuille Résumé
-            
-            // 2. Ajouter l'en-tête du tableau
+            // 1. Ajouter l'en-tête du tableau
             ws_data.push(["Thème", "Critère", "Intitulé", "Conformité", "Commentaire"]);
             
-            // 3. Ajouter les données des critères
+            // 2. Ajouter les données des critères
             let currentTheme = "";
             let themeStartRow = 2; // Ligne de début du premier thème (après les en-têtes)
             let currentThemeRow = themeStartRow;
@@ -978,7 +984,7 @@
             // Convertir les données en feuille de calcul
             const ws = XLSX.utils.aoa_to_sheet(ws_data);
             
-            // 4. Définir les largeurs de colonnes
+            // 3. Définir les largeurs de colonnes
             const colWidths = [
                 { wch: 30 }, // Thème
                 { wch: 10 }, // Critère
@@ -988,10 +994,10 @@
             ];
             ws['!cols'] = colWidths;
             
-            // 5. Définir les plages de fusion
+            // 4. Définir les plages de fusion
             ws['!merges'] = mergeRanges;
             
-            // 6. Appliquer le style aux cellules
+            // 5. Appliquer le style aux cellules
             const range = XLSX.utils.decode_range(ws['!ref']);
             
             // Parcourir toutes les cellules
@@ -1089,13 +1095,13 @@
                 }
             }
             
-            // 7. Ajouter la feuille au classeur
+            // 6. Ajouter la feuille au classeur
             XLSX.utils.book_append_sheet(wb, ws, "Conformité");
             
-            // 8. Créer une feuille de résumé avec les informations du document
+            // 7. Créer une feuille de résumé avec les informations du document et couleurs conditionnelles
             createSummarySheet(wb);
             
-            // 9. Générer le fichier Excel
+            // 8. Générer le fichier Excel
             setTimeout(() => {
                 const wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
                 
@@ -1124,7 +1130,8 @@
                 // Confirmation
                 const nonConformeCount = Object.keys(complianceData).filter(c => complianceData[c].status === 'nc').length;
                 const note = calculateQualityNote();
-                alert(`Fichier Excel généré avec succès!\n\n${nonConformeCount} critère(s) sont marqués comme non conforme(s).\nNote de qualité: ${note}/20\n\nLe fichier inclut:\n✓ Les thèmes fusionnés\n✓ Les couleurs par thème\n✓ Le formatage professionnel\n✓ Une feuille de résumé avec toutes les informations`);
+                const noteColor = getNoteColor(note);
+                alert(`Fichier Excel généré avec succès!\n\n${nonConformeCount} critère(s) sont marqués comme non conforme(s).\nNote de qualité: ${note.toFixed(1)}/100\n\nLe fichier inclut:\n✓ Les thèmes fusionnés\n✓ Les couleurs par thème\n✓ Le formatage professionnel\n✓ Une feuille de résumé avec toutes les informations\n✓ Couleurs conditionnelles (Rouge si <85%, Vert si ≥85%)`);
             }, 500);
         }
 
@@ -1157,13 +1164,14 @@
             });
             
             const evaluatedCount = counts.c + counts.nc;
-            const conformitePourcentage = evaluatedCount > 0 ? (counts.c / evaluatedCount * 100).toFixed(1) : 0;
-            const note = (conformitePourcentage / 100 * 20).toFixed(1);
+            const conformitePourcentage = evaluatedCount > 0 ? (counts.c / evaluatedCount * 100) : 0;
+            const noteColor = getNoteColor(conformitePourcentage);
             
-            // Note de qualité
+            // Note de qualité (sur 100)
             summaryData.push(["NOTE DE QUALITÉ"]);
-            summaryData.push(["Note sur 20:", `${note}/20`]);
-            summaryData.push(["Pourcentage de conformité:", `${conformitePourcentage}%`]);
+            summaryData.push(["Note sur 100:", `${conformitePourcentage.toFixed(1)}/100`]);
+            summaryData.push(["Pourcentage de conformité:", `${conformitePourcentage.toFixed(1)}%`]);
+            summaryData.push(["Statut:", conformitePourcentage >= 85 ? "CONFORME (≥85%)" : "NON CONFORME (<85%)"]);
             summaryData.push([]);
             
             // Tableau de résumé
@@ -1235,7 +1243,7 @@
                     }
                     
                     // Titres de sections
-                    else if (R === 2 || R === 10 || R === 16) {
+                    else if (R === 2 || R === 11 || R === 17) {
                         cellStyle = {
                             font: { sz: 14, bold: true, color: { rgb: "FFFFFF" } },
                             fill: { fgColor: { rgb: "4A6491" } }
@@ -1243,7 +1251,7 @@
                     }
                     
                     // En-têtes des tableaux
-                    else if (R === 3 || R === 11 || R === 17) {
+                    else if (R === 3 || R === 12 || R === 18) {
                         cellStyle = {
                             font: { bold: true, color: { rgb: "FFFFFF" } },
                             fill: { fgColor: { rgb: "2C3E50" } },
@@ -1257,7 +1265,7 @@
                     }
                     
                     // Données
-                    else if (R > 3 && R <= 8 || R > 11 && R <= 14 || R > 17) {
+                    else if (R > 3 && R <= 9 || R > 12 && R <= 15 || R > 18) {
                         cellStyle = {
                             border: {
                                 bottom: { style: "thin", color: { rgb: "CCCCCC" } },
@@ -1266,9 +1274,32 @@
                             }
                         };
                         
-                        // Mettre en évidence la ligne de note
-                        if (R === 12) {
-                            cellStyle.font = { bold: true, color: { rgb: "006400" } };
+                        // Couleur conditionnelle pour la ligne de note (R=5)
+                        if (R === 5 && C === 1) {
+                            // Cellule de la note
+                            const noteValue = ws_summary[cell_ref].v;
+                            if (noteValue && typeof noteValue === 'string') {
+                                const note = parseFloat(noteValue);
+                                if (!isNaN(note)) {
+                                    if (note >= 85) {
+                                        cellStyle.font = { bold: true, color: { rgb: "27ae60" } }; // Vert
+                                    } else {
+                                        cellStyle.font = { bold: true, color: { rgb: "e74c3c" } }; // Rouge
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Couleur conditionnelle pour la ligne de statut (R=7)
+                        if (R === 7 && C === 1) {
+                            const statutValue = ws_summary[cell_ref].v;
+                            if (statutValue && typeof statutValue === 'string') {
+                                if (statutValue.includes("CONFORME")) {
+                                    cellStyle.font = { bold: true, color: { rgb: "27ae60" } }; // Vert
+                                } else {
+                                    cellStyle.font = { bold: true, color: { rgb: "e74c3c" } }; // Rouge
+                                }
+                            }
                         }
                     }
                     
