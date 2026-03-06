@@ -1,657 +1,610 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cofidis - Expert Tour de France</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+Option Explicit
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
+' Déclaration des variables globales
+Private KnowledgeBase As Object
+Private CurrentSheet As Worksheet
+Private ChatHistory As Collection
+Private IsTyping As Boolean
 
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
+' Couleurs Cofidis
+Const COLOR_COFIDIS_ROUGE As Long = 15518732  ' #ED1C24
+Const COLOR_COFIDIS_JAUNE As Long = 16766720   ' #FFD700
+Const COLOR_COFIDIS_BLEU As Long = 14664       ' #003A6B (pour accent)
+Const COLOR_BLANC As Long = 16777215
+Const COLOR_GRIS As Long = 12632256
+Const COLOR_NOIR As Long = 0
 
-        /* Effet de route de vélo en arrière-plan */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(45deg, rgba(255,215,0,0.02) 0px, rgba(255,215,0,0.02) 20px, rgba(237,28,36,0.02) 20px, rgba(237,28,36,0.02) 40px);
-            pointer-events: none;
-        }
+'###############################################################################
+' SUB: CreateChatbot
+' Crée l'interface complète du chatbot
+'###############################################################################
+Sub CreateChatbot()
+    Dim ws As Worksheet
+    Dim btn As Object
+    Dim rng As Range
+    
+    ' Créer ou récupérer la feuille
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("Cofidis Chatbot")
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws.Name = "Cofidis Chatbot"
+    End If
+    On Error GoTo 0
+    
+    Set CurrentSheet = ws
+    
+    ' Nettoyer la feuille
+    ws.Cells.Clear
+    ws.Cells.Interior.ColorIndex = xlNone
+    ws.Cells.Font.Color = COLOR_NOIR
+    ws.Cells.Font.Name = "Montserrat"
+    ws.Cells.Font.Size = 10
+    
+    ' Configurer la largeur des colonnes
+    ws.Columns("A").ColumnWidth = 5   ' Espacement gauche
+    ws.Columns("B").ColumnWidth = 40  ' Zone de chat
+    ws.Columns("C").ColumnWidth = 40  ' Zone de chat
+    ws.Columns("D").ColumnWidth = 5   ' Espacement droit
+    
+    ws.Rows("1:5").RowHeight = 15     ' Espacement haut
+    
+    '=======================================================================
+    ' HEADER - Style Cofidis Tour de France
+    '=======================================================================
+    With ws.Range("A2:D8")
+        .Interior.Color = COLOR_COFIDIS_ROUGE
+        .Borders(xlEdgeBottom).Weight = xlThick
+        .Borders(xlEdgeBottom).Color = COLOR_COFIDIS_JAUNE
+    End With
+    
+    ' Logo Cofidis
+    With ws.Range("B4")
+        .Value = "COFIDIS"
+        .Font.Size = 36
+        .Font.Bold = True
+        .Font.Color = COLOR_BLANC
+        .Font.Name = "Montserrat"
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+    
+    With ws.Range("B4").Characters(1, 3).Font
+        .Color = COLOR_COFIDIS_JAUNE
+        .Bold = True
+    End With
+    
+    ' Badge Tour de France
+    With ws.Range("B5")
+        .Value = "★ SPONSOR OFFICIEL TOUR DE FRANCE ★"
+        .Font.Size = 12
+        .Font.Bold = True
+        .Font.Color = COLOR_COFIDIS_ROUGE
+        .Interior.Color = COLOR_COFIDIS_JAUNE
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+        .BorderAround Weight:=xlThin, Color:=COLOR_COFIDIS_ROUGE
+    End With
+    
+    ' Sous-titre
+    With ws.Range("B6")
+        .Value = "Expert 10 Questions - Équipe de France du Crédit"
+        .Font.Size = 14
+        .Font.Color = COLOR_BLANC
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+    
+    '=======================================================================
+    ' ZONE DE CHAT
+    '=======================================================================
+    ' Zone d'affichage des messages
+    ws.Rows("10:40").RowHeight = 20
+    
+    ' Créer la zone de chat avec bordure
+    With ws.Range("B10:C40")
+        .Interior.Color = RGB(245, 245, 245)  ' Gris très clair
+        .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_JAUNE
+        .Borders(xlInsideVertical).Weight = xlHairline
+        .Borders(xlInsideVertical).Color = RGB(200, 200, 200)
+        .VerticalAlignment = xlTop
+        .WrapText = True
+    End With
+    
+    ' En-têtes des colonnes de chat
+    With ws.Range("B9")
+        .Value = "Assistant Cofidis"
+        .Font.Bold = True
+        .Font.Color = COLOR_COFIDIS_BLANC
+        .Interior.Color = COLOR_COFIDIS_ROUGE
+        .HorizontalAlignment = xlCenter
+        .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_JAUNE
+    End With
+    
+    With ws.Range("C9")
+        .Value = "Vous"
+        .Font.Bold = True
+        .Font.Color = COLOR_COFIDIS_ROUGE
+        .Interior.Color = COLOR_COFIDIS_JAUNE
+        .HorizontalAlignment = xlCenter
+        .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_ROUGE
+    End With
+    
+    '=======================================================================
+    ' ZONE DE SAISIE
+    '=======================================================================
+    ' Label pour la saisie
+    With ws.Range("B42")
+        .Value = "Votre question :"
+        .Font.Bold = True
+        .Font.Color = COLOR_COFIDIS_ROUGE
+        .VerticalAlignment = xlCenter
+    End With
+    
+    ' Zone de texte pour la saisie
+    ws.Range("B43:C44").Interior.Color = COLOR_BLANC
+    ws.Range("B43:C44").BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_ROUGE
+    ws.Range("B43:C44").Font.Color = COLOR_NOIR
+    ws.Range("B43:C44").Font.Name = "Montserrat"
+    ws.Range("B43:C44").Font.Size = 11
+    ws.Range("B43:C44").WrapText = True
+    ws.Range("B43").Value = "Cliquez ici pour poser votre question..."
+    ws.Range("B43").Font.Color = RGB(150, 150, 150)
+    
+    '=======================================================================
+    ' BOUTONS
+    '=======================================================================
+    ' Bouton Envoyer
+    Set btn = ws.Buttons.Add(ws.Range("D43").Left, ws.Range("D43").Top, 60, 40)
+    With btn
+        .Caption = "ENVOYER"
+        .Font.Name = "Montserrat"
+        .Font.Size = 10
+        .Font.Bold = True
+        .ForeColor = COLOR_BLANC
+        .BackColor = COLOR_COFIDIS_ROUGE
+        .OnAction = "SendMessage"
+        .Name = "btnSend"
+    End With
+    
+    ' Bouton Effacer l'historique
+    Set btn = ws.Buttons.Add(ws.Range("D45").Left, ws.Range("D45").Top, 60, 30)
+    With btn
+        .Caption = "EFFACER"
+        .Font.Name = "Montserrat"
+        .Font.Size = 9
+        .Font.Bold = True
+        .ForeColor = COLOR_COFIDIS_ROUGE
+        .BackColor = COLOR_COFIDIS_JAUNE
+        .OnAction = "ClearChat"
+        .Name = "btnClear"
+    End With
+    
+    '=======================================================================
+    ' QUESTIONS SUGGÉRÉES
+    '=======================================================================
+    Dim suggestions(1 To 2, 1 To 4) As String
+    suggestions(1, 1) = "PSM"
+    suggestions(1, 2) = "Échéance"
+    suggestions(1, 3) = "Taux usuraire"
+    suggestions(1, 4) = "OCI"
+    suggestions(2, 1) = "Tutelle"
+    suggestions(2, 2) = "FIPEN"
+    suggestions(2, 3) = "Assurance"
+    suggestions(2, 4) = "Décompte"
+    
+    With ws.Range("B47")
+        .Value = "QUESTIONS RAPIDES"
+        .Font.Bold = True
+        .Font.Color = COLOR_COFIDIS_ROUGE
+        .Font.Size = 12
+    End With
+    
+    Dim i As Integer, j As Integer
+    For i = 1 To 2
+        For j = 1 To 4
+            With ws.Range("B" & (48 + (i - 1) * 2)).Offset(0, j - 1)
+                .Value = suggestions(i, j)
+                .Font.Bold = True
+                .Font.Color = COLOR_COFIDIS_ROUGE
+                .Interior.Color = COLOR_COFIDIS_JAUNE
+                .HorizontalAlignment = xlCenter
+                .VerticalAlignment = xlCenter
+                .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_ROUGE
+                .AddComment
+                .Comment.Text Text:="Cliquez pour poser cette question"
+                .Comment.Visible = False
+            End With
+        Next j
+    Next i
+    
+    ' Initialiser la base de connaissances
+    InitializeKnowledgeBase
+    
+    ' Initialiser l'historique
+    Set ChatHistory = New Collection
+    
+    ' Message de bienvenue
+    AddBotMessage "🚴‍♂️ Bonjour et bienvenue chez Cofidis, partenaire officiel du Tour de France !" & vbCrLf & vbCrLf & _
+                  "Je suis spécialisé dans 10 questions spécifiques. Posez-moi vos questions sur les PSM, décomptes, échéances, assurances, etc."
+    
+    ' Activer les événements
+    EnableEvents
+    
+    MsgBox "Chatbot Cofidis créé avec succès !", vbInformation, "Succès"
+End Sub
 
-        .chatbot-container {
-            width: 100%;
-            max-width: 600px;
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 30px 60px rgba(237, 28, 36, 0.3);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-            max-height: 800px;
-            border: 3px solid #FFD700;
-            position: relative;
-            z-index: 1;
-        }
+'###############################################################################
+' SUB: InitializeKnowledgeBase
+' Initialise la base de connaissances
+'###############################################################################
+Sub InitializeKnowledgeBase()
+    Set KnowledgeBase = CreateObject("Scripting.Dictionary")
+    
+    ' Question 1: PSM
+    KnowledgeBase.Add "psm", "🚵 Le Prêt sur Mesure (PSM) est un crédit amortissable. Il peut être ouvert pour un montant de 500€ jusqu'à 35 000€. Selon le montant emprunté, la durée varie de 6 à 84 mois."
+    KnowledgeBase.Add "pret sur mesure", "🚵 Le Prêt sur Mesure (PSM) est un crédit amortissable. Il peut être ouvert pour un montant de 500€ jusqu'à 35 000€. Selon le montant emprunté, la durée varie de 6 à 84 mois."
+    
+    ' Question 2: Décompte
+    KnowledgeBase.Add "decompte", "📆 Le décompte est à consulter à la date de la prochaine échéance. Exemple: nous sommes le 7/02, l'échéance du contrat est au 5, vous consultez le décompte en date du 5/03."
+    KnowledgeBase.Add "date decompte", "📆 Le décompte est à consulter à la date de la prochaine échéance. Exemple: nous sommes le 7/02, l'échéance du contrat est au 5, vous consultez le décompte en date du 5/03."
+    
+    ' Question 3: Échéance
+    KnowledgeBase.Add "echeance", "📅 L'échéance du mois d'un contrat est visible dans GEC, Onglet [Evénements] vue 'Opérations' sur la ligne 'Echéance'. Cette ligne est tracée en date de quantième du contrat."
+    KnowledgeBase.Add "echeance mois", "📅 L'échéance du mois d'un contrat est visible dans GEC, Onglet [Evénements] vue 'Opérations' sur la ligne 'Echéance'. Cette ligne est tracée en date de quantième du contrat."
+    
+    ' Question 4: Rebond assurance
+    KnowledgeBase.Add "assurance", "🛡️ Dans le cadre d'une étude crédit sur Accessio, PSM, PSM sur PSM, prêt rénovation, si le tiers n'a pas souscrit à l'assurance et que le dossier est complet, le conseiller positionne manuellement un incomplet assurance pour demander au client de nous recontacter afin de lui conseiller l'assurance sur son crédit."
+    KnowledgeBase.Add "rebond assurance", "🛡️ Dans le cadre d'une étude crédit sur Accessio, PSM, PSM sur PSM, prêt rénovation, si le tiers n'a pas souscrit à l'assurance et que le dossier est complet, le conseiller positionne manuellement un incomplet assurance pour demander au client de nous recontacter afin de lui conseiller l'assurance sur son crédit."
+    
+    ' Question 5: Dates prélèvement
+    KnowledgeBase.Add "4cb", "💳 Les dates d'échéances ne sont pas modifiables sur les produits monétiques (3CB, 4CB ou PNF 3/4)."
+    KnowledgeBase.Add "prelevement", "💳 Les dates d'échéances ne sont pas modifiables sur les produits monétiques (3CB, 4CB ou PNF 3/4)."
+    
+    ' Question 6: Tutelle
+    KnowledgeBase.Add "tutelle", "👥 Un client sous tutelle est géré par le Secteur des Affaires Spécifiques."
+    KnowledgeBase.Add "curatelle", "👥 Un client sous tutelle est géré par le Secteur des Affaires Spécifiques."
+    
+    ' Question 7: FIPEN
+    KnowledgeBase.Add "fipen", "📋 La FIPEN est la fiche précontractuelle d'information européenne normalisée, rendue obligatoire par la loi Lagarde dans le cadre de la signature d'une offre de crédit à la consommation."
+    
+    ' Question 8: Taux usuraire
+    KnowledgeBase.Add "usure", "📊 Le taux d'usure est revu tous les trimestres : janvier / avril / juillet / octobre. Celui-ci diffère selon les produits."
+    KnowledgeBase.Add "taux usuraire", "📊 Le taux d'usure est revu tous les trimestres : janvier / avril / juillet / octobre. Celui-ci diffère selon les produits."
+    
+    ' Question 9: OCI
+    KnowledgeBase.Add "oci", "📁 Un dossier en OCI peut avoir 2 significations : soit le dossier est géré en incomplet par le service acceptation, soit pour le process SE+ c'est un état qui est poussé avec un sous motif afin que le conseiller puisse le traiter en fonction des attendus liés au sous motif."
+    
+    ' Question 10: CPP
+    KnowledgeBase.Add "cpp", "⚡ Il faut expliquer au client que suite à la mise à jour de l'ensemble des données de son dossier nous sommes amenés à faire cette nouvelle proposition adaptée."
+    KnowledgeBase.Add "justifier cpp", "⚡ Il faut expliquer au client que suite à la mise à jour de l'ensemble des données de son dossier nous sommes amenés à faire cette nouvelle proposition adaptée."
+End Sub
 
-        /* Header Cofidis Team - Rouge et Jaune */
-        .chatbot-header {
-            background: linear-gradient(135deg, #ED1C24 0%, #B22222 100%);
-            color: white;
-            padding: 25px 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border-bottom: 4px solid #FFD700;
-        }
+'###############################################################################
+' SUB: SendMessage
+' Envoie le message de l'utilisateur
+'###############################################################################
+Sub SendMessage()
+    Dim userInput As String
+    Dim response As String
+    Dim lastRow As Long
+    
+    On Error GoTo ErrorHandler
+    
+    ' Récupérer la question
+    userInput = Trim(CurrentSheet.Range("B43").Value)
+    
+    If userInput = "" Or userInput = "Cliquez ici pour poser votre question..." Then
+        MsgBox "Veuillez poser une question.", vbExclamation, "Attention"
+        Exit Sub
+    End If
+    
+    ' Afficher la question de l'utilisateur
+    AddUserMessage userInput
+    
+    ' Simuler la frappe
+    IsTyping = True
+    Application.StatusBar = "L'assistant réfléchit..."
+    DoEvents
+    
+    ' Petite pause pour simuler la réflexion
+    Application.Wait Now + TimeValue("00:00:01")
+    
+    ' Trouver la réponse
+    response = FindBestMatch(userInput)
+    
+    ' Afficher la réponse
+    AddBotMessage response
+    
+    ' Nettoyer
+    IsTyping = False
+    Application.StatusBar = False
+    
+    ' Effacer la zone de saisie
+    CurrentSheet.Range("B43").Value = ""
+    CurrentSheet.Range("B43").Font.Color = RGB(150, 150, 150)
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Erreur: " & Err.Description, vbCritical, "Erreur"
+    IsTyping = False
+    Application.StatusBar = False
+End Sub
 
-        /* Effet de maillot jaune */
-        .chatbot-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 215, 0, 0.15);
-            border-radius: 50%;
-            transform: rotate(45deg);
-        }
+'###############################################################################
+' FUNCTION: FindBestMatch
+' Trouve la meilleure réponse pour la question
+'###############################################################################
+Function FindBestMatch(question As String) As String
+    Dim questionLower As String
+    Dim key As Variant
+    Dim bestMatch As String
+    Dim highestScore As Integer
+    Dim currentScore As Integer
+    
+    questionLower = LCase(question)
+    bestMatch = ""
+    highestScore = 0
+    
+    ' Parcourir tous les mots-clés
+    For Each key In KnowledgeBase.Keys
+        currentScore = 0
+        
+        ' Vérifier si le mot-clé est présent
+        If InStr(1, questionLower, key, vbTextCompare) > 0 Then
+            currentScore = currentScore + 3
+        End If
+        
+        ' Vérifier les mots individuels
+        Dim words As Variant
+        words = Split(questionLower, " ")
+        Dim word As Variant
+        
+        For Each word In words
+            If Len(word) > 2 Then
+                If InStr(1, key, word, vbTextCompare) > 0 Or InStr(1, word, key, vbTextCompare) > 0 Then
+                    currentScore = currentScore + 1
+                End If
+            End If
+        Next word
+        
+        If currentScore > highestScore Then
+            highestScore = currentScore
+            bestMatch = KnowledgeBase(key)
+        End If
+    Next key
+    
+    ' Si pas de correspondance
+    If bestMatch = "" Then
+        bestMatch = "🏁 Désolé, je ne peux répondre qu'aux 10 questions du parcours. Les thèmes disponibles sont : PSM, décomptes, échéances, rebond assurance, modifications de dates, tutelle, FIPEN, taux usuraire, OCI, et justifications CPP."
+    End If
+    
+    FindBestMatch = bestMatch
+End Function
 
-        /* Effet de vélo */
-        .chatbot-header::after {
-            content: '🚴';
-            position: absolute;
-            bottom: -10px;
-            left: 20px;
-            font-size: 60px;
-            opacity: 0.1;
-            transform: rotate(15deg);
-        }
+'###############################################################################
+' SUB: AddUserMessage
+' Ajoute un message utilisateur à l'historique
+'###############################################################################
+Sub AddUserMessage(message As String)
+    Dim lastRow As Long
+    Dim messageRow As Long
+    
+    ' Trouver la prochaine ligne vide dans la colonne C
+    lastRow = CurrentSheet.Cells(CurrentSheet.Rows.Count, "C").End(xlUp).Row
+    If lastRow < 10 Then lastRow = 9
+    messageRow = lastRow + 1
+    
+    ' Ajouter le message
+    With CurrentSheet.Range("C" & messageRow)
+        .Value = message
+        .Font.Color = COLOR_BLANC
+        .Interior.Color = COLOR_COFIDIS_ROUGE
+        .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_JAUNE
+        .Font.Bold = True
+    End With
+    
+    ' Ajouter l'heure
+    CurrentSheet.Range("B" & messageRow).Value = Format(Now, "HH:MM") & " - ⚡ Sprint"
+    CurrentSheet.Range("B" & messageRow).Font.Color = COLOR_COFIDIS_ROUGE
+    CurrentSheet.Range("B" & messageRow).Font.Italic = True
+    
+    ' Sauvegarder dans l'historique
+    ChatHistory.Add "USER: " & message
+    
+    ' Auto-scroll
+    CurrentSheet.Activate
+    CurrentSheet.Range("C" & messageRow).Select
+End Sub
 
-        .cofidis-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
+'###############################################################################
+' SUB: AddBotMessage
+' Ajoute un message du bot à l'historique
+'###############################################################################
+Sub AddBotMessage(message As String)
+    Dim lastRow As Long
+    Dim messageRow As Long
+    Dim km As Integer
+    
+    ' Trouver la prochaine ligne vide dans la colonne B
+    lastRow = CurrentSheet.Cells(CurrentSheet.Rows.Count, "B").End(xlUp).Row
+    If lastRow < 10 Then lastRow = 9
+    messageRow = lastRow + 1
+    
+    ' Ajouter le message
+    With CurrentSheet.Range("B" & messageRow)
+        .Value = message
+        .Font.Color = COLOR_NOIR
+        .Interior.Color = RGB(255, 249, 230)  ' Blanc cassé
+        .BorderAround Weight:=xlMedium, Color:=COLOR_COFIDIS_JAUNE
+        .BorderLeft Weight:=xlThick, Color:=COLOR_COFIDIS_JAUNE
+        .BorderRight Weight:=xlThin, Color:=COLOR_COFIDIS_ROUGE
+        .WrapText = True
+    End With
+    
+    ' Ajouter l'heure avec km aléatoire
+    Randomize
+    km = Int((100 * Rnd) + 1)
+    CurrentSheet.Range("C" & messageRow).Value = Format(Now, "HH:MM") & " - " & km & " km"
+    CurrentSheet.Range("C" & messageRow).Font.Color = RGB(184, 134, 11)  ' Or foncé
+    CurrentSheet.Range("C" & messageRow).Font.Italic = True
+    
+    ' Sauvegarder dans l'historique
+    ChatHistory.Add "BOT: " & message
+    
+    ' Auto-scroll
+    CurrentSheet.Activate
+    CurrentSheet.Range("B" & messageRow).Select
+End Sub
 
-        .logo-text {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+'###############################################################################
+' SUB: ClearChat
+' Efface l'historique du chat
+'###############################################################################
+Sub ClearChat()
+    Dim response As VbMsgBoxResult
+    
+    response = MsgBox("Voulez-vous vraiment effacer tout l'historique ?", vbYesNo + vbQuestion, "Confirmation")
+    
+    If response = vbYes Then
+        ' Effacer les messages
+        CurrentSheet.Range("B11:C40").ClearContents
+        CurrentSheet.Range("B11:C40").Interior.ColorIndex = xlNone
+        
+        ' Remettre le message de bienvenue
+        AddBotMessage "🚴‍♂️ Historique effacé. Posez-moi vos questions !"
+        
+        ' Réinitialiser l'historique
+        Set ChatHistory = New Collection
+    End If
+End Sub
 
-        .logo-text span:first-child {
-            color: #FFD700;
-            text-shadow: 2px 2px 0 #B22222;
-        }
-
-        .logo-text span:last-child {
-            color: white;
-            text-shadow: 2px 2px 0 #FFD700;
-        }
-
-        .tour-de-france {
-            background: #FFD700;
-            color: #ED1C24;
-            padding: 5px 15px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-top: 5px;
-            box-shadow: 0 4px 0 #B22222;
-        }
-
-        .chatbot-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 10px 0 5px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .chatbot-header p {
-            font-size: 0.9rem;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            font-weight: 400;
-            background: rgba(0,0,0,0.2);
-            padding: 5px 15px;
-            border-radius: 30px;
-            display: inline-block;
-        }
-
-        /* Messages Area */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #F5F5F5;
-        }
-
-        .message {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-message {
-            align-items: flex-end;
-        }
-
-        .bot-message {
-            align-items: flex-start;
-        }
-
-        .message-content {
-            max-width: 80%;
-            padding: 14px 18px;
-            border-radius: 18px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            word-wrap: break-word;
-            box-shadow: 0 3px 10px rgba(237, 28, 36, 0.2);
-        }
-
-        .user-message .message-content {
-            background: #ED1C24;
-            color: white;
-            border-bottom-right-radius: 4px;
-            border: 2px solid #FFD700;
-        }
-
-        .bot-message .message-content {
-            background: white;
-            color: #2D3748;
-            border-bottom-left-radius: 4px;
-            border-left: 4px solid #FFD700;
-            border-right: 2px solid #ED1C24;
-        }
-
-        .timestamp {
-            font-size: 0.7rem;
-            color: #666;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .user-message .timestamp {
-            text-align: right;
-            color: #ED1C24;
-        }
-
-        .bot-message .timestamp {
-            color: #B8860B;
-        }
-
-        /* Typing Indicator */
-        .typing-indicator {
-            display: flex;
-            padding: 14px 18px;
-            background: white;
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            border-left: 4px solid #FFD700;
-            border-right: 2px solid #ED1C24;
-            width: fit-content;
-        }
-
-        .typing-indicator span {
-            height: 10px;
-            width: 10px;
-            background: #ED1C24;
-            border-radius: 50%;
-            display: inline-block;
-            margin: 0 3px;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-            background: #FFD700;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-            background: #ED1C24;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-            30% { transform: translateY(-8px); opacity: 1; }
-        }
-
-        /* Input Area */
-        .chat-input-container {
-            display: flex;
-            padding: 20px;
-            background: white;
-            border-top: 3px solid #FFD700;
-            position: relative;
-        }
-
-        #userInput {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid #ED1C24;
-            border-radius: 30px;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s;
-            color: #2D3748;
-        }
-
-        #userInput:focus {
-            border-color: #FFD700;
-            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
-        }
-
-        #userInput::placeholder {
-            color: #999;
-            font-weight: 400;
-        }
-
-        #sendButton {
-            background: #ED1C24;
-            color: white;
-            border: none;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            margin-left: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(237, 28, 36, 0.4);
-            border: 2px solid #FFD700;
-        }
-
-        #sendButton:hover {
-            background: #B22222;
-            transform: scale(1.1) rotate(10deg);
-            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5);
-        }
-
-        #sendButton:disabled {
-            background: #999;
-            border-color: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        #sendButton svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        /* Suggested Questions - Cofidis Team Style */
-        .suggested-questions {
-            padding: 15px 20px;
-            background: #F5F5F5;
-            border-top: 2px dashed #FFD700;
-        }
-
-        .suggested-title {
-            font-size: 0.9rem;
-            color: #ED1C24;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .suggested-title::before {
-            content: '🚴';
-            font-size: 1.2rem;
-        }
-
-        .suggested-title::after {
-            content: '';
-            flex: 1;
-            height: 3px;
-            background: linear-gradient(90deg, #ED1C24, #FFD700, #ED1C24);
-        }
-
-        .suggested-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .suggested-chip {
-            background: white;
-            border: 2px solid #ED1C24;
-            border-radius: 30px;
-            padding: 12px 18px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #ED1C24;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .suggested-chip:hover {
-            background: #ED1C24;
-            color: white;
-            border-color: #FFD700;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(237, 28, 36, 0.4);
-        }
-
-        /* Maillot jaune pour le meilleur message */
-        .message.bot-message:first-child .message-content {
-            border-left-width: 6px;
-            border-left-color: #FFD700;
-            background: #FFF9E6;
-            position: relative;
-        }
-
-        .message.bot-message:first-child .message-content::after {
-            content: '🏆';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            font-size: 20px;
-            background: #FFD700;
-            border-radius: 50%;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* Scrollbar personnalisée */
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: #F5F5F5;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #ED1C24;
-            border-radius: 4px;
-            border: 2px solid #FFD700;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #B22222;
-        }
-    </style>
-</head>
-<body>
-    <div class="chatbot-container">
-        <div class="chatbot-header">
-            <div class="cofidis-logo">
-                <div class="logo-text">
-                    <span>COF</span><span>IDIS</span>
-                </div>
-            </div>
-            <div class="tour-de-france">
-                ★ SPONSOR OFFICIEL TOUR DE FRANCE ★
-            </div>
-            <h1>Expert 10 Questions</h1>
-            <p>Équipe de France du Crédit</p>
-        </div>
-
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot-message">
-                <div class="message-content">
-                    🚴‍♂️ Bonjour et bienvenue chez Cofidis, partenaire officiel du Tour de France !<br><br>
-                    Je suis spécialisé dans 10 questions spécifiques. Posez-moi vos questions sur les PSM, décomptes, échéances, assurances, etc. Je reconnais vos questions même si elles sont formulées différemment !
-                </div>
-                <div class="timestamp">Départ - 0 km</div>
-            </div>
-        </div>
-
-        <div class="suggested-questions">
-            <div class="suggested-title">QUESTIONS SPRINT</div>
-            <div class="suggested-grid" id="suggestedGrid">
-                <span class="suggested-chip" onclick="useSuggestion('Qu\'est-ce qu\'un PSM?')">🚵 PSM</span>
-                <span class="suggested-chip" onclick="useSuggestion('Comment trouver l\'échéance du mois?')">📅 Échéance</span>
-                <span class="suggested-chip" onclick="useSuggestion('C\'est quoi le taux usuraire?')">📊 Taux usuraire</span>
-                <span class="suggested-chip" onclick="useSuggestion('Que signifie OCI?')">📁 OCI</span>
-                <span class="suggested-chip" onclick="useSuggestion('Comment gérer un client sous tutelle?')">👤 Tutelle</span>
-                <span class="suggested-chip" onclick="useSuggestion('Qu\'est-ce que la FIPEN?')">📄 FIPEN</span>
-                <span class="suggested-chip" onclick="useSuggestion('Rebond assurance?')">🛡️ Assurance</span>
-                <span class="suggested-chip" onclick="useSuggestion('Date décompte?')">📆 Décompte</span>
-            </div>
-        </div>
-
-        <div class="chat-input-container">
-            <input type="text" id="userInput" placeholder="Posez votre question..." onkeypress="handleKeyPress(event)">
-            <button id="sendButton" onclick="sendMessage()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // Base de connaissances avec mots-clés et réponses (identique)
-        const knowledgeBase = [
-            {
-                id: 1,
-                keywords: ['psm', 'prêt sur mesure', 'pret sur mesure', 'crédit amortissable', '500', '35000', '6 mois', '84 mois'],
-                response: "🚵 Le Prêt sur Mesure (PSM) est un crédit amortissable. Il peut être ouvert pour un montant de 500€ jusqu'à 35 000€. Selon le montant emprunté, la durée varie de 6 à 84 mois."
-            },
-            {
-                id: 2,
-                keywords: ['décompte', 'date décompte', 'positionner décompte', 'envoyer décompte', 'décompte 7', 'consultation décompte'],
-                response: "📆 Le décompte est à consulter à la date de la prochaine échéance. Exemple: nous sommes le 7/02, l'échéance du contrat est au 5, vous consultez le décompte en date du 5/03."
-            },
-            {
-                id: 3,
-                keywords: ['échéance du mois', 'trouver échéance', 'voir échéance', 'gec échéance', 'événements échéance'],
-                response: "📅 L'échéance du mois d'un contrat est visible dans GEC, Onglet [Evénements] vue 'Opérations' sur la ligne 'Echéance'. Cette ligne est tracée en date de quantième du contrat."
-            },
-            {
-                id: 4,
-                keywords: ['rebond assurance', 'assurance non souscrite', 'incomplet assurance', 'accessio', 'prêt rénovation', 'conseiller assurance'],
-                response: "🛡️ Dans le cadre d'une étude crédit sur Accessio, PSM, PSM sur PSM, prêt rénovation, si le tiers n'a pas souscrit à l'assurance et que le dossier est complet, le conseiller positionne manuellement un incomplet assurance pour demander au client de nous recontacter afin de lui conseiller l'assurance sur son crédit."
-            },
-            {
-                id: 5,
-                keywords: ['modifier date prélèvement', 'date prélèvement 4cb', '4cb', '3cb', 'pnf', 'modifier échéance monétique', 'date échéance modifiable'],
-                response: "💳 Les dates d'échéances ne sont pas modifiables sur les produits monétiques (3CB, 4CB ou PNF 3/4)."
-            },
-            {
-                id: 6,
-                keywords: ['client sous tutelle', 'tutelle', 'curatelle', 'affaires spécifiques', 'gestion tutelle', 'secteur affaires spécifiques'],
-                response: "👥 Un client sous tutelle est géré par le Secteur des Affaires Spécifiques."
-            },
-            {
-                id: 7,
-                keywords: ['fipen', 'fiche précontractuelle', 'information européenne', 'loi lagarde', 'offre crédit consommation'],
-                response: "📋 La FIPEN est la fiche précontractuelle d'information européenne normalisée, rendue obligatoire par la loi Lagarde dans le cadre de la signature d'une offre de crédit à la consommation."
-            },
-            {
-                id: 8,
-                keywords: ['taux usuraire', 'usure', 'taux d\'usure', 'trimestre usure', 'janvier avril juillet octobre'],
-                response: "📊 Le taux d'usure est revu tous les trimestres : janvier / avril / juillet / octobre. Celui-ci diffère selon les produits."
-            },
-            {
-                id: 9,
-                keywords: ['oci', 'dossier oci', 'incomplet oci', 'se+ oci', 'signification oci', 'géré en incomplet'],
-                response: "📁 Un dossier en OCI peut avoir 2 significations : soit le dossier est géré en incomplet par le service acceptation, soit pour le process SE+ c'est un état qui est poussé avec un sous motif afin que le conseiller puisse le traiter en fonction des attendus liés au sous motif."
-            },
-            {
-                id: 10,
-                keywords: ['cpp', 'justifier cpp', 'répondre client cpp', 'nouvelle proposition', 'mise à jour données'],
-                response: "⚡ Il faut expliquer au client que suite à la mise à jour de l'ensemble des données de son dossier nous sommes amenés à faire cette nouvelle proposition adaptée."
-            }
-        ];
-
-        let isTyping = false;
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !isTyping) {
-                sendMessage();
-            }
-        }
-
-        function useSuggestion(question) {
-            document.getElementById('userInput').value = question;
-            sendMessage();
-        }
-
-        function findBestMatch(userQuestion) {
-            const questionLower = userQuestion.toLowerCase();
+'###############################################################################
+' SUB: SuggestionClick
+' Gère les clics sur les suggestions
+'###############################################################################
+Sub SuggestionClick(Target As Range)
+    Dim suggestion As String
+    
+    ' Vérifier si la cellule cliquée est dans la zone des suggestions
+    If Not Intersect(Target, CurrentSheet.Range("B48:E49")) Is Nothing Then
+        If Target.Value <> "" Then
+            suggestion = Target.Value
             
-            const words = questionLower.split(' ');
+            ' Traduire la suggestion en question
+            Select Case suggestion
+                Case "PSM": suggestion = "Qu'est-ce qu'un PSM?"
+                Case "Échéance": suggestion = "Comment trouver l'échéance du mois?"
+                Case "Taux usuraire": suggestion = "C'est quoi le taux usuraire?"
+                Case "OCI": suggestion = "Que signifie OCI?"
+                Case "Tutelle": suggestion = "Comment gérer un client sous tutelle?"
+                Case "FIPEN": suggestion = "Qu'est-ce que la FIPEN?"
+                Case "Assurance": suggestion = "Rebond assurance?"
+                Case "Décompte": suggestion = "A quelle date doit-on se positionner pour le décompte?"
+            End Select
             
-            let bestMatch = null;
-            let highestScore = 0;
+            ' Mettre la suggestion dans la zone de saisie
+            CurrentSheet.Range("B43").Value = suggestion
+            CurrentSheet.Range("B43").Font.Color = COLOR_NOIR
+            
+            ' Envoyer automatiquement
+            SendMessage
+        End If
+    End If
+End Sub
 
-            for (const item of knowledgeBase) {
-                let score = 0;
-                
-                for (const keyword of item.keywords) {
-                    const keywordLower = keyword.toLowerCase();
-                    
-                    if (questionLower.includes(keywordLower)) {
-                        score += 3;
-                    }
-                    
-                    for (const word of words) {
-                        if (word.length > 2) {
-                            if (keywordLower.includes(word) || word.includes(keywordLower)) {
-                                score += 1;
-                            }
-                        }
-                    }
-                }
-                
-                if (score > highestScore) {
-                    highestScore = score;
-                    bestMatch = item;
-                }
-            }
+'###############################################################################
+' SUB: EnableEvents
+' Active les événements de la feuille
+'###############################################################################
+Sub EnableEvents()
+    ' Cette sub est appelée pour activer la détection des clics
+    ' Note: Pour une utilisation complète, il faudrait utiliser
+    ' le module Worksheet_SelectionChange dans le code de la feuille
+    MsgBox "Les suggestions sont actives ! Cliquez sur les boutons jaunes pour une question rapide.", vbInformation, "Info"
+End Sub
 
-            return bestMatch;
-        }
+'###############################################################################
+' SUB: Worksheet_SelectionChange (à placer dans le module de la feuille)
+' Pour activer les clics sur les suggestions, ajouter ce code dans le module
+' de la feuille "Cofidis Chatbot"
+'###############################################################################
+'
+' Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+'     SuggestionClick Target
+' End Sub
+'
 
-        function addMessage(text, isUser = false) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = text;
-            
-            const timestampDiv = document.createElement('div');
-            timestampDiv.className = 'timestamp';
-            const now = new Date();
-            
-            // Thème Tour de France pour les timestamps
-            if (isUser) {
-                timestampDiv.textContent = `${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - ⚡ Sprint`;
-            } else {
-                const km = Math.floor(Math.random() * 100) + 1;
-                timestampDiv.textContent = `${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - ${km} km`;
-            }
-            
-            messageDiv.appendChild(contentDiv);
-            messageDiv.appendChild(timestampDiv);
-            messagesContainer.appendChild(messageDiv);
-            
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+'###############################################################################
+' SUB: ExportHistory
+' Exporte l'historique du chat
+'###############################################################################
+Sub ExportHistory()
+    Dim item As Variant
+    Dim historyText As String
+    Dim fileNum As Integer
+    Dim fileName As String
+    
+    If ChatHistory.Count = 0 Then
+        MsgBox "Aucun historique à exporter.", vbExclamation, "Attention"
+        Exit Sub
+    End If
+    
+    ' Créer le texte de l'historique
+    historyText = "HISTORIQUE DU CHAT - COFIDIS" & vbCrLf
+    historyText = historyText & "Date: " & Date & vbCrLf
+    historyText = historyText & String(50, "=") & vbCrLf & vbCrLf
+    
+    For Each item In ChatHistory
+        historyText = historyText & item & vbCrLf
+        historyText = historyText & String(30, "-") & vbCrLf
+    Next item
+    
+    ' Sauvegarder dans un fichier
+    fileName = ThisWorkbook.Path & "\Chatbot_History_" & Format(Now, "yyyymmdd_hhmmss") & ".txt"
+    
+    On Error Resume Next
+    fileNum = FreeFile
+    Open fileName For Output As fileNum
+    Print #fileNum, historyText
+    Close fileNum
+    On Error GoTo 0
+    
+    MsgBox "Historique exporté avec succès !" & vbCrLf & fileName, vbInformation, "Export réussi"
+End Sub
 
-        function showTypingIndicator() {
-            const messagesContainer = document.getElementById('chatMessages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot-message';
-            typingDiv.id = 'typingIndicator';
-            
-            const indicatorDiv = document.createElement('div');
-            indicatorDiv.className = 'typing-indicator';
-            indicatorDiv.innerHTML = '<span></span><span></span><span></span>';
-            
-            typingDiv.appendChild(indicatorDiv);
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+'###############################################################################
+' SUB: ShowHelp
+' Affiche l'aide
+'###############################################################################
+Sub ShowHelp()
+    Dim helpMsg As String
+    
+    helpMsg = "COMMENT UTILISER LE CHATBOT COFIDIS :" & vbCrLf & vbCrLf
+    helpMsg = helpMsg & "1. Posez votre question dans la zone de saisie" & vbCrLf
+    helpMsg = helpMsg & "2. Cliquez sur 'ENVOYER' ou appuyez sur Entrée" & vbCrLf
+    helpMsg = helpMsg & "3. Cliquez sur les suggestions jaunes pour des questions rapides" & vbCrLf
+    helpMsg = helpMsg & "4. Utilisez 'EFFACER' pour vider l'historique" & vbCrLf & vbCrLf
+    helpMsg = helpMsg & "QUESTIONS DISPONIBLES :" & vbCrLf
+    helpMsg = helpMsg & "- PSM (Prêt sur Mesure)" & vbCrLf
+    helpMsg = helpMsg & "- Dates de décompte" & vbCrLf
+    helpMsg = helpMsg & "- Échéances du mois" & vbCrLf
+    helpMsg = helpMsg & "- Rebond assurance" & vbCrLf
+    helpMsg = helpMsg & "- Dates de prélèvement 4CB" & vbCrLf
+    helpMsg = helpMsg & "- Clients sous tutelle" & vbCrLf
+    helpMsg = helpMsg & "- FIPEN" & vbCrLf
+    helpMsg = helpMsg & "- Taux usuraire" & vbCrLf
+    helpMsg = helpMsg & "- OCI" & vbCrLf
+    helpMsg = helpMsg & "- Justification CPP"
+    
+    MsgBox helpMsg, vbInformation, "Aide - Chatbot Cofidis"
+End Sub
 
-        function removeTypingIndicator() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const question = input.value.trim();
-            
-            if (question === '' || isTyping) return;
-            
-            addMessage(question, true);
-            input.value = '';
-            
-            isTyping = true;
-            document.getElementById('userInput').disabled = true;
-            document.getElementById('sendButton').disabled = true;
-            
-            showTypingIndicator();
-            
-            setTimeout(() => {
-                removeTypingIndicator();
-                
-                const match = findBestMatch(question);
-                
-                if (match) {
-                    addMessage(match.response);
-                } else {
-                    addMessage("🏁 Désolé, je ne peux répondre qu'aux 10 questions du parcours. Les thèmes disponibles sont : PSM, décomptes, échéances, rebond assurance, modifications de dates, tutelle, FIPEN, taux usuraire, OCI, et justifications CPP.");
-                }
-                
-                isTyping = false;
-                document.getElementById('userInput').disabled = false;
-                document.getElementById('sendButton').disabled = false;
-                document.getElementById('userInput').focus();
-            }, 800);
-        }
-
-        window.onload = function() {
-            document.getElementById('userInput').focus();
-        };
-    </script>
-</body>
-</html>
+'###############################################################################
+' SUB: Main
+' Point d'entrée principal
+'###############################################################################
+Sub Main()
+    CreateChatbot
+End Sub
