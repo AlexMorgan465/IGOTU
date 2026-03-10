@@ -1,3 +1,55 @@
-Private Sub Worksheet_SelectionChange(ByVal Target As Range)
-    SuggestionClick Target
-End Sub
+# Fracture numérique – Définition et enjeux
+
+- **Définition** : inégalités d’accès et d’usage des technologies numériques. Cela inclut l’accès à Internet, la possession d’équipements informatiques et le niveau de compétences digitales. L’UIT (Agence ONU) souligne que la fracture numérique reflète les différences entre individus ou territoires dans l’accès aux TIC【83†L72-L74】.  
+- **Dimensions** : on observe des écarts **entre pays riches/pauvres** (liés au niveau de développement), **entre zones urbaines/rurales** (83% d’urbains connectés vs 48% de ruraux【83†L122-L125】), **entre générations** (les jeunes plus connectés), et **selon le niveau d’éducation** (meilleure maîtrise du numérique chez les plus diplômés).  
+- **Au-delà de la connectivité** : la fracture numérique ne se limite pas à l’accès aux réseaux. Elle englobe aussi les **compétences** (savoir se servir des outils) et les **usages** (participation aux services en ligne, information, etc.).
+
+---
+
+# Statistiques mondiales sur la fracture numérique
+
+- Environ **2,6 milliards de personnes** dans le monde restent **hors ligne** en 2024【83†L97-L100】 (soit ~32 % de la population mondiale). Même si 68 % sont désormais connectés【83†L72-L74】, **un tiers** de la population mondiale est exclu du numérique.  
+- **Disparités pays riches/pauvres** : ~93 % des habitants des pays à revenu élevé ont Internet, contre seulement ~27 % dans les pays à faible revenu【83†L89-L91】.  
+- **Zones urbaines/rurales** : 83 % des citadins utilisent Internet vs 48 % des ruraux【83†L122-L125】. Parmi les 2,6 milliards hors ligne, plus de la moitié vivent en milieu rural【83†L122-L125】.  
+- Ces chiffres montrent que **l’accès aux technologies dépend fortement du développement économique et des infrastructures**.
+
+---
+
+# Fracture numérique liée aux compétences
+
+- **Compétences en Europe** : seulement **60 % des Européens (16-74 ans)** ont des **compétences numériques de base**【70†L157-L158】 (objectif UE 80 % d’ici 2030).  
+- **Disparités générationnelles** : chez les 65-74 ans, seuls **~33 %** disposent de compétences numériques de base【70†L180-L183】, contre environ 75 % des 16-24 ans. Les personnes âgées sont donc particulièrement concernées par la fracture numérique.  
+- **Impact** : le manque de compétences limite l’accès aux services en ligne, à l’information et aux opportunités d’emploi. Par exemple, **90 % des emplois** en Europe exigent des compétences numériques de base【76†L49-L54】, ce qui désavantage les personnes non formées ou non équipées.
+
+---
+
+# Causes de la fracture numérique
+
+- **Infrastructures manquantes** : dans de nombreuses régions (zones rurales, pays en développement), l’accès à Internet haut débit n’est pas garanti【83†L122-L125】. Par exemple, seul 48 % des ruraux sont en ligne【83†L122-L125】.  
+- **Coût des équipements** : le prix des outils numériques freine l’accès. L’association Emmaüs Connect note que **80 % des foyers précaires gagnent <1000€/mois** alors qu’un smartphone coûte en moyenne **500 €**【76†L86-L89】. Ce budget est inabordable pour beaucoup.  
+- **Formation numérique insuffisante** : sans apprentissage, les personnes (notamment âgées ou peu éduquées) peinent à acquérir les compétences requises. L’absence de formation maintient ainsi les publics vulnérables en marge du numérique.  
+- **Facteurs socio-éducatifs** : le niveau d’éducation favorise l’aisance numérique. Les personnes avec un diplôme supérieur sont généralement plus aptes à utiliser les outils. De plus, l’âge reste un déterminant clé (les plus jeunes ayant grandi avec ces technologies).
+
+---
+
+# Conséquences sociales et éthiques
+
+- **Exclusion sociale** : les personnes non connectées ou non formées peuvent être exclues de la vie moderne (démarches en ligne, informations, réseau social numérique). Elles risquent un isolement accru.  
+- **Éducation** : la fracture numérique peut creuser le fossé scolaire/étudiant. Les cours et ressources en ligne ne profitent pas à tous si certains élèves n’ont pas d’ordinateur ou d’Internet à domicile.  
+- **Emploi** : sans compétences numériques, les candidats ont moins de chances dans un marché du travail où les recruteurs et formations sont de plus en plus digitaux. La recherche d’emploi en ligne devient difficile pour eux.  
+- **Services publics** : de plus en plus de démarches administratives sont dématérialisées. Par exemple, **16 millions de Français** peinent à faire les formalités en ligne【76†L56-L60】. Cela crée une inégalité d’accès aux services essentiels.  
+- **Justice sociale** : sur le plan éthique, un accès inégal au numérique renforce les inégalités économiques et sociales. De nombreux experts (UE, ONU) considèrent l’accès aux TIC comme un droit d’accès à l’information et aux opportunités de la société moderne.
+
+---
+
+# Solutions pour réduire la fracture numérique
+
+- **Améliorer l’accès à Internet** : développer les infrastructures (fibre, 4G/5G, satellite) dans toutes les zones. Les programmes publics (France Très Haut Débit, Europe) financent l’extension de la couverture.  
+- **Former aux compétences numériques** : déployer des actions de formation (écoles, ateliers, centres sociaux). Par exemple, l’État français soutient un réseau de *conseillers numériques* dans les territoires pour accompagner les usagers.  
+- **Réduire le coût des équipements** : mettre en place des aides financières, prêt ou recyclage d’ordinateurs/smartphones. Certaines associations comme Emmaüs Connect reconditionnent et distribuent du matériel à bas prix【76†L86-L89】.  
+- **Créer des espaces d’accès public** : bibliothèques, maisons de services au public et *tiers-lieux* offrent Internet et ordinateurs gratuits, ainsi que du soutien. Ces lieux peuvent proposer un accompagnement personnalisé.  
+- **Initiatives clés** : exemples d’actions concrètes – Plan national pour l’inclusion numérique (État français), programmes de formations comme Simplon ou Web@cadémie, projets municipaux (médiation numérique), Wi-Fi publics dans les villes, etc. Ces initiatives visent à garantir que **toute la population** puisse bénéficier des opportunités du numérique.
+
+---
+
+**Sources :** Statistiques et définitions tirées de rapports de l’ONU-UIT【83†L72-L74】【83†L89-L91】【83†L97-L100】【83†L122-L125】, Eurostat【70†L157-L158】【70†L180-L183】, Emmaüs Connect【76†L49-L54】【76†L56-L60】【76†L86-L89】, et analyses de France Stratégie et ANCT sur la fracture numérique.
