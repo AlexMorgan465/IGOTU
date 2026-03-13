@@ -1,19 +1,73 @@
-Private Sub cmdLoad_Click()
+Sub CalculerKPI()
 
-Dim total As Integer
-Dim ch As ChartObject
+Dim ws As Worksheet
+Dim lastRow As Long
+Dim i As Long
 
-'KPI
-total = Sheets("Sheet1").Range("B2") + Sheets("Sheet1").Range("B3")
-lblTotal.Caption = "Total Sales : " & total
+Set ws = ThisWorkbook.Worksheets("DATA")
 
-'Get chart
-Set ch = Sheets("Sheet1").ChartObjects("ChartSales")
+lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
 
-'Copy chart
-ch.Chart.ChartArea.Copy
+Dim agent1 As Long, agent2 As Long, agent3 As Long, agent4 As Long
+Dim nc As Long, encours As Long, traites As Long
 
-'Paste inside UserForm
-Me.Paste
+Dim bouygues As Long, acm As Long, dirco As Long, contrtheque As Long, cic As Long
+
+For i = 2 To lastRow
+
+    'Agents
+    Select Case ws.Cells(i, 7).Value
+        Case "BENCRHF"
+            agent1 = agent1 + 1
+        Case "HAMDANMO"
+            agent2 = agent2 + 1
+        Case "LISSAOHI"
+            agent3 = agent3 + 1
+        Case "RMAIDIM"
+            agent4 = agent4 + 1
+    End Select
+
+    'Status
+    Select Case ws.Cells(i, 4).Value
+        Case "NON CONFORME"
+            nc = nc + 1
+        Case "EN COURS"
+            encours = encours + 1
+        Case "TRAITES"
+            traites = traites + 1
+    End Select
+
+    'Domaines
+    Select Case ws.Cells(i, 2).Value
+        Case "Bouygues telecom"
+            bouygues = bouygues + 1
+        Case "ACM"
+            acm = acm + 1
+        Case "DIRCO"
+            dirco = dirco + 1
+        Case "CONTRTHEQUE"
+            contrtheque = contrtheque + 1
+        Case "CIC CIB ASSET SERVICING"
+            cic = cic + 1
+    End Select
+
+Next i
+
+'Afficher dans les labels
+
+UserForm1.lblAgent1.Caption = agent1
+UserForm1.lblAgent2.Caption = agent2
+UserForm1.lblAgent3.Caption = agent3
+UserForm1.lblAgent4.Caption = agent4
+
+UserForm1.lblNC.Caption = nc
+UserForm1.lblEncours.Caption = encours
+UserForm1.lblTraites.Caption = traites
+
+UserForm1.lblBouygues.Caption = bouygues
+UserForm1.lblACM.Caption = acm
+UserForm1.lblDIRCO.Caption = dirco
+UserForm1.lblContrtheque.Caption = contrtheque
+UserForm1.lblCIC.Caption = cic
 
 End Sub
