@@ -1,368 +1,57 @@
-Parfait 👍
-Je vais te proposer la V2 professionnelle de ton application VBA.
-Cette version est beaucoup plus proche d’un explorateur Windows, et adaptée à un dossier partagé réseau utilisé par plusieurs agents (comme ton équipe Hamdani / Benchrif / Hiba / Imad).
-
-Cette V2 ajoute :
-
-✔ Arborescence TreeView
-✔ Chargement rapide niveau par niveau (évite de scanner tout le partage)
-✔ Drag & Drop possible
-✔ Filtrage PDF / Word
-✔ Gestion fichiers temporaires (~$)
-✔ Journal LOG automatique
-✔ Statut Traité / Erreur
-✔ Protection racine réseau
-
-
----
-
-🧠 Architecture V2
-
-Modules
-
-Module	Rôle
-
-modConfig	constantes
-modFSO	opérations fichiers
-modTree	gestion arborescence
-modLog	journal
-modSecurity	protections
-modMain	lancement
-
-
-UserForm
-
-frmGestionV2
-
-Contrôles :
-
-Contrôle	Nom
-
-TreeView dossiers	tvFolders
-ListView fichiers	lvFiles
-TextBox racine	txtRoot
-Boutons actions	différents
-
-
-
----
-
-⚙️ Références VBA à activer
-
-Dans Tools → References
-
-Activer :
-
-Microsoft Windows Common Controls 6.0 (TreeView / ListView)
-Microsoft Scripting Runtime
-
-
----
-
-📁 Module modConfig
-
 Option Explicit
-
-Public Const ROOT_PATH As String = "\\Serveur\Partage\A_TRAITER\"
-Public Const PATH_TRAITES As String = "\\Serveur\Partage\TRAITES\"
-Public Const PATH_ERREURS As String = "\\Serveur\Partage\ERREURS\"
-
-Public AllowedExt As Variant
-
-Public Sub InitConfig()
-
-AllowedExt = Array("pdf", "doc", "docx")
-
-End Sub
-
-
----
-
-📁 Module modSecurity
-
-Empêche suppression hors dossier.
-
-Public Function IsSafePath(path As String) As Boolean
-
-If InStr(1, path, ROOT_PATH, vbTextCompare) = 1 Then
-    IsSafePath = True
-End If
-
-End Function
-
-
----
-
-📁 Module modFSO
-
-Option Explicit
-
-Public fso As New FileSystemObject
-
-
----
-
-Lister dossiers
-
-Public Sub GetFolders(path As String, tv As TreeView)
-
-Dim folder As Folder
-Dim subf As Folder
-Dim node As Node
-
-Set folder = fso.GetFolder(path)
-
-For Each subf In folder.SubFolders
-
-    tv.Nodes.Add , , subf.Path, subf.Name
-
-Next
-
-End Sub
-
-
----
-
-Lister fichiers
-
-Public Sub GetFiles(path As String, lv As ListView)
-
-Dim folder As Folder
-Dim file As File
-Dim ext As String
-Dim item As ListItem
-
-lv.ListItems.Clear
-
-Set folder = fso.GetFolder(path)
-
-For Each file In folder.Files
-
-    ext = LCase(fso.GetExtensionName(file.Name))
-
-    If IsAllowed(ext) Then
-    
-        If Left(file.Name, 2) <> "~$" Then
-        
-            Set item = lv.ListItems.Add(, , file.Name)
-            
-            item.SubItems(1) = ext
-            item.SubItems(2) = file.DateLastModified
-            item.SubItems(3) = Round(file.Size / 1024, 2) & " KB"
-        
-        End If
-        
-    End If
-
-Next
-
-End Sub
-
-
----
-
-Filtre extensions
-
-Public Function IsAllowed(ext As String) As Boolean
-
-Dim i
-
-For i = LBound(AllowedExt) To UBound(AllowedExt)
-
-    If ext = AllowedExt(i) Then
-    
-        IsAllowed = True
-        Exit Function
-        
-    End If
-
-Next
-
-End Function
-
-
----
-
-📁 Module modLog
-
-Public Sub WriteLog(action As String, src As String, dest As String, result As String)
-
-Dim ws As Worksheet
-Dim r As Long
-
-Set ws = ThisWorkbook.Sheets("LOG")
-
-r = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
-
-ws.Cells(r, 1) = Now
-ws.Cells(r, 2) = Environ("Username")
-ws.Cells(r, 3) = action
-ws.Cells(r, 4) = src
-ws.Cells(r, 5) = dest
-ws.Cells(r, 6) = result
-
-End Sub
-
-
----
-
-🖥 UserForm frmGestionV2
-
-
----
-
-Initialisation
 
 Private Sub UserForm_Initialize()
-
-InitConfig
-
-txtRoot = ROOT_PATH
-
-LoadTree
-
+    Dim chemin As String
+    
+    ' Dossier racine (à modifier)
+    chemin = "C:\Test"
+    
+    TreeView1.Nodes.Clear
+    Call ChargerDossier(chemin, Nothing)
 End Sub
 
-
----
-
-🌳 Charger arborescence
-
-Sub LoadTree()
-
-tvFolders.Nodes.Clear
-
-tvFolders.Nodes.Add , , ROOT_PATH, ROOT_PATH
-
-GetFolders ROOT_PATH, tvFolders
-
+' Fonction pour charger les dossiers dans le TreeView
+Private Sub ChargerDossier(ByVal chemin As String, ByVal parentNode As Node)
+    Dim fso As Object
+    Dim dossier As Object
+    Dim sousDossier As Object
+    Dim node As Node
+    
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set dossier = fso.GetFolder(chemin)
+    
+    ' Ajouter le noeud
+    If parentNode Is Nothing Then
+        Set node = TreeView1.Nodes.Add(, , chemin, dossier.Name)
+    Else
+        Set node = TreeView1.Nodes.Add(parentNode, tvwChild, chemin, dossier.Name)
+    End If
+    
+    ' Parcourir les sous-dossiers
+    For Each sousDossier In dossier.SubFolders
+        Call ChargerDossier(sousDossier.Path, node)
+    Next
 End Sub
 
-
----
-
-📄 Charger fichiers dossier sélectionné
-
-Private Sub tvFolders_NodeClick(ByVal Node As MSComctlLib.Node)
-
-GetFiles Node.Key, lvFiles
-
+' Quand on clique sur un dossier
+Private Sub TreeView1_NodeClick(ByVal Node As MSComctlLib.Node)
+    Dim fso As Object
+    Dim dossier As Object
+    Dim fichier As Object
+    
+    ListBox1.Clear
+    
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set dossier = fso.GetFolder(Node.Key)
+    
+    ' Afficher les fichiers
+    For Each fichier In dossier.Files
+        ListBox1.AddItem fichier.Name
+    Next
+    
+    ' Afficher aussi les sous-dossiers (optionnel)
+    Dim sousDossier As Object
+    For Each sousDossier In dossier.SubFolders
+        ListBox1.AddItem "[Dossier] " & sousDossier.Name
+    Next
 End Sub
-
-
----
-
-📂 Ouvrir fichier
-
-Private Sub cmdOpen_Click()
-
-Dim path
-
-path = tvFolders.SelectedItem.Key & "\" & lvFiles.SelectedItem.Text
-
-Shell "explorer.exe """ & path & """"
-
-End Sub
-
-
----
-
-🗑 Supprimer fichier
-
-Private Sub cmdDelete_Click()
-
-Dim filePath
-
-filePath = tvFolders.SelectedItem.Key & "\" & lvFiles.SelectedItem.Text
-
-If MsgBox("Supprimer ce fichier ?", vbYesNo) = vbNo Then Exit Sub
-
-If Not IsSafePath(filePath) Then
-
-MsgBox "Action refusée"
-
-Exit Sub
-
-End If
-
-fso.DeleteFile filePath, True
-
-WriteLog "DELETE", filePath, "", "OK"
-
-GetFiles tvFolders.SelectedItem.Key, lvFiles
-
-End Sub
-
-
----
-
-✅ Marquer fichier traité
-
-Private Sub cmdTraite_Click()
-
-Dim src
-Dim destFolder
-Dim dest
-
-src = tvFolders.SelectedItem.Key & "\" & lvFiles.SelectedItem.Text
-
-destFolder = PATH_TRAITES & Format(Date, "yyyy-mm") & "\"
-
-If Not fso.FolderExists(destFolder) Then
-
-MkDir destFolder
-
-End If
-
-dest = destFolder & lvFiles.SelectedItem.Text
-
-fso.MoveFile src, dest
-
-WriteLog "MOVE", src, dest, "OK"
-
-GetFiles tvFolders.SelectedItem.Key, lvFiles
-
-End Sub
-
-
----
-
-📊 Avantages de cette V2
-
-Fonction	Résultat
-
-Chargement rapide	ne scanne pas tout le partage
-Arborescence	comme explorateur Windows
-Multi agents	possible
-Filtre PDF/Word	automatique
-Ignore fichiers temporaires	oui
-LOG complet	oui
-Sécurité racine	oui
-
-
-
----
-
-🚀 V3 (ce que je peux aussi te faire)
-
-Je peux aussi te créer une V3 ultra avancée utilisée dans les banques :
-
-🔥 fonctionnalités
-
-✔ Explorateur Windows complet dans Excel
-✔ Drag & Drop fichiers entre dossiers
-✔ Recherche instantanée PDF
-✔ compteur par agent
-
-Hamdani   124 fichiers
-Hiba       98 fichiers
-Imad       76 fichiers
-Benchrif   112 fichiers
-
-✔ Dashboard Power BI intégré
-
-✔ scan automatique du DP
-
-✔ anti doublons
-
-✔ détection PDF non conformes
