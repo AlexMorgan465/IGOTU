@@ -1,32 +1,9 @@
-Private Sub CommandButton_Delete_Click()
-    Dim fso As Object
-    Dim chemin As String
-    
-    If TreeView1.SelectedItem Is Nothing Then
-        MsgBox "Sélectionne un dossier", vbExclamation
-        Exit Sub
-    End If
-    
-    chemin = TreeView1.SelectedItem.Key
-    
-    If MsgBox("Supprimer ce dossier et tout son contenu ?", vbYesNo + vbCritical) = vbNo Then Exit Sub
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    fso.DeleteFolder chemin, True
-    
-    MsgBox "Dossier supprimé", vbInformation
-    
-    ' Refresh
-    TreeView1.Nodes.Clear
-    Call ChargerDossier("C:\Test", Nothing)
-    ListBox1.Clear
-End Sub
 Private Sub CommandButton_Move_Click()
     Dim fso As Object
     Dim source As String
     Dim destination As String
     
+    ' Vérifier sélection
     If TreeView1.SelectedItem Is Nothing Then
         MsgBox "Sélectionne un dossier source", vbExclamation
         Exit Sub
@@ -34,20 +11,19 @@ Private Sub CommandButton_Move_Click()
     
     source = TreeView1.SelectedItem.Key
     
-    destination = InputBox("Chemin de destination :", "Déplacer vers")
-    
-    If destination = "" Then Exit Sub
+    ' Ouvrir fenêtre parcourir
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Choisir le dossier de destination"
+        If .Show <> -1 Then Exit Sub
+        destination = .SelectedItems(1)
+    End With
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    If Not fso.FolderExists(destination) Then
-        MsgBox "Destination invalide", vbExclamation
-        Exit Sub
-    End If
-    
+    ' Déplacer
     fso.MoveFolder source, destination
     
-    MsgBox "Dossier déplacé", vbInformation
+    MsgBox "Dossier déplacé avec succès", vbInformation
     
     ' Refresh
     TreeView1.Nodes.Clear
@@ -58,6 +34,7 @@ Private Sub CommandButton_Copy_Click()
     Dim source As String
     Dim destination As String
     
+    ' Vérifier sélection
     If TreeView1.SelectedItem Is Nothing Then
         MsgBox "Sélectionne un dossier source", vbExclamation
         Exit Sub
@@ -65,49 +42,17 @@ Private Sub CommandButton_Copy_Click()
     
     source = TreeView1.SelectedItem.Key
     
-    destination = InputBox("Chemin de destination :", "Copier vers")
-    
-    If destination = "" Then Exit Sub
+    ' Ouvrir fenêtre parcourir
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Choisir le dossier de destination"
+        If .Show <> -1 Then Exit Sub
+        destination = .SelectedItems(1)
+    End With
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    If Not fso.FolderExists(destination) Then
-        MsgBox "Destination invalide", vbExclamation
-        Exit Sub
-    End If
-    
+    ' Copier
     fso.CopyFolder source, destination
     
-    MsgBox "Dossier copié", vbInformation
-End Sub
-Private Sub CommandButton_Rename_Click()
-    Dim fso As Object
-    Dim ancienChemin As String
-    Dim nouveauNom As String
-    Dim nouveauChemin As String
-    Dim parentPath As String
-    
-    If TreeView1.SelectedItem Is Nothing Then
-        MsgBox "Sélectionne un dossier", vbExclamation
-        Exit Sub
-    End If
-    
-    ancienChemin = TreeView1.SelectedItem.Key
-    
-    nouveauNom = InputBox("Nouveau nom :", "Renommer")
-    
-    If nouveauNom = "" Then Exit Sub
-    
-    parentPath = Left(ancienChemin, InStrRev(ancienChemin, "\") - 1)
-    nouveauChemin = parentPath & "\" & nouveauNom
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    Name ancienChemin As nouveauChemin
-    
-    MsgBox "Dossier renommé", vbInformation
-    
-    ' Refresh
-    TreeView1.Nodes.Clear
-    Call ChargerDossier("C:\Test", Nothing)
+    MsgBox "Dossier copié avec succès", vbInformation
 End Sub
