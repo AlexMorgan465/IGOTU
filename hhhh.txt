@@ -1,55 +1,9 @@
-Private Sub CommandButton_Delete_Click()
-    Dim fso As Object
-    Dim cheminDossier As String
-    Dim cheminComplet As String
-    Dim item As String
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    ' Si un élément ListBox est sélectionné
-    If ListBox1.ListIndex <> -1 Then
-        
-        cheminDossier = TreeView1.SelectedItem.Key
-        item = ListBox1.Value
-        cheminComplet = cheminDossier & "\" & Replace(item, "[Dossier] ", "")
-        
-        If MsgBox("Supprimer cet élément ?", vbYesNo + vbCritical) = vbNo Then Exit Sub
-        
-        If Left(item, 9) = "[Dossier]" Then
-            fso.DeleteFolder cheminComplet, True
-        Else
-            fso.DeleteFile cheminComplet, True
-        End If
-        
-        MsgBox "Élément supprimé", vbInformation
-        
-    ' Sinon supprimer le dossier TreeView
-    ElseIf Not TreeView1.SelectedItem Is Nothing Then
-        
-        cheminComplet = TreeView1.SelectedItem.Key
-        
-        If MsgBox("Supprimer ce dossier ?", vbYesNo + vbCritical) = vbNo Then Exit Sub
-        
-        fso.DeleteFolder cheminComplet, True
-        
-        MsgBox "Dossier supprimé", vbInformation
-        
-    Else
-        MsgBox "Aucune sélection", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Refresh
-    TreeView1.Nodes.Clear
-    Call ChargerDossier("C:\Test", Nothing)
-    ListBox1.Clear
-End Sub
-Private Sub CommandButton_Copy_Click()
+Private Sub CommandButton_Move_Click()
     Dim fso As Object
     Dim source As String
     Dim destination As String
-    Dim cheminDossier As String
     Dim item As String
+    Dim cheminDossier As String
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     
@@ -60,32 +14,53 @@ Private Sub CommandButton_Copy_Click()
         destination = .SelectedItems(1)
     End With
     
-    ' Si élément ListBox sélectionné
+    On Error GoTo Erreur
+    
+    ' Si élément ListBox
     If ListBox1.ListIndex <> -1 Then
         
         cheminDossier = TreeView1.SelectedItem.Key
         item = ListBox1.Value
         source = cheminDossier & "\" & Replace(item, "[Dossier] ", "")
         
-        If Left(item, 9) = "[Dossier]" Then
-            fso.CopyFolder source, destination
-        Else
-            fso.CopyFile source, destination
+        ' Empêcher déplacement dans lui-même
+        If InStr(1, destination, source, vbTextCompare) > 0 Then
+            MsgBox "Impossible de déplacer dans lui-même", vbCritical
+            Exit Sub
         End If
         
-        MsgBox "Élément copié", vbInformation
+        If Left(item, 9) = "[Dossier]" Then
+            fso.MoveFolder source, destination
+        Else
+            fso.MoveFile source, destination
+        End If
         
-    ' Sinon copier dossier TreeView
+    ' Sinon TreeView
     ElseIf Not TreeView1.SelectedItem Is Nothing Then
         
         source = TreeView1.SelectedItem.Key
         
-        fso.CopyFolder source, destination
+        If InStr(1, destination, source, vbTextCompare) > 0 Then
+            MsgBox "Impossible de déplacer dans lui-même", vbCritical
+            Exit Sub
+        End If
         
-        MsgBox "Dossier copié", vbInformation
+        fso.MoveFolder source, destination
         
     Else
         MsgBox "Aucune sélection", vbExclamation
         Exit Sub
     End If
+    
+    MsgBox "Déplacement réussi", vbInformation
+    
+    ' Refresh
+    TreeView1.Nodes.Clear
+    Call ChargerDossier("C:\Test", Nothing)
+    ListBox1.Clear
+    
+    Exit Sub
+
+Erreur:
+    MsgBox "Erreur : " & Err.Description, vbCritical
 End Sub
