@@ -1,52 +1,31 @@
-Private Sub CommandButton_CopyFile_Click()
-
-    Dim cheminDossier As String
-    Dim fichier As String
-    Dim source As String
-    Dim destination As String
-    Dim destinationFile As String
+Private Sub CommandButton_Rename_Click()
+    Dim fso As Object
+    Dim ancienChemin As String
+    Dim nouveauNom As String
+    Dim nouveauChemin As String
+    Dim parentPath As String
     
-    ' Vérifier sélection
     If TreeView1.SelectedItem Is Nothing Then
         MsgBox "Sélectionne un dossier", vbExclamation
         Exit Sub
     End If
     
-    If ListBox1.ListIndex = -1 Then
-        MsgBox "Sélectionne un fichier", vbExclamation
-        Exit Sub
-    End If
+    ancienChemin = TreeView1.SelectedItem.Key
     
-    fichier = ListBox1.Value
+    nouveauNom = InputBox("Nouveau nom :", "Renommer")
     
-    ' Vérifier que ce n'est pas un dossier
-    If Left(fichier, 9) = "[Dossier]" Then
-        MsgBox "Veuillez sélectionner un fichier uniquement", vbExclamation
-        Exit Sub
-    End If
+    If nouveauNom = "" Then Exit Sub
     
-    ' Chemin source
-    cheminDossier = TreeView1.SelectedItem.Key
-    source = cheminDossier & "\" & fichier
+    parentPath = Left(ancienChemin, InStrRev(ancienChemin, "\") - 1)
+    nouveauChemin = parentPath & "\" & nouveauNom
     
-    ' Fenêtre parcourir
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Choisir le dossier de destination"
-        If .Show <> -1 Then Exit Sub
-        destination = .SelectedItems(1)
-    End With
+    Set fso = CreateObject("Scripting.FileSystemObject")
     
-    destinationFile = destination & "\" & fichier
+    Name ancienChemin As nouveauChemin
     
-    On Error GoTo Erreur
+    MsgBox "Dossier renommé", vbInformation
     
-    ' Copier le fichier
-    FileCopy source, destinationFile
-    
-    MsgBox "Fichier copié avec succès", vbInformation
-    Exit Sub
-
-Erreur:
-    MsgBox "Erreur : " & Err.Description, vbCritical
-
+    ' Refresh
+    TreeView1.Nodes.Clear
+    Call ChargerDossier("C:\Test", Nothing)
 End Sub
