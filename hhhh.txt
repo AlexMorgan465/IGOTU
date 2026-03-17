@@ -1,57 +1,68 @@
-Option Explicit
-
-Private Sub UserForm_Initialize()
-    Dim chemin As String
-    
-    ' Dossier racine (à modifier)
-    chemin = "C:\Test"
-    
-    TreeView1.Nodes.Clear
-    Call ChargerDossier(chemin, Nothing)
-End Sub
-
-' Fonction pour charger les dossiers dans le TreeView
-Private Sub ChargerDossier(ByVal chemin As String, ByVal parentNode As Node)
+Private Sub CommandButton_CreateFolder_Click()
     Dim fso As Object
-    Dim dossier As Object
-    Dim sousDossier As Object
-    Dim node As Node
+    Dim cheminParent As String
+    Dim nomDossier As String
+    Dim nouveauChemin As String
     
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    Set dossier = fso.GetFolder(chemin)
-    
-    ' Ajouter le noeud
-    If parentNode Is Nothing Then
-        Set node = TreeView1.Nodes.Add(, , chemin, dossier.Name)
-    Else
-        Set node = TreeView1.Nodes.Add(parentNode, tvwChild, chemin, dossier.Name)
+    ' Vérifier qu’un noeud est sélectionné
+    If TreeView1.SelectedItem Is Nothing Then
+        MsgBox "Sélectionne un dossier d'abord", vbExclamation
+        Exit Sub
     End If
     
-    ' Parcourir les sous-dossiers
-    For Each sousDossier In dossier.SubFolders
-        Call ChargerDossier(sousDossier.Path, node)
-    Next
-End Sub
-
-' Quand on clique sur un dossier
-Private Sub TreeView1_NodeClick(ByVal Node As MSComctlLib.Node)
-    Dim fso As Object
-    Dim dossier As Object
-    Dim fichier As Object
+    cheminParent = TreeView1.SelectedItem.Key
     
-    ListBox1.Clear
+    ' Demander le nom du dossier
+    nomDossier = InputBox("Nom du nouveau dossier :", "Créer dossier")
+    
+    If nomDossier = "" Then Exit Sub
+    
+    nouveauChemin = cheminParent & "\" & nomDossier
     
     Set fso = CreateObject("Scripting.FileSystemObject")
-    Set dossier = fso.GetFolder(Node.Key)
     
-    ' Afficher les fichiers
-    For Each fichier In dossier.Files
-        ListBox1.AddItem fichier.Name
-    Next
+    ' Vérifier si existe déjà
+    If fso.FolderExists(nouveauChemin) Then
+        MsgBox "Ce dossier existe déjà", vbExclamation
+        Exit Sub
+    End If
     
-    ' Afficher aussi les sous-dossiers (optionnel)
-    Dim sousDossier As Object
-    For Each sousDossier In dossier.SubFolders
-        ListBox1.AddItem "[Dossier] " & sousDossier.Name
-    Next
+    ' Créer le dossier
+    fso.CreateFolder nouveauChemin
+    
+    MsgBox "Dossier créé avec succès", vbInformation
+    
+    ' Rafraîchir TreeView
+    TreeView1.Nodes.Clear
+    Call ChargerDossier("C:\Test", Nothing)
+End Sub
+Private Sub CommandButton_OpenFile_Click()
+    Dim cheminDossier As String
+    Dim fichier As String
+    Dim cheminComplet As String
+    
+    ' Vérifier sélection
+    If TreeView1.SelectedItem Is Nothing Then
+        MsgBox "Sélectionne un dossier", vbExclamation
+        Exit Sub
+    End If
+    
+    If ListBox1.ListIndex = -1 Then
+        MsgBox "Sélectionne un fichier", vbExclamation
+        Exit Sub
+    End If
+    
+    fichier = ListBox1.Value
+    
+    ' Ignorer les dossiers
+    If Left(fichier, 9) = "[Dossier]" Then
+        MsgBox "Ceci est un dossier", vbExclamation
+        Exit Sub
+    End If
+    
+    cheminDossier = TreeView1.SelectedItem.Key
+    cheminComplet = cheminDossier & "\" & fichier
+    
+    ' Ouvrir le fichier avec l'application par défaut
+    Shell "explorer.exe """ & cheminComplet & """", vbNormalFocus
 End Sub
