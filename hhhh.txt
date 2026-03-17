@@ -1,60 +1,26 @@
-Private Sub CommandButton_Copy_Click()
-    Dim fso As Object
-    Dim source As String
-    Dim destination As String
-    Dim cheminDossier As String
-    Dim item As String
+Private Sub ChargerArborescence()
+
+    Dim chemin As String
     
-    Set fso = CreateObject("Scripting.FileSystemObject")
+    chemin = TextBox_Path.Value
     
-    ' Choisir destination
-    With Application.FileDialog(msoFileDialogFolderPicker)
-        .Title = "Choisir le dossier de destination"
-        If .Show <> -1 Then Exit Sub
-        destination = .SelectedItems(1)
-    End With
-    
-    On Error GoTo Erreur
-    
-    ' Si élément ListBox
-    If ListBox1.ListIndex <> -1 Then
-        
-        cheminDossier = TreeView1.SelectedItem.Key
-        item = ListBox1.Value
-        source = cheminDossier & "\" & Replace(item, "[Dossier] ", "")
-        
-        ' Empêcher copie dans lui-même
-        If InStr(1, destination, source, vbTextCompare) > 0 Then
-            MsgBox "Impossible de copier dans lui-même", vbCritical
-            Exit Sub
-        End If
-        
-        If Left(item, 9) = "[Dossier]" Then
-            fso.CopyFolder source, destination, True ' overwrite
-        Else
-            fso.CopyFile source, destination, True ' overwrite
-        End If
-        
-    ' Sinon TreeView
-    ElseIf Not TreeView1.SelectedItem Is Nothing Then
-        
-        source = TreeView1.SelectedItem.Key
-        
-        If InStr(1, destination, source, vbTextCompare) > 0 Then
-            MsgBox "Impossible de copier dans lui-même", vbCritical
-            Exit Sub
-        End If
-        
-        fso.CopyFolder source, destination, True
-        
-    Else
-        MsgBox "Aucune sélection", vbExclamation
+    ' Vérifier si vide
+    If chemin = "" Then
+        MsgBox "Veuillez entrer un chemin", vbExclamation
         Exit Sub
     End If
     
-    MsgBox "Copie réussie", vbInformation
-    Exit Sub
+    ' Vérifier si existe
+    If Dir(chemin, vbDirectory) = "" Then
+        MsgBox "Chemin invalide", vbCritical
+        Exit Sub
+    End If
+    
+    ' Vider
+    TreeView1.Nodes.Clear
+    ListBox1.Clear
+    
+    ' Charger
+    Call ChargerDossier(chemin, Nothing)
 
-Erreur:
-    MsgBox "Erreur : " & Err.Description, vbCritical
 End Sub
