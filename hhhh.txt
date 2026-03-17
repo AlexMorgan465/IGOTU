@@ -1,9 +1,9 @@
-Private Sub CommandButton_Move_Click()
+Private Sub CommandButton_Copy_Click()
     Dim fso As Object
     Dim source As String
     Dim destination As String
-    Dim item As String
     Dim cheminDossier As String
+    Dim item As String
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     
@@ -23,16 +23,16 @@ Private Sub CommandButton_Move_Click()
         item = ListBox1.Value
         source = cheminDossier & "\" & Replace(item, "[Dossier] ", "")
         
-        ' Empêcher déplacement dans lui-même
+        ' Empêcher copie dans lui-même
         If InStr(1, destination, source, vbTextCompare) > 0 Then
-            MsgBox "Impossible de déplacer dans lui-même", vbCritical
+            MsgBox "Impossible de copier dans lui-même", vbCritical
             Exit Sub
         End If
         
         If Left(item, 9) = "[Dossier]" Then
-            fso.MoveFolder source, destination
+            fso.CopyFolder source, destination, True ' overwrite
         Else
-            fso.MoveFile source, destination
+            fso.CopyFile source, destination, True ' overwrite
         End If
         
     ' Sinon TreeView
@@ -41,24 +41,18 @@ Private Sub CommandButton_Move_Click()
         source = TreeView1.SelectedItem.Key
         
         If InStr(1, destination, source, vbTextCompare) > 0 Then
-            MsgBox "Impossible de déplacer dans lui-même", vbCritical
+            MsgBox "Impossible de copier dans lui-même", vbCritical
             Exit Sub
         End If
         
-        fso.MoveFolder source, destination
+        fso.CopyFolder source, destination, True
         
     Else
         MsgBox "Aucune sélection", vbExclamation
         Exit Sub
     End If
     
-    MsgBox "Déplacement réussi", vbInformation
-    
-    ' Refresh
-    TreeView1.Nodes.Clear
-    Call ChargerDossier("C:\Test", Nothing)
-    ListBox1.Clear
-    
+    MsgBox "Copie réussie", vbInformation
     Exit Sub
 
 Erreur:
