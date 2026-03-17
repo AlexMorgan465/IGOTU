@@ -1,26 +1,51 @@
-Private Sub ChargerArborescence()
+Private Sub CommandButton_CopyFile_Click()
 
-    Dim chemin As String
+    Dim fso As Object
+    Dim cheminDossier As String
+    Dim fichier As String
+    Dim source As String
+    Dim destination As String
     
-    chemin = TextBox_Path.Value
+    Set fso = CreateObject("Scripting.FileSystemObject")
     
-    ' Vérifier si vide
-    If chemin = "" Then
-        MsgBox "Veuillez entrer un chemin", vbExclamation
+    ' Vérifier sélection fichier
+    If TreeView1.SelectedItem Is Nothing Then
+        MsgBox "Sélectionne un dossier", vbExclamation
         Exit Sub
     End If
     
-    ' Vérifier si existe
-    If Dir(chemin, vbDirectory) = "" Then
-        MsgBox "Chemin invalide", vbCritical
+    If ListBox1.ListIndex = -1 Then
+        MsgBox "Sélectionne un fichier", vbExclamation
         Exit Sub
     End If
     
-    ' Vider
-    TreeView1.Nodes.Clear
-    ListBox1.Clear
+    fichier = ListBox1.Value
     
-    ' Charger
-    Call ChargerDossier(chemin, Nothing)
+    ' Empêcher si c'est un dossier
+    If Left(fichier, 9) = "[Dossier]" Then
+        MsgBox "Veuillez sélectionner un fichier uniquement", vbExclamation
+        Exit Sub
+    End If
+    
+    cheminDossier = TreeView1.SelectedItem.Key
+    source = cheminDossier & "\" & fichier
+    
+    ' Fenêtre parcourir
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Choisir le dossier de destination"
+        If .Show <> -1 Then Exit Sub
+        destination = .SelectedItems(1)
+    End With
+    
+    On Error GoTo Erreur
+    
+    ' Copier fichier (overwrite activé)
+    fso.CopyFile source, destination, True
+    
+    MsgBox "Fichier copié avec succès", vbInformation
+    Exit Sub
+
+Erreur:
+    MsgBox "Erreur : " & Err.Description, vbCritical
 
 End Sub
