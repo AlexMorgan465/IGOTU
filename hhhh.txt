@@ -1,14 +1,12 @@
 Private Sub CommandButton_CopyFile_Click()
 
-    Dim fso As Object
     Dim cheminDossier As String
     Dim fichier As String
     Dim source As String
     Dim destination As String
+    Dim destinationFile As String
     
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    ' Vérifier sélection fichier
+    ' Vérifier sélection
     If TreeView1.SelectedItem Is Nothing Then
         MsgBox "Sélectionne un dossier", vbExclamation
         Exit Sub
@@ -21,12 +19,13 @@ Private Sub CommandButton_CopyFile_Click()
     
     fichier = ListBox1.Value
     
-    ' Empêcher si c'est un dossier
+    ' Vérifier que ce n'est pas un dossier
     If Left(fichier, 9) = "[Dossier]" Then
         MsgBox "Veuillez sélectionner un fichier uniquement", vbExclamation
         Exit Sub
     End If
     
+    ' Chemin source
     cheminDossier = TreeView1.SelectedItem.Key
     source = cheminDossier & "\" & fichier
     
@@ -37,10 +36,12 @@ Private Sub CommandButton_CopyFile_Click()
         destination = .SelectedItems(1)
     End With
     
+    destinationFile = destination & "\" & fichier
+    
     On Error GoTo Erreur
     
-    ' Copier fichier (overwrite activé)
-    fso.CopyFile source, destination, True
+    ' Copier le fichier
+    FileCopy source, destinationFile
     
     MsgBox "Fichier copié avec succès", vbInformation
     Exit Sub
