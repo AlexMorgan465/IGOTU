@@ -1,37 +1,16 @@
-Bonjour Hicham,
+Bonjour Pierre,
 
-Merci pour ton retour.
+Merci pour ton message.
 
-Suite à ton message, j’ai préparé une première projection concrète du parcours client cible pour l’activité crédit immobilier, afin de mieux illustrer les évolutions proposées.
+Le processus de validation des PDF statiques accessibles est effectivement pris en charge par la Task Force, en s’appuyant sur la checklist de contrôle définie.
 
-👉 Tu trouveras ci-dessous une illustration du parcours :
+Une fois le document balisé, la validation finale est assurée par la Task Force, qui vérifie la conformité aux exigences d’accessibilité. Le métier reste toutefois impliqué en amont pour s’assurer que le contenu répond bien aux besoins fonctionnels.
 
-[Insérer ici l’image du parcours client]
+Concernant les évolutions visant à améliorer le niveau d’accessibilité, celles-ci sont généralement identifiées et proposées par la Task Force, en lien avec les normes en vigueur. Leur validation et priorisation peuvent ensuite être partagées avec le métier selon les impacts.
 
-Ce parcours se structure en plusieurs étapes clés :
+N’hésite pas si tu as besoin de précisions complémentaires.
 
-1. Simulation immobilière (en amont du formulaire)
-   Le client réalise une première simulation (montant du bien, apport, durée) et obtient une estimation de mensualité.
-   → Objectif : renforcer l’engagement et qualifier le besoin dès l’entrée.
+Bonne journée,
 
-2. Formulaire de contact enrichi
-   Collecte des informations client avec ajout d’une notion de maturité du projet (court / moyen / long terme).
-   → Objectif : mieux prioriser les leads côté CRC.
-
-3. Choix du créneau de rappel
-   Le client sélectionne une plage horaire de contact.
-   → Objectif : maximiser la joignabilité et améliorer l’expérience client.
-
-4. Validation du numéro (optionnelle)
-   Mise en place d’un contrôle via code SMS (OTP).
-   → Objectif : fiabiliser les coordonnées et réduire les leads non exploitables.
-
-5. Confirmation + SMS automatique
-   Envoi d’un message confirmant la prise en charge avec rappel du créneau choisi.
-   → Objectif : préparer le client à l’appel et augmenter le taux de décroché.
-
-Ce dispositif permet de passer d’un parcours actuel générant des leads peu engagés à un parcours plus structuré, orienté qualification et engagement client, avec un impact attendu direct sur la joignabilité et la transformation.
-
-Je peux compléter ce travail par une estimation des gains potentiels ou une déclinaison plus détaillée pour les équipes IT si besoin.
-
-Cordialement,
+Cordialement
+[Ton prénom / nom]
