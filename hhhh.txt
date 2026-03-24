@@ -1,71 +1,76 @@
-Voici un modèle de mail de constat que vous pouvez utiliser pour formaliser les observations suite à l’analyse des deux documents.
-
----
-
-Objet : Constat relatif aux normes de présentation – IPID et FGDR
-
-Date : 24 mars 2026
-De : [Votre nom / service]
-À : [Destinataire(s)]
-
 Bonjour,
 
-Je vous prie de trouver ci-après un constat établi suite à l’examen des deux documents réglementaires suivants :
+Suite à l’analyse de deux documents réglementaires, je vous transmets ci-dessous un constat structuré portant sur leurs normes de présentation et leurs objectifs respectifs :
 
-1. Règlement d’exécution (UE) 2017/1469 de la Commission – établissant le format normalisé du document d’information sur le produit d’assurance (IPID) ;
-2. Arrêté du 27 octobre 2015 (annexe I) – relatif au formulaire type d’information sur la garantie des dépôts (FGDR).
+Documents examinés :
+
+- Règlement d’exécution (UE) 2017/1469 de la Commission (IPID)
+- Arrêté du 27 octobre 2015 – Annexe I (FGDR)
 
 ---
 
 1. Objet et champ d’application
 
-Document Objet principal Champ
-IPID Information précontractuelle normalisée pour les produits d’assurance non‑vie Assurances non‑vie (auto, habitation, etc.)
-FGDR Information sur la garantie des dépôts bancaires Dépôts bancaires (comptes, livrets)
+- IPID : Document d’information précontractuelle standardisé pour les produits d’assurance non-vie (auto, habitation, etc.).
+- FGDR : Document informatif relatif à la garantie des dépôts bancaires (comptes, livrets).
 
 ---
 
-2. Points communs constatés
+2. Points communs
 
-· Objectif commun : Les deux textes visent à renforcer la transparence et la protection des consommateurs en imposant une information normalisée, claire et comparable.
-· Standardisation : Chaque document impose un format type (longueur, structure, intitulés, mentions obligatoires).
-· Obligation d’information précontractuelle : Les deux documents sont conçus pour être remis avant la conclusion du contrat (assurance ou compte bancaire).
-· Plafonds chiffrés : L’IPID impose des plafonds de garantie (ex. : montants maximaux assurés) ; le FGDR indique un plafond d’indemnisation (100 000 €).
-· Utilisation de symboles : L’IPID prévoit un système codifié (coches, croix, couleurs, icônes). Le FGDR utilise des listes structurées mais sans symboles graphiques normalisés.
+Les deux dispositifs présentent plusieurs convergences :
 
----
-
-3. Différences constatées
-
-Critère IPID (assurance non‑vie) FGDR (garantie des dépôts)
-Autorité Règlement européen – application directe Arrêté national (France)
-Support / longueur 2 à 3 pages A4 maximum, police définie Pas de limite explicite dans le formulaire type
-Structure imposée Ordre des sections impératif (9 rubriques) Structure libre mais mentions obligatoires
-Symboles / icônes Oui, avec couleurs et formes normalisées (parapluie vert, croix rouge, etc.) Non
-Accusé de réception Non mentionné Mention explicite (signature du contrat, envoi annuel)
-Mise à disposition numérique Encadrée (pop‑up, couches, etc.) Non traitée dans le détail
+- Un objectif commun de transparence et de protection du consommateur
+- Une volonté de standardisation de l’information (structure, mentions obligatoires)
+- Une remise en amont de la relation contractuelle
+- La présence de plafonds chiffrés (garanties ou indemnisation)
+- Une structuration facilitant la compréhension globale de l’information
 
 ---
 
-4. Éléments de vigilance
+3. Différences principales
 
-· Lisibilité : L’IPID impose une police minimale et un langage simple, ce qui n’est pas explicitement détaillé dans l’arrêté FGDR, bien que l’objectif de clarté soit sous-jacent.
-· Harmonisation : L’IPID est uniforme dans toute l’UE, tandis que le FGDR est spécifique à la France, ce qui peut entraîner des formats différents au sein d’un même groupe international.
-· Expérience client : L’absence de codification visuelle dans le formulaire FGDR peut réduire la rapidité d’identification des informations clés comparé à l’IPID.
+Plusieurs écarts significatifs sont observés :
+
+- Cadre réglementaire :
+  IPID relève d’un règlement européen directement applicable, tandis que le FGDR dépend d’un arrêté national.
+
+- Format et structure :
+  L’IPID impose une structure stricte (ordre des rubriques, limitation à 2–3 pages, exigences typographiques), contrairement au FGDR qui reste plus souple.
+
+- Aspect visuel :
+  L’IPID intègre des éléments graphiques normalisés (icônes, couleurs, symboles), alors que le FGDR n’en prévoit pas.
+
+- Formalisation de la remise :
+  Le FGDR inclut des mécanismes de traçabilité (signature, envoi périodique), absents du cadre IPID.
+
+- Digitalisation :
+  L’IPID encadre la diffusion numérique (ex. formats interactifs), ce qui n’est pas détaillé pour le FGDR.
+
+---
+
+4. Points de vigilance
+
+- Lisibilité : L’IPID impose des standards précis (langage clair, taille de police), contrairement au FGDR où ces exigences restent implicites.
+- Harmonisation internationale : L’IPID est uniforme à l’échelle européenne, alors que le FGDR peut varier selon les cadres nationaux.
+- Expérience utilisateur : L’absence d’éléments visuels dans le FGDR peut limiter l’accessibilité et la rapidité de compréhension des informations clés.
 
 ---
 
 5. Conclusion
 
-Les deux textes répondent à une même logique de protection du consommateur par la standardisation de l’information. Toutefois, ils diffèrent dans leur mise en œuvre : l’IPID est très prescriptif sur la forme (icônes, couleurs, ordre), tandis que le FGDR se concentre davantage sur le contenu informatif à délivrer sans imposer une présentation graphique stricte.
+Les deux dispositifs s’inscrivent dans une logique commune de normalisation de l’information au bénéfice du consommateur. Toutefois, leurs approches diffèrent :
 
-Un travail d’alignement des pratiques internes pourrait être utile, notamment en matière de lisibilité et d’expérience utilisateur, dans l’attente d’éventuelles évolutions réglementaires.
+- L’IPID adopte une démarche fortement prescriptive, notamment sur la forme et la présentation.
+- Le FGDR privilégie une approche centrée sur le contenu, avec davantage de flexibilité sur le format.
+
+Dans ce contexte, une réflexion sur l’harmonisation des pratiques internes, notamment en matière de lisibilité et d’expérience utilisateur, pourrait constituer un levier d’amélioration pertinent.
 
 ---
 
-Je reste à votre disposition pour tout échange complémentaire.
+Je reste à votre disposition pour toute précision ou échange complémentaire.
 
 Cordialement,
 [Votre nom]
-[Service / fonction]
-[Coordonnées]
+[Votre fonction / service]
+[Vos coordonnées]
