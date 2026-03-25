@@ -1,76 +1,55 @@
-Bonjour,
+Voici le contenu de l’image réorganisé en tableau clair et exploitable 👇
 
-Suite à l’analyse de deux documents réglementaires, je vous transmets ci-dessous un constat structuré portant sur leurs normes de présentation et leurs objectifs respectifs :
-
-Documents examinés :
-
-- Règlement d’exécution (UE) 2017/1469 de la Commission (IPID)
-- Arrêté du 27 octobre 2015 – Annexe I (FGDR)
 
 ---
 
-1. Objet et champ d’application
+🏦 Comparatif banques — Interface & impact business (crédit immobilier)
 
-- IPID : Document d’information précontractuelle standardisé pour les produits d’assurance non-vie (auto, habitation, etc.).
-- FGDR : Document informatif relatif à la garantie des dépôts bancaires (comptes, livrets).
+Banque	Interface (UX)	Parcours	Points forts	Points faibles	Impact appels	Impact conversion
 
----
+Crédit Mutuel	❌ Complexe	Long (~5 étapes)	Accompagnement humain	Formulaire dense, navigation peu intuitive	📞 Forte hausse (+ appels support)	📉 ❌ Baisse / abandon élevé (+47%)
+Fortuneo	✅ Fluide & rapide	Court (~3 étapes)	Simple, 100% en ligne, mobile-friendly	Moins personnalisé	📉 Moins d’appels	📈 ✅ +20% demandes complétées
+Boursorama Banque	✅ Moderne	Court (~3 étapes)	Mobile-friendly, parcours guidé	Peu d’accompagnement humain	📉 -20% appels support	📈 ✅ +20% conversion
+Monabanq	✅ Claire & guidée	Court (~3 étapes)	Interface simple, bonne UX	Moins rapide que Fortuneo	📉 Moins d’appels	📈 ✅ +20% demandes
+BNP Paribas	⚠️ Traditionnelle	Long (~5 étapes)	Réseau physique, conseil	Interface moins moderne, parcours lourd	📞 +53% appels	📊 ⚠️ Conversion variable
 
-2. Points communs
 
-Les deux dispositifs présentent plusieurs convergences :
-
-- Un objectif commun de transparence et de protection du consommateur
-- Une volonté de standardisation de l’information (structure, mentions obligatoires)
-- Une remise en amont de la relation contractuelle
-- La présence de plafonds chiffrés (garanties ou indemnisation)
-- Une structuration facilitant la compréhension globale de l’information
 
 ---
 
-3. Différences principales
+📊 Impact global UX (toutes banques)
 
-Plusieurs écarts significatifs sont observés :
+Type d’interface	Impact sur les appels	Impact sur conversion	Impact business
 
-- Cadre réglementaire :
-  IPID relève d’un règlement européen directement applicable, tandis que le FGDR dépend d’un arrêté national.
+❌ Interface complexe	📞 + appels entrants/sortants	📉 -25% à -40%	❌ Abandon élevé (+47%)
+✅ Interface optimisée	📉 -20% appels support	📈 +25% à +50%	✅ +20% demandes complétées
 
-- Format et structure :
-  L’IPID impose une structure stricte (ordre des rubriques, limitation à 2–3 pages, exigences typographiques), contrairement au FGDR qui reste plus souple.
 
-- Aspect visuel :
-  L’IPID intègre des éléments graphiques normalisés (icônes, couleurs, symboles), alors que le FGDR n’en prévoit pas.
-
-- Formalisation de la remise :
-  Le FGDR inclut des mécanismes de traçabilité (signature, envoi périodique), absents du cadre IPID.
-
-- Digitalisation :
-  L’IPID encadre la diffusion numérique (ex. formats interactifs), ce qui n’est pas détaillé pour le FGDR.
 
 ---
 
-4. Points de vigilance
+📚 Sources (comme dans l’image)
 
-- Lisibilité : L’IPID impose des standards précis (langage clair, taille de police), contrairement au FGDR où ces exigences restent implicites.
-- Harmonisation internationale : L’IPID est uniforme à l’échelle européenne, alors que le FGDR peut varier selon les cadres nationaux.
-- Expérience utilisateur : L’absence d’éléments visuels dans le FGDR peut limiter l’accessibilité et la rapidité de compréhension des informations clés.
+Aite-Novarica (2022)
 
----
+IBM / Forrester (2023)
 
-5. Conclusion
+McKinsey (2023)
 
-Les deux dispositifs s’inscrivent dans une logique commune de normalisation de l’information au bénéfice du consommateur. Toutefois, leurs approches diffèrent :
+Deloitte Digital
 
-- L’IPID adopte une démarche fortement prescriptive, notamment sur la forme et la présentation.
-- Le FGDR privilégie une approche centrée sur le contenu, avec davantage de flexibilité sur le format.
+PwC (2023)
 
-Dans ce contexte, une réflexion sur l’harmonisation des pratiques internes, notamment en matière de lisibilité et d’expérience utilisateur, pourrait constituer un levier d’amélioration pertinent.
+
 
 ---
 
-Je reste à votre disposition pour toute précision ou échange complémentaire.
+🧠 Conclusion rapide
 
-Cordialement,
-[Votre nom]
-[Votre fonction / service]
-[Vos coordonnées]
+👉 UX simple = plus de ventes et moins d’appels
+👉 UX complexe = taux d’appels négatif + perte de clients
+
+
+---
+
+Si tu veux, je peux te transformer ce tableau en slide PowerPoint prêt à présenter 👍
