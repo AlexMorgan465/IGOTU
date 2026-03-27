@@ -1,202 +1,283 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Removals Services</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crédit Mutuel - Prêt Immobilier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    <header class="main-header">
+        <div class="top-bar">
+            <span>Particuliers</span> | <span>Auto-entrepreneurs</span> | <span>Professionnels</span> | <span>Entreprises</span>
+        </div>
+        <nav class="navbar">
+            <div class="logo">
+                <span class="cm-blue">Crédit</span><span class="cm-red"> Mutuel</span>
+            </div>
+            <ul class="nav-links">
+                <li>Nos offres</li>
+                <li>Vos projets</li>
+                <li>Simulations</li>
+                <li>Magazine</li>
+            </ul>
+            <div class="auth-buttons">
+                <button class="btn-outline">Ouvrir un compte</button>
+                <button class="btn-filled">Espace client</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <div class="container">
+            <div class="content-left">
+                <p class="breadcrumb">Particuliers > Nos offres > Crédit > Prêt immobilier</p>
+                <p class="small-label">PRÊT MODULIMMO</p>
+                <h1>Prêt immobilier : vos projets immobiliers <br><span class="highlight">à portée de main</span></h1>
+                
+                <p class="description">Financez tous vos projets immobiliers avec notre prêt Modulimmo ! Un prêt modulable qui évolue en même temps que vous et s'adapte à votre situation financière.</p>
+
+                <ul class="features-list">
+                    <li><i class="icon">🔄</i> Possibilité de baisser ou d'augmenter vos mensualités</li>
+                    <li><i class="icon">📊</i> Pas de montant minimum ou maximum</li>
+                    <li><i class="icon">📈</i> Emprunt à taux fixe ou variable</li>
+                    <li><i class="icon">📅</i> Durée d'emprunt jusqu'à 25 ans</li>
+                </ul>
+
+                <div class="promo-box">
+                    <p class="promo-tag">SPÉCIAL PRIMO-ACCÉDANT</p>
+                    <p><strong>Prêt Coup de Pouce : un taux à 0,99%</strong> jusqu'à 30 000 € pour votre 1er achat immobilier. Du jamais vu !</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h3>Pas encore client ?</h3>
+                <p>Un conseiller vous rappelle pour simuler la mensualité de votre emprunt immobilier</p>
+                
+                <form id="simulationForm">
+                    <input type="text" placeholder="Nom*" required>
+                    <input type="text" placeholder="Prénom*" required>
+                    <div class="input-group">
+                        <input type="tel" placeholder="N° de téléphone*" required>
+                        <input type="text" placeholder="Code Postal*" required>
+                    </div>
+                    <input type="email" placeholder="Adresse e-mail*" required>
+                    
+                    <button type="submit" class="btn-submit">Obtenir une mensualité</button>
+                    <p class="form-footer">* Information obligatoire</p>
+                </form>
+
+                <div class="call-section">
+                    <p>Ou appelez le</p>
+                    <div class="phone-number">09 69 391 059</div>
+                    <p class="hours">De 8h30 à 19h du lundi au vendredi, de 8h30 à 13h le samedi.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bottom-info">
+        Vous êtes client du Crédit Mutuel ? <a href="#">Authentifiez-vous</a> pour être accompagné par votre conseiller.
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+:root {
+    --cm-blue: #003399;
+    --cm-red: #E2001A;
+    --text-dark: #333;
+    --bg-light: #f4f7f9;
 }
 
 body {
-    background: #f5f5f5;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-light);
 }
 
-/* HERO */
-.hero {
-    background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
-    padding: 40px 20px;
-    color: white;
-    position: relative;
-}
-
-.hero-overlay {
-    background: rgba(0,0,0,0.6);
-    padding: 40px;
-}
-
-.hero h1 {
-    font-size: 32px;
-    font-weight: bold;
-}
-
-.highlight {
-    color: #fff;
-    background: red;
-    padding: 5px 10px;
-}
-
-/* FORM */
-.form-box {
-    position: absolute;
-    right: 20px;
-    top: 40px;
+/* Header */
+.main-header {
     background: white;
-    color: black;
-    padding: 20px;
-    border-radius: 8px;
-    width: 260px;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 5%;
 }
 
-.form-box h3 {
-    font-size: 14px;
+.top-bar {
+    font-size: 12px;
+    color: #666;
     margin-bottom: 10px;
 }
 
-.form-box input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-}
-
-/* SERVICES BAR */
-.services-bar {
-    background: rgba(0,0,0,0.8);
-    color: white;
-    text-align: center;
-    padding: 15px;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-/* IMAGES */
-.gallery {
+.navbar {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding: 20px;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.gallery img {
-    width: 30%;
-    border-radius: 8px;
-}
-
-/* GREEN STRIP */
-.green-strip {
-    background: #2e7d32;
-    color: white;
-    text-align: center;
-    padding: 15px;
-    font-weight: bold;
-    font-size: 20px;
-}
-
-/* PRICING */
-.pricing {
-    text-align: center;
-    padding: 20px;
+.logo {
     font-size: 24px;
     font-weight: bold;
 }
 
-/* CONTACT */
-.contact {
-    background: #222;
+.cm-red { color: var(--cm-red); }
+.cm-blue { color: var(--cm-blue); }
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.btn-outline {
+    border: 1px solid var(--cm-blue);
+    background: transparent;
+    color: var(--cm-blue);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.btn-filled {
+    background: var(--cm-blue);
     color: white;
-    text-align: center;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 50px 5%;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    gap: 40px;
+}
+
+.content-left {
+    flex: 1;
+}
+
+.breadcrumb { font-size: 12px; color: #777; }
+.small-label { font-weight: bold; color: #555; font-size: 14px; margin-top: 20px; }
+
+h1 {
+    font-size: 32px;
+    color: var(--cm-blue);
+}
+
+.highlight {
+    background-color: var(--cm-red);
+    color: white;
+    padding: 2px 8px;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+}
+
+.features-list li {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+}
+
+.icon { margin-right: 10px; color: var(--cm-blue); }
+
+.promo-box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 30px;
+    border-left: 5px solid var(--cm-red);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Form Card */
+.form-card {
+    width: 400px;
+    background: white;
     padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+    position: relative;
+    border-right: 15px solid var(--cm-blue); /* L'accent bleu sur le côté */
 }
 
-.phone {
-    font-size: 40px;
-    font-weight: bold;
+.form-card input {
+    width: 100%;
+    padding: 12px;
     margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
 }
 
-.email {
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-submit {
+    width: 100%;
+    background: var(--cm-blue);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.call-section {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.phone-number {
     font-size: 20px;
-    color: #9be59b;
+    font-weight: bold;
+    color: var(--cm-blue);
 }
 
-/* RESPONSIVE */
-@media(max-width: 900px) {
-    .gallery {
-        flex-direction: column;
-    }
+.hours { font-size: 11px; color: #888; }
 
-    .gallery img {
-        width: 100%;
-    }
-
-    .form-box {
-        position: static;
-        margin-top: 20px;
-    }
+.bottom-info {
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
 }
-</style>
-</head>
+document.getElementById('simulationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Simulation simple d'envoi
+    const formData = new FormData(this);
+    alert("Merci " + formData.get('Prénom') + ", un conseiller vous rappellera prochainement.");
+    
+    // Réinitialisation
+    this.reset();
+});
 
-<body>
-
-<!-- HERO -->
-<div class="hero">
-    <div class="hero-overlay">
-        <h1>
-            Prêt immobilier : vos projets immobiliers <br>
-            <span class="highlight">à portée de main</span>
-        </h1>
-        <p>Financez tous vos projets immobiliers avec notre prêt modulable.</p>
-    </div>
-
-    <div class="form-box">
-        <h3>la mensualité de votre emprunt immobilier</h3>
-        <input type="text" placeholder="Nom*">
-        <input type="text" placeholder="Prénom*">
-        <button onclick="submitForm()">Envoyer</button>
-    </div>
-</div>
-
-<!-- SERVICES -->
-<div class="services-bar">
-    FURNITURE REMOVALS • WASTE REMOVALS • HOUSE MOVING • 
-    GARDEN CLEARANCES • GRASS CUTTING
-</div>
-
-<!-- IMAGES -->
-<div class="gallery">
-    <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952">
-    <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d">
-    <img src="https://images.unsplash.com/photo-1581093458791-9d42c7b9b83d">
-</div>
-
-<!-- GREEN STRIP -->
-<div class="green-strip">
-    SERVICES FOR HOME OWNERS & BUSINESSES
-</div>
-
-<!-- PRICING -->
-<div class="pricing">
-    PRICING VARIES – CALL FOR A QUOTE!
-</div>
-
-<!-- CONTACT -->
-<div class="contact">
-    <div>📞 CALL:</div>
-    <div class="phone">07346 348779</div>
-    <div class="email">✉️ JamWithAVan@gmail.com</div>
-</div>
-
-<script>
-function submitForm() {
-    alert("Formulaire envoyé !");
-}
-</script>
-
-</body>
-</html>
+// Animation simple au survol des boutons
+const buttons = document.querySelectorAll('button');
+buttons.forEach(btn => {
+    btn.addEventListener('mouseover', () => {
+        btn.style.opacity = '0.8';
+    });
+    btn.addEventListener('mouseout', () => {
+        btn.style.opacity = '1';
+    });
+});
