@@ -1,874 +1,202 @@
-Voici le code complet du site Crédit Mutuel avec toutes les améliorations innovantes : formulaire avec consentement explicite, dashboard client, popup de confirmation, et une interface moderne qui respecte l'identité de la banque.
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Crédit Mutuel · Crédit Immobilier nouvelle génération</title>
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f9ff;
-            color: #1e2f3e;
-            line-height: 1.5;
-        }
-
-        /* Couleurs institution Crédit Mutuel */
-        :root {
-            --cm-blue: #003366;
-            --cm-blue-light: #0066b3;
-            --cm-green: #008c6f;
-            --cm-green-dark: #006f58;
-            --cm-gold: #d4af37;
-            --cm-gray-light: #f0f4f9;
-            --cm-gray: #6c7a8e;
-            --shadow-sm: 0 8px 20px rgba(0, 51, 102, 0.08);
-            --shadow-md: 0 12px 28px rgba(0, 51, 102, 0.12);
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* Header */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            flex-wrap: wrap;
-            gap: 20px;
-            border-bottom: 1px solid rgba(0, 51, 102, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            background: linear-gradient(135deg, #003366, #0066b3);
-            width: 44px;
-            height: 44px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.6rem;
-            box-shadow: 0 6px 12px rgba(0,51,102,0.2);
-        }
-
-        .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #003366;
-            line-height: 1.2;
-        }
-
-        .logo-text span {
-            font-size: 0.75rem;
-            color: #008c6f;
-            font-weight: 500;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #1e3a5f;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: #008c6f;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #003366;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            color: #003366;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-outline:hover {
-            background: #003366;
-            color: white;
-        }
-
-        /* Hero Section */
-        .hero {
-            display: flex;
-            align-items: center;
-            gap: 48px;
-            padding: 48px 0 32px;
-            flex-wrap: wrap;
-        }
-
-        .hero-content {
-            flex: 1;
-        }
-
-        .hero-badge {
-            background: #e6f0fa;
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #003366;
-            margin-bottom: 20px;
-        }
-
-        .hero-content h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #002b4a;
-            line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        .hero-content p {
-            font-size: 1.2rem;
-            color: #4a627a;
-            margin-bottom: 32px;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 24px;
-            margin-top: 24px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #008c6f;
-        }
-
-        .hero-image {
-            flex: 1;
-            background: linear-gradient(145deg, #e3f0fc, #cde3f5);
-            border-radius: 48px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .hero-image i {
-            font-size: 6rem;
-            color: #003366;
-        }
-
-        /* Formulaire principal */
-        .form-section {
-            background: white;
-            border-radius: 48px;
-            padding: 48px;
-            margin: 48px 0;
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(0,102,179,0.1);
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .form-header h2 {
-            font-size: 2rem;
-            color: #003366;
-            margin-bottom: 12px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1e3a5f;
-        }
-
-        .form-group input, .form-group select {
-            padding: 14px 18px;
-            border: 1.5px solid #e0e8f0;
-            border-radius: 28px;
-            font-size: 1rem;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #008c6f;
-            box-shadow: 0 0 0 3px rgba(0,140,111,0.1);
-        }
-
-        /* Consentement RGPD */
-        .consent-box {
-            background: #f8fafd;
-            border-radius: 24px;
-            padding: 20px;
-            margin: 24px 0;
-            border-left: 4px solid #008c6f;
-        }
-
-        .consent-box label {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .consent-box input {
-            width: 20px;
-            height: 20px;
-            margin-top: 2px;
-        }
-
-        /* Mode de contact radios */
-        .contact-modes {
-            display: flex;
-            gap: 24px;
-            margin: 24px 0;
-            flex-wrap: wrap;
-        }
-
-        .contact-option {
-            flex: 1;
-            border: 2px solid #e0e8f0;
-            border-radius: 28px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .contact-option.selected {
-            border-color: #008c6f;
-            background: #f0faf7;
-        }
-
-        .contact-option input {
-            margin-right: 12px;
-            transform: scale(1.1);
-        }
-
-        .contact-option label {
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #callbackOptions {
-            background: #f8fafd;
-            border-radius: 24px;
-            padding: 20px;
-            margin-top: 20px;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .btn-submit {
-            background: #008c6f;
-            color: white;
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 48px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 24px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-submit:hover {
-            background: #006f58;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,140,111,0.3);
-        }
-
-        /* Dashboard client */
-        .dashboard-section {
-            background: linear-gradient(135deg, #003366 0%, #004c8c 100%);
-            border-radius: 48px;
-            padding: 48px;
-            margin: 48px 0;
-            color: white;
-        }
-
-        .dashboard-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .dashboard-header h2 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-
-        .steps {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin: 32px 0;
-        }
-
-        .step {
-            flex: 1;
-            text-align: center;
-            padding: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 32px;
-            backdrop-filter: blur(4px);
-        }
-
-        .step-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
-
-        .step.done .step-icon { color: #d4af37; }
-        .step.active .step-icon { color: #ffd966; animation: pulse 1.5s infinite; }
-        .step span { font-weight: 500; display: block; margin-top: 8px; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .dashboard-actions {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 32px;
-        }
-
-        .btn-dashboard {
-            background: white;
-            color: #003366;
-            padding: 12px 28px;
-            border-radius: 40px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-        }
-
-        .btn-dashboard:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-
-        /* Popup */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .popup-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .popup-card {
-            background: white;
-            max-width: 450px;
-            width: 90%;
-            border-radius: 48px;
-            padding: 40px 32px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            transform: scale(0.9);
-            transition: transform 0.2s;
-        }
-
-        .popup-overlay.active .popup-card {
-            transform: scale(1);
-        }
-
-        .popup-card h2 {
-            color: #008c6f;
-            margin-bottom: 16px;
-        }
-
-        .popup-card .popup-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 28px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* Mobile */
-        @media (max-width: 768px) {
-            .container { padding: 0 16px; }
-            .hero-content h1 { font-size: 2rem; }
-            .form-grid { grid-template-columns: 1fr; }
-            .form-group.full-width { grid-column: span 1; }
-            .contact-modes { flex-direction: column; }
-            .steps { flex-direction: column; }
-            .navbar { flex-direction: column; text-align: center; }
-        }
-
-        /* Notification toast */
-        .toast-notification {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #1e2f3e;
-            color: white;
-            padding: 14px 24px;
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1100;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s;
-        }
-
-        .toast-notification.show {
-            transform: translateX(0);
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 0 30px;
-            color: #6c7a8e;
-            border-top: 1px solid #e0e8f0;
-            margin-top: 40px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Removals Services</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f5f5f5;
+}
+
+/* HERO */
+.hero {
+    background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+    padding: 40px 20px;
+    color: white;
+    position: relative;
+}
+
+.hero-overlay {
+    background: rgba(0,0,0,0.6);
+    padding: 40px;
+}
+
+.hero h1 {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.highlight {
+    color: #fff;
+    background: red;
+    padding: 5px 10px;
+}
+
+/* FORM */
+.form-box {
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    background: white;
+    color: black;
+    padding: 20px;
+    border-radius: 8px;
+    width: 260px;
+}
+
+.form-box h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+/* SERVICES BAR */
+.services-bar {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* IMAGES */
+.gallery {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+.gallery img {
+    width: 30%;
+    border-radius: 8px;
+}
+
+/* GREEN STRIP */
+.green-strip {
+    background: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* PRICING */
+.pricing {
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* CONTACT */
+.contact {
+    background: #222;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+.phone {
+    font-size: 40px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.email {
+    font-size: 20px;
+    color: #9be59b;
+}
+
+/* RESPONSIVE */
+@media(max-width: 900px) {
+    .gallery {
+        flex-direction: column;
+    }
+
+    .gallery img {
+        width: 100%;
+    }
+
+    .form-box {
+        position: static;
+        margin-top: 20px;
+    }
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <!-- Header -->
-    <nav class="navbar">
-        <div class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-hand-holding-heart"></i>
-            </div>
-            <div class="logo-text">
-                <h1>Crédit Mutuel</h1>
-                <span>Banque coopérative et citoyenne</span>
-            </div>
-        </div>
-        <div class="nav-links">
-            <a href="#">Accueil</a>
-            <a href="#">Crédit immobilier</a>
-            <a href="#">Simulation</a>
-            <a href="#">Contact</a>
-            <button class="btn-outline" id="quickRappelBtn"><i class="fas fa-phone-alt"></i> Être rappelé</button>
-        </div>
-    </nav>
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-overlay">
+        <h1>
+            Prêt immobilier : vos projets immobiliers <br>
+            <span class="highlight">à portée de main</span>
+        </h1>
+        <p>Financez tous vos projets immobiliers avec notre prêt modulable.</p>
+    </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <i class="fas fa-check-circle"></i> Nouvelle expérience digitale
-            </div>
-            <h1>Votre crédit immobilier<br>en toute maîtrise</h1>
-            <p>Obtenez une réponse sous 24h, choisissez votre mode de contact et suivez votre dossier en temps réel.</p>
-            <div class="hero-stats">
-                <div class="stat"><div class="stat-number">+92%</div><div>Clients satisfaits</div></div>
-                <div class="stat"><div class="stat-number">24h</div><div>Réponse moyenne</div></div>
-                <div class="stat"><div class="stat-number">100%</div><div>Digital & humain</div></div>
-            </div>
-        </div>
-        <div class="hero-image">
-            <i class="fas fa-home"></i>
-            <i class="fas fa-chart-line" style="font-size: 3rem; margin-left: 16px;"></i>
-            <p style="margin-top: 16px; font-weight: 500;">🏆 Taux compétitifs 2026</p>
-        </div>
-    </section>
-
-    <!-- FORMULAIRE AVEC CONSENTEMENT EXPLICITE -->
-    <section class="form-section" id="formSection">
-        <div class="form-header">
-            <h2>📋 Simulez & validez votre projet</h2>
-            <p>Remplissez le formulaire, choisissez votre mode de contact et obtenez une réponse rapide</p>
-        </div>
-
-        <form id="creditForm">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Prénom *</label>
-                    <input type="text" id="prenom" placeholder="Marie" required>
-                </div>
-                <div class="form-group">
-                    <label>Nom *</label>
-                    <input type="text" id="nom" placeholder="Dupont" required>
-                </div>
-                <div class="form-group">
-                    <label>Téléphone *</label>
-                    <input type="tel" id="telephone" placeholder="06 12 34 56 78" required>
-                </div>
-                <div class="form-group">
-                    <label>Email *</label>
-                    <input type="email" id="email" placeholder="marie@exemple.fr" required>
-                </div>
-                <div class="form-group full-width">
-                    <label>Code postal *</label>
-                    <input type="text" id="codePostal" placeholder="67000" required>
-                </div>
-            </div>
-
-            <!-- Consentement RGPD explicite -->
-            <div class="consent-box">
-                <label>
-                    <input type="checkbox" id="consentRGPD" required>
-                    <span>J'accepte que mes données soient utilisées pour l'étude de mon projet de crédit immobilier et être contacté(e) par un conseiller Crédit Mutuel. Conformément au RGPD, j'ai un droit d'accès, de rectification et d'opposition. <a href="#" style="color:#008c6f;">En savoir plus</a></span>
-                </label>
-            </div>
-
-            <h3 style="margin: 20px 0 12px;">📞 Comment souhaitez-vous être contacté ?</h3>
-            <div class="contact-modes" id="contactModes">
-                <div class="contact-option" data-value="callback">
-                    <label>
-                        <input type="radio" name="contact" value="callback" required> 
-                        <i class="fas fa-phone"></i> Être rappelé par un conseiller
-                    </label>
-                </div>
-                <div class="contact-option" data-value="online">
-                    <label>
-                        <input type="radio" name="contact" value="online"> 
-                        <i class="fas fa-laptop"></i> Continuer 100% en ligne (simulation avancée + chat)
-                    </label>
-                </div>
-            </div>
-
-            <!-- Créneaux dynamiques -->
-            <div id="callbackOptions" style="display:none;">
-                <label style="font-weight: 600;"><i class="far fa-calendar-alt"></i> Choisissez votre créneau de rappel :</label>
-                <select id="creneauSelect" style="margin-top: 12px; width:100%; padding:12px; border-radius:40px;">
-                    <option>Aujourd’hui 14h-16h</option>
-                    <option>Demain 10h-12h</option>
-                    <option>Demain 14h-16h</option>
-                    <option>Après-demain 9h-12h</option>
-                </select>
-                <p style="font-size: 0.8rem; margin-top: 8px; color:#008c6f;"><i class="fas fa-clock"></i> Créneau garanti, appel qualité</p>
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <i class="fas fa-paper-plane"></i> Valider ma demande
-            </button>
-        </form>
-    </section>
-
-    <!-- DASHBOARD CLIENT (innovation majeure) -->
-    <section class="dashboard-section" id="dashboard">
-        <div class="dashboard-header">
-            <h2>📊 Suivi de votre dossier</h2>
-            <p>Visualisez l'avancement en temps réel et restez maître de votre projet</p>
-        </div>
-        <div class="steps" id="stepsContainer">
-            <div class="step done" data-step="1">
-                <div class="step-icon"><i class="fas fa-check-circle"></i></div>
-                <div>Demande reçue</div>
-                <span>✔ Validation initiale</span>
-            </div>
-            <div class="step active" data-step="2">
-                <div class="step-icon"><i class="fas fa-chart-line"></i></div>
-                <div>Analyse en cours</div>
-                <span>⏳ Étude personnalisée</span>
-            </div>
-            <div class="step" data-step="3">
-                <div class="step-icon"><i class="fas fa-file-signature"></i></div>
-                <div>Offre envoyée</div>
-                <span>📄 Simulation définitive</span>
-            </div>
-            <div class="step" data-step="4">
-                <div class="step-icon"><i class="fas fa-handshake"></i></div>
-                <div>Signature finale</div>
-                <span>🏁 Projet réalisé</span>
-            </div>
-        </div>
-        <div class="dashboard-actions">
-            <button class="btn-dashboard" id="requestCallDashboard"><i class="fas fa-phone"></i> Demander un rappel</button>
-            <button class="btn-dashboard" id="openChatBtn"><i class="fas fa-comments"></i> Chat en ligne</button>
-            <button class="btn-dashboard" id="simulateAgain"><i class="fas fa-calculator"></i> Re-simuler mon prêt</button>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p><i class="fas fa-shield-alt"></i> Sécurité & confidentialité garanties | Crédit Mutuel - Une banque qui vous accompagne</p>
-        <p style="font-size:0.8rem;">✨ Passage d’un système "appel subi" → "contact maîtrisé" | Dashboard client, consentement clair, suivi 24h</p>
-    </footer>
-</div>
-
-<!-- POPUP CONFIRMATION -->
-<div id="confirmationPopup" class="popup-overlay">
-    <div class="popup-card">
-        <i class="fas fa-check-circle" style="font-size: 4rem; color: #008c6f; margin-bottom: 16px;"></i>
-        <h2>✅ Demande envoyée</h2>
-        <p>Votre dossier est en cours d’analyse par nos experts.</p>
-        <p><strong>⏱️ Réponse estimée : 24h</strong></p>
-        <div class="popup-actions">
-            <button class="btn-dashboard" id="trackDashboardBtn"><i class="fas fa-chart-simple"></i> Suivre mon dossier</button>
-            <button class="btn-dashboard" id="planCallAgain"><i class="fas fa-calendar-plus"></i> Planifier un appel</button>
-        </div>
+    <div class="form-box">
+        <h3>la mensualité de votre emprunt immobilier</h3>
+        <input type="text" placeholder="Nom*">
+        <input type="text" placeholder="Prénom*">
+        <button onclick="submitForm()">Envoyer</button>
     </div>
 </div>
 
-<!-- Notification Toast -->
-<div id="toastNotif" class="toast-notification">
-    <i class="fas fa-bell"></i>
-    <span id="toastMessage">Votre dossier est en cours de traitement !</span>
+<!-- SERVICES -->
+<div class="services-bar">
+    FURNITURE REMOVALS • WASTE REMOVALS • HOUSE MOVING • 
+    GARDEN CLEARANCES • GRASS CUTTING
+</div>
+
+<!-- IMAGES -->
+<div class="gallery">
+    <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952">
+    <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d">
+    <img src="https://images.unsplash.com/photo-1581093458791-9d42c7b9b83d">
+</div>
+
+<!-- GREEN STRIP -->
+<div class="green-strip">
+    SERVICES FOR HOME OWNERS & BUSINESSES
+</div>
+
+<!-- PRICING -->
+<div class="pricing">
+    PRICING VARIES – CALL FOR A QUOTE!
+</div>
+
+<!-- CONTACT -->
+<div class="contact">
+    <div>📞 CALL:</div>
+    <div class="phone">07346 348779</div>
+    <div class="email">✉️ JamWithAVan@gmail.com</div>
 </div>
 
 <script>
-    // Gestion dynamique des modes de contact
-    const contactRadios = document.querySelectorAll('input[name="contact"]');
-    const callbackDiv = document.getElementById('callbackOptions');
-    const contactOptionsDivs = document.querySelectorAll('.contact-option');
-
-    function updateContactUI() {
-        const selectedRadio = document.querySelector('input[name="contact"]:checked');
-        if (selectedRadio && selectedRadio.value === "callback") {
-            callbackDiv.style.display = "block";
-        } else {
-            callbackDiv.style.display = "none";
-        }
-        // style visuel pour les cartes
-        contactOptionsDivs.forEach(div => {
-            const radio = div.querySelector('input');
-            if (radio.checked) {
-                div.classList.add('selected');
-            } else {
-                div.classList.remove('selected');
-            }
-        });
-    }
-
-    contactRadios.forEach(radio => {
-        radio.addEventListener('change', updateContactUI);
-    });
-    updateContactUI();
-
-    // Fonction toast
-    function showToast(message, duration = 4000) {
-        const toast = document.getElementById('toastNotif');
-        document.getElementById('toastMessage').innerText = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, duration);
-    }
-
-    // Soumission formulaire + popup
-    const form = document.getElementById('creditForm');
-    const popup = document.getElementById('confirmationPopup');
-    const dashboardSteps = document.getElementById('stepsContainer');
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Vérification consentement
-        const consent = document.getElementById('consentRGPD').checked;
-        if (!consent) {
-            alert("Merci d'accepter les conditions de traitement des données pour que nous puissions traiter votre demande.");
-            return;
-        }
-
-        // Vérifier téléphone/email remplis
-        const tel = document.getElementById('telephone').value.trim();
-        const email = document.getElementById('email').value.trim();
-        if (!tel || !email) {
-            alert("Veuillez renseigner un téléphone et un email valides.");
-            return;
-        }
-
-        // Récupération du mode de contact choisi
-        const contactMode = document.querySelector('input[name="contact"]:checked');
-        if (!contactMode) {
-            alert("Veuillez sélectionner un mode de contact (rappel ou 100% en ligne).");
-            return;
-        }
-
-        // simulation d'envoi
-        const prenom = document.getElementById('prenom').value;
-        const nom = document.getElementById('nom').value;
-        let creneauMsg = "";
-        if (contactMode.value === "callback") {
-            const creneau = document.getElementById('creneauSelect').value;
-            creneauMsg = ` - Créneau choisi : ${creneau}`;
-            showToast(`✅ Demande enregistrée. Rappel planifié ${creneau}`, 5000);
-        } else {
-            showToast(`✅ Demande 100% en ligne reçue. Accédez à votre espace simulation.`, 5000);
-        }
-        
-        // Sauvegarde localStorage pour dashboard
-        const leadData = {
-            prenom: prenom,
-            nom: nom,
-            tel: tel,
-            email: email,
-            contactMode: contactMode.value,
-            creneau: contactMode.value === "callback" ? document.getElementById('creneauSelect').value : null,
-            dateDemande: new Date().toLocaleString(),
-            etape: 2  // analyse en cours
-        };
-        localStorage.setItem('creditMutuelLead', JSON.stringify(leadData));
-        
-        // Mettre à jour dynamiquement le dashboard step pour montrer "analyse en cours"
-        document.querySelectorAll('.step').forEach((step, idx) => {
-            if (idx === 0) step.classList.add('done');
-            if (idx === 1) step.classList.add('active');
-            if (idx > 1) step.classList.remove('active', 'done');
-        });
-
-        // Afficher popup avec options innovantes
-        popup.classList.add('active');
-        
-        // Message de notification
-        setTimeout(() => {
-            // optionnel: envoyer une notif
-        }, 100);
-    });
-
-    // Fermeture popup / actions
-    function closePopup() {
-        popup.classList.remove('active');
-    }
-
-    document.getElementById('trackDashboardBtn')?.addEventListener('click', () => {
-        closePopup();
-        document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
-        showToast("Retrouvez votre dossier en bas de page avec les étapes actualisées", 3000);
-    });
-
-    document.getElementById('planCallAgain')?.addEventListener('click', () => {
-        closePopup();
-        // Pré-sélectionne le mode rappel
-        document.querySelector('input[value="callback"]').checked = true;
-        updateContactUI();
-        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
-        showToast("Choisissez un nouveau créneau pour un rappel personnalisé", 3000);
-    });
-
-    // Dashboard actions supplémentaires
-    document.getElementById('requestCallDashboard')?.addEventListener('click', () => {
-        document.querySelector('input[value="callback"]').checked = true;
-        updateContactUI();
-        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
-        showToast("Planifiez votre rappel depuis le formulaire ci-dessus", 3000);
-    });
-
-    document.getElementById('openChatBtn')?.addEventListener('click', () => {
-        alert("💬 Chat Crédit Mutuel (simulation) : Un conseiller virtuel est à votre disposition pour répondre à vos questions sur les taux et conditions.");
-        showToast("Chat en ligne bientôt disponible avec un expert immobilier", 4000);
-    });
-
-    document.getElementById('simulateAgain')?.addEventListener('click', () => {
-        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
-        showToast("Modifiez vos données et relancez votre simulation", 2500);
-    });
-
-    document.getElementById('quickRappelBtn')?.addEventListener('click', () => {
-        document.querySelector('input[value="callback"]').checked = true;
-        updateContactUI();
-        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Charger les données si existent pour améliorer UX
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedLead = localStorage.getItem('creditMutuelLead');
-        if (savedLead) {
-            try {
-                const data = JSON.parse(savedLead);
-                if (data.prenom) document.getElementById('prenom').value = data.prenom;
-                if (data.nom) document.getElementById('nom').value = data.nom;
-                if (data.tel) document.getElementById('telephone').value = data.tel;
-                if (data.email) document.getElementById('email').value = data.email;
-                if (data.contactMode === 'callback') {
-                    document.querySelector('input[value="callback"]').checked = true;
-                    updateContactUI();
-                    if(data.creneau) {
-                        const select = document.getElementById('creneauSelect');
-                        if(select) select.value = data.creneau;
-                    }
-                } else if (data.contactMode === 'online') {
-                    document.querySelector('input[value="online"]').checked = true;
-                    updateContactUI();
-                }
-            } catch(e) {}
-        }
-    });
+function submitForm() {
+    alert("Formulaire envoyé !");
+}
 </script>
+
 </body>
 </html>
-```
