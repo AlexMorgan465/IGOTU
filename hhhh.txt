@@ -3,92 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulation Prêt Immobilier</title>
+    <title>Prêt Immobilier - Crédit Mutuel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<div class="container">
     <header class="header">
-        <div class="header-content">
-            <div class="illustration">
-                <img src="https://img.icons8.com/clouds/100/home.png" alt="house">
-            </div>
-            <div class="title-area">
-                <h1>Simulation <span>Prêt Immobilier</span></h1>
-                <p>Obtenez une estimation <strong>rapide de votre capacité d'emprunt</strong></p>
+        <div class="top-nav">
+            <div class="container-nav">
+                <a href="#" class="active">Particuliers</a>
+                <a href="#">Auto-entrepreneurs</a>
+                <a href="#">Professionnels</a>
+                <a href="#">Entreprises</a>
+                <a href="#">Agriculteurs</a>
+                <a href="#">Associations</a>
             </div>
         </div>
+        <nav class="main-nav">
+            <div class="logo-section">
+                <img src="\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Task_Force_Central\logo (1).svg" alt="Crédit Mutuel" class="logo-img">
+            </div>
+            <ul class="menu">
+                <li>Nos offres <span class="arrow">▼</span></li>
+                <li>Vos projets <span class="arrow">▼</span></li>
+                <li>Simulations</li>
+                <li>Magazine</li>
+		
+            </ul>
+	    <button class="search-btn">🔍</button>
+            <div class="actions">
+                
+                <button class="btn-secondary">Ouvrir un compte</button>
+                <button class="btn-primary">Espace client</button>
+            </div>
+        </nav>
     </header>
 
-    <nav class="stepper">
-        <div class="step active">1. Votre Projet</div>
-        <div class="step">2. Votre Apport</div>
-        <div class="step">3. Vos Revenus</div>
-        <div class="step">4. Vos Charges</div>
-        <div class="step">5. Votre Situation</div>
-    </nav>
-
-    <div class="main-layout">
-        <section class="form-card">
-            <h2>Votre Projet</h2>
-            <p class="subtitle">Remplissez ce formulaire pour obtenir une estimation de votre prêt immobilier en quelques minutes.</p>
-
-            <div class="input-group">
-                <label>Type de projet</label>
-                <div class="toggle-buttons">
-                    <button class="btn-toggle active">Achat résidence principale</button>
-                    <button class="btn-toggle">Investissement locatif</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Type de bien</label>
-                <div class="toggle-buttons mini">
-                    <button class="btn-toggle active">Ancien</button>
-                    <button class="btn-toggle">Neuf</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Prix du bien</label>
-                <div class="select-wrapper">
-                    <span class="currency">€</span>
-                    <select>
-                        <option>250 000 € ~</option>
-                        <option>300 000 € ~</option>
-                    </select>
-                </div>
-                <small>Ex: 250 000 €, 300 000 €, etc.</small>
-            </div>
-
-            <button class="btn-next">ÉTAPE SUIVANTE <i class="fa-solid fa-chevron-right"></i></button>
-        </section>
-
-        <aside class="summary-card">
-            <h3>Résumé</h3>
-            <div class="summary-item">
-                <span class="label">Montant finançable environ</span>
-                <span class="value main-price">230 000 €</span>
-            </div>
-            <div class="summary-item highlight">
-                <span class="label">Mensualité estimée</span>
-                <span class="value mensualite">+ 950 € / mois</span>
-            </div>
-            <hr>
-            <ul class="details">
-                <li><i class="fa-solid fa-chevron-right"></i> Durée : <strong>25 ans</strong></li>
-                <li><i class="fa-solid fa-chevron-right"></i> Taux estimé : <strong>1,20 %</strong></li>
-                <li><i class="fa-solid fa-chevron-right"></i> Crédits : <strong>25 000 €</strong></li>
-            </ul>
-            <button class="btn-offer">OBTENIR UNE OFFRE !</button>
-            <div class="callback">
-                <i class="fa-solid fa-phone"></i> Rappel rapide par un conseiller
-            </div>
-        </aside>
+    <div class="breadcrumb-container">
+        <span>Particuliers > Nos offres > Crédits > Prêt immobilier > Prêt immobilier</span>
     </div>
-</div>
+
+    <main class="hero">
+        <div class="hero-grid">
+            <div class="hero-text">
+                <span class="sub-title">PRÊT MODULIMMO</span>
+                <h1>Prêt immobilier : vos projets immobiliers <br><mark>à portée de main</mark></h1>
+                
+                <p class="intro-p">Financez tous vos projets immobiliers avec notre prêt Modulimmo ! Un prêt modulable qui évolue en même temps que vous et s'adapte à votre situation financière.</p>
+
+                <ul class="checklist">
+                    <li><span class="icon-blue"><img src=\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Task_Force_Central\rate.svg class"listt"></span> Possibilité de baisser ou d'augmenter vos mensualités¹</li>
+                    <li><span class="icon-blue"><img src=\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Task_Force_Central\settings_2.svg class"list"></span> Pas de montant minimum ou maximum</li>
+                    <li><span class="icon-blue"><img src=\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Task_Force_Central\deal.svg class"list"></span> Emprunt à taux fixe ou variable¹</li>
+                    <li><span class="icon-blue"><img src=\\uf11pu01\ACCESSIBILITÉ_CONSEILLERS\Task_Force_Central\calendar.svg class"list"></span> Durée d'emprunt jusqu'à 25 ans</li>
+                </ul>
+
+                <div class="card-promo">
+                    <span class="promo-label">SPÉCIAL PRIMO-ACCÉDANT</span>
+                    <p><span class="colr"><u>Prêt Coup de Pouce² </u></span><strong><span class="colr1">: un taux à 0,99% jusqu'à 30 000 € pour votre 1er achat immobilier. Du jamais vu !</span></strong></p>
+                </div>
+<button class="btn-simuler" onclick="document.querySelector('.page-simulation').scrollIntoView({behavior:'smooth'})"><i class="fas fa-calculator"></i> Simuler mon crédit</button>
+            </div>
+
+            <div class="form-wrapper">
+                <div class="form-card">
+                    <p class="form-desc"><strong>Pas encore client ?<br>Un conseiller vous rappelle pour simuler la mensualité de votre emprunt immobilier</strong></p>
+                    
+                    <div class="inputs">
+                        <input type="text" placeholder="Nom*">
+                        <input type="text" placeholder="Prénom*">
+                        <div class="row">
+                            <input type="text" placeholder="N° de téléphone*">
+                            <input type="text" placeholder="Code Postal*">
+                        </div>
+                        <input type="email" placeholder="Adresse e-mail*">
+                    </div>
+	 <div class="consent-box">
+		<input type="checkbox" id="consentRGPD" required>
+                <label>  
+                 	<span>J'accepte que mes données soient utilisées pour l'étude de mon projet de crédit immobilier et être contacté(e) par un conseiller Crédit Mutuel. Conformément au RGPD, j'ai un droit d'accès, de rectification et d'opposition. <a href="#" style="color:#008c6f;">En savoir plus</a><strong>*</strong></span>
+                </label>
+            </div>
+
+
+                    <button class="btn-full">Obtenir une mensualité</button>
+                    <p class="required-text">* Information obligatoire</p>
+                   
+
+                    <div class="phone-box">
+                        <p>Ou appelez le</p>
+                        <div class="phone-num">09 69 391 059 <span>Appel non surtaxé</span></div>
+                        <p class="schedule">de 8h30 à 19h du lundi au vendredi, de 8h30 à 13h le samedi.</p>
+                    </div>
+                </div>
+
+                <div class="blue-accent"></div>
+
+            </div>
+        </div>
+
+
+
+    </main>
+
+    <aside class="side-menu">
+        <div class="side-item">📞<span>Nous contacter</span></div>
+        <div class="side-item">📍<span>Trouver une caisse</span></div>
+        <div class="side-item">❓<span>Besoin d'aide ?</span></div>
+    </aside>
+
+
+
+
+    <footer class="footer-auth">
+        Vous êtes client du Crédit Mutuel ? <a href="#">Authentifiez-vous</a> pour être accompagné par votre conseiller.
+    </footer>
 
 </body>
 </html>
