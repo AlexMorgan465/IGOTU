@@ -102,7 +102,102 @@
 
             </div>
         </div>
+<!-- simulation section -->
+<div class="container1">
+    <header class="header1">
+        <h1>Simulation <span>Prêt Immobilier</span></h1>
+        <p>Estimation <strong>rapide</strong> de votre capacité d'emprunt</p>
+    </header>
 
+    <nav class="stepper1" id="stepper">
+        <div class="step active" data-step="1">1. Projet</div>
+        <div class="step" data-step="2">2. Apport</div>
+        <div class="step" data-step="3">3. Revenus</div>
+        <div class="step" data-step="4">4. Charges</div>
+        <div class="step" data-step="5">5. Situation</div>
+    </nav>
+
+    <div class="main-layout-1">
+        <section class="form-container">
+            
+            <div class="form-step active" id="step1">
+                <h2>Votre Projet</h2>
+                <div class="input-group">
+                    <label>Type de bien</label>
+                    <div class="toggle-group">
+                        <button class="btn-toggle active" onclick="updateVal('bien', 'Ancien')">Ancien</button>
+                        <button class="btn-toggle" onclick="updateVal('bien', 'Neuf')">Neuf</button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Prix du bien estimé (€)</label>
+                    <input type="number" id="input-prix" value="250000" oninput="calculer()">
+                </div>
+            </div>
+
+            <div class="form-step" id="step2">
+                <h2>Votre Apport</h2>
+                <p>Combien pouvez-vous injecter personnellement ?</p>
+                <div class="input-group">
+                    <input type="range" min="0" max="100000" step="5000" id="input-apport" value="25000" oninput="calculer()">
+                    <div class="range-val"><span id="val-apport">25 000</span> €</div>
+                </div>
+            </div>
+
+            <div class="form-step" id="step3">
+                <h2>Vos Revenus</h2>
+                <div class="input-group">
+                    <label>Revenus nets mensuels (foyer)</label>
+                    <input type="number" id="input-revenus" value="3500" oninput="calculer()">
+                </div>
+            </div>
+
+            <div class="form-step" id="step4">
+                <h2>Vos Charges</h2>
+                <div class="input-group">
+                    <label>Loyer ou crédits en cours</label>
+                    <input type="number" id="input-charges" value="0" oninput="calculer()">
+                </div>
+            </div>
+
+            <div class="form-step" id="step5">
+                <h2>Votre Situation</h2>
+                <div class="input-group">
+                    <label>Profession</label>
+                    <select id="input-job">
+                        <option value="cdi">CDI / Fonctionnaire</option>
+                        <option value="independant">Indépendant / Libéral</option>
+                        <option value="cdd">CDD / Intérim</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button id="prevBtn1" class="btn-secondary1" onclick="changeStep(-1)" style="display:none;">Précédent</button>
+                <button id="nextBtn1" class="btn-primary1" onclick="changeStep(1)">ÉTAPE SUIVANTE</button>
+            </div>
+        </section>
+
+        <aside class="summary-card">
+            <h3>Résumé</h3>
+            <div class="res-item">
+                <small>Montant finançable</small>
+                <div class="big-price"><span id="res-montant">230 000</span> €</div>
+            </div>
+            <div class="res-item highlight">
+                <small>Mensualité estimée</small>
+                <div class="blue-price"><span id="res-mensualite">950</span> € / mois</div>
+            </div>
+            <hr>
+            <ul class="details-list">
+                <li>Durée : <strong>25 ans</strong></li>
+                <li>Taux : <strong>1,20 %</strong></li>
+                <li>Apport : <strong id="res-apport">25 000 €</strong></li>
+            </ul>
+            <button class="btn-orange-full">OBTENIR UNE OFFRE !</button>
+        </aside>
+    </div>
+</div>
 
 
     </main>
@@ -119,6 +214,211 @@
     <footer class="footer-auth">
         Vous êtes client du Crédit Mutuel ? <a href="#">Authentifiez-vous</a> pour être accompagné par votre conseiller.
     </footer>
-
+<script src="script.js"></script>
 </body>
 </html>
+:root {
+    --cm-blue: #003399;
+    --cm-red: #E2001A;
+    --cm-bg: #F4F7F9;
+    --text-grey: #4A4A4A;
+    --primary: #2c5a94;
+    --orange: #f58220;
+    --bg: #f4f7f9;
+}
+
+body {
+    margin: 0;
+    font-family: InterVariable,Arial,Helvetica,sans-serif;
+    background-color: #e5eef9;
+    color: #1d1d1f;
+font-size:1rem;
+}
+
+/* Header & Nav */
+.top-nav {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+.container-nav {
+    padding: 8px 5%;
+    display: flex;
+    gap: 15px;
+}
+.container-nav a { text-decoration: none; color: #666; }
+.container-nav a.active { color: var(--cm-blue); font-weight: bold; border-bottom: 2px solid var(--cm-blue); }
+
+.main-nav {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 15px 5%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.logo-img {width:150px; margin-right: 20px; }
+.menu { list-style: none; display: flex; gap: 25px; margin: 0; padding: 0; font-weight: 600; color: var(--cm-blue); }
+.arrow { font-size: 8px; vertical-align: middle; }
+
+.actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.btn-primary { background: var(--cm-blue); color: #fff; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+.btn-secondary { background: #fff; color: var(--cm-blue); border: 1px solid var(--cm-blue); padding: 10px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+
+/* Hero */
+.breadcrumb-container { padding: 15px 5%; font-size: 11px; color: #888; }
+
+.hero { padding: 40px 5%; position: relative; }
+.hero-grid { display: grid; grid-template-columns: 1fr 420px; gap: 60px; max-width: 1200px; margin: 0 auto; }
+.hero .checklist {display:block; width:100%; padding-left:12px; border-left:1px solid #d4221d}
+.hero .checklist:hover{cursor:pointer;}
+.sub-title { font-weight: bold; font-size: 12px; color: #777; letter-spacing: 1px; }
+h1 { font-size: 30px; color: var(--cm-blue); line-height: 1.2; margin: 15px 0;font-familly:InterVariable,Arial,Helvetica,sans-serif; }
+mark { background-color: var(--cm-red); color: #fff; padding: 0 10px; }
+
+.intro-p { font-size: 1rem; line-height: 1.6; margin-bottom: 30px; }
+.checklist { list-style: none; padding: 0; }
+.checklist li { margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; }
+.icon-blue { color: var(--cm-blue); margin-right: 15px; font-weight: bold; }
+
+.card-promo {
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+	width:400px;
+    margin-top: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.promo-label { color: black; font-size: 11px; font-family:InterVariable, Arial, Helvetica, sans-serif; }
+.colr {color: #003192;font-size:1.25rem;}
+.colr1 {color: #da2d10;font-size:1.25rem;}
+/* Formulaire Replica */
+.form-wrapper { position: relative; }
+.form-card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    z-index: 2;
+    position: relative;
+    text-align: center;
+}
+.blue-accent {
+    position: absolute;
+    top: 20px; right: -40px; bottom: -30px; width: 400px; 
+    background: var(--cm-blue);
+    border-radius: 30px;
+    z-index: 1;
+}
+.search-btn{border-radius:50%;cursor:pointer;min-width:2.5rem;min-height:2.5rem;margin-left:1rem; border-width: 1px ; background-color: #fff}
+
+
+.form-desc { font-size: 16px;}
+
+.inputs input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn-full { background: var(--cm-blue); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+
+.phone-box { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
+.phone-num { font-size: 20px; font-weight: bold; color: var(--cm-blue); }
+.phone-num span { font-size: 10px; background: #eee; padding: 2px 5px; border-radius: 3px; color: #333; }
+
+/* Sidebar Icons */
+.side-menu { position: fixed; right: 0; top: 40%; background: #fff; border: 1px solid #ddd; border-right: none; border-radius: 10px 0 0 10px; overflow: hidden; }
+.side-item { padding: 15px; font-size: 10px; text-align: center; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.3s; width: 60px;background:rgba(211,224,243,.8);}
+.side-item span { display: block; margin-top: 5px; ; }
+.side-item:hover { background: #2B66DA; }
+.side-item:hover {color: #ffff}
+
+.footer-auth { text-align: center; padding: 40px; font-size: 14px; }
+.footer-auth a { color: var(--cm-blue); font-weight: bold; text-decoration: underline; }
+
+ .consent-box {
+            background: #f8fafd;
+            border-radius: 24px;
+            padding: 20px;
+            margin: 7px 0;
+            font-size:12px;
+	    display:flex;
+        }
+
+ .consent-box label {
+            gap: 12px;
+            cursor: pointer;
+        }
+
+ .consent-box input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+@keyframes flash {
+  		0%, 100% {
+    			background-color: transparent;
+    			color: #dd2d36;
+    			border: 1px solid #dd2d36;
+  	}
+  		50% {
+    			background-color: #dd2d36;
+    			color: white;
+  		}
+	}
+        .btn-simuler {
+            background: #0066b3;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-weight: 600;
+            border: none;
+            font-size: 1.05rem;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,102,179,0.25);
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+	    margin-top:18px;
+	    animation: flash 1s infinite;
+        }
+        .btn-simuler:hover {
+            background: #004b8f;
+            transform: scale(1.02);
+        }
+
+       .container1 { width: 900px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+
+.header1 { padding: 20px 40px; background: linear-gradient(to right, #fff, #eef5ff); }
+.header1 h1 { margin: 0; color: #1a3a5f; }
+.header1 h1 span { font-weight: 300; }
+
+/* Stepper */
+.stepper1 { display: flex; background: #e2eaf1; }
+.step { flex: 1; padding: 15px; text-align: center; color: #666; font-size: 14px; opacity: 0.6; }
+.step.active { background: #1a3a5f; color: white; opacity: 1; font-weight: bold; }
+
+/* Layout */
+.main-layout-1 { display: grid; grid-template-columns: 1fr 300px; gap: 30px; padding: 40px; }
+.form-step { display: none; }
+.form-step.active { display: block; animation: fadeIn 0.3s; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.input-group { margin-bottom: 25px; }
+label { display: block; font-weight: bold; margin-bottom: 10px; color: #444; }
+input[type="number"], select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; }
+
+/* Boutons */
+.toggle-group { display: flex; gap: 10px; }
+.btn-toggle { flex: 1; padding: 10px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; }
+.btn-toggle.active { background: var(--primary); color: white; }
+
+.nav-buttons { display: flex; gap: 10px; margin-top: 30px; }
+.btn-primary1 { background: var(--orange); color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 2; box-shadow: 0 4px 0 #d46d14; }
+.btn-secondary1 { background: #eee; border: none; padding: 15px 20px; border-radius: 6px; cursor: pointer; flex: 1; }
+
+/* Sidebar */
+.summary-card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; background: #fafafa; }
+.big-price { font-size: 26px; font-weight: 800; color: #1a3a5f; }
+.blue-price { font-size: 22px; font-weight: bold; color: var(--primary); }
+.btn-orange-full { width: 100%; background: var(--orange); border: none; color: white; padding: 15px; border-radius: 6px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+.details-list { list-style: none; padding: 0; margin-top: 20px; font-size: 14px; }
