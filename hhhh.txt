@@ -1,350 +1,94 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulation Prêt Immobilier</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f7fb;
-      color: #333;
-    }header {
-  background: #1e3a8a;
-  color: white;
-  padding: 20px;
-  text-align: center;
-}
-
-.container {
-  display: flex;
-  max-width: 1100px;
-  margin: 30px auto;
-  gap: 20px;
-}
-
-.form {
-  flex: 2;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.summary {
-  flex: 1;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  height: fit-content;
-}
-
-h2 {
-  margin-top: 0;
-}
-
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.btn {
-  margin-top: 20px;
-  background: #f97316;
-  color: white;
-  padding: 12px;
-  border: none;
-  width: 100%;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background: #ea580c;
-}
-
-.result {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.small {
-  color: #666;
-  font-size: 14px;
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-}
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Prêt Immobilier</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body><header>
-  <h1>Simulation Prêt Immobilier</h1>
-  <p>Obtenez une estimation rapide de votre capacité d'emprunt</p>
-</header><div class="container">  <div class="form">
-    <h2>Votre projet</h2><label>Type de projet</label>
-<select id="typeProjet">
-  <option>Achat résidence principale</option>
-  <option>Investissement locatif</option>
-</select>
+<body>
 
-<label>Type de bien</label>
-<select id="typeBien">
-  <option>Ancien</option>
-  <option>Neuf</option>
-</select>
+<div class="container">
+    <header class="header">
+        <div class="header-content">
+            <div class="illustration">
+                <img src="https://img.icons8.com/clouds/100/home.png" alt="house">
+            </div>
+            <div class="title-area">
+                <h1>Simulation <span>Prêt Immobilier</span></h1>
+                <p>Obtenez une estimation <strong>rapide de votre capacité d'emprunt</strong></p>
+            </div>
+        </div>
+    </header>
 
-<label>Prix du bien (€)</label>
-<input type="number" id="prix" value="250000">
+    <nav class="stepper">
+        <div class="step active">1. Votre Projet</div>
+        <div class="step">2. Votre Apport</div>
+        <div class="step">3. Vos Revenus</div>
+        <div class="step">4. Vos Charges</div>
+        <div class="step">5. Votre Situation</div>
+    </nav>
 
-<label>Apport (€)</label>
-<input type="number" id="apport" value="25000">
+    <div class="main-layout">
+        <section class="form-card">
+            <h2>Votre Projet</h2>
+            <p class="subtitle">Remplissez ce formulaire pour obtenir une estimation de votre prêt immobilier en quelques minutes.</p>
 
-<label>Salaire mensuel (€)</label>
-<input type="number" id="revenu" value="3200">
+            <div class="input-group">
+                <label>Type de projet</label>
+                <div class="toggle-buttons">
+                    <button class="btn-toggle active">Achat résidence principale</button>
+                    <button class="btn-toggle">Investissement locatif</button>
+                </div>
+            </div>
 
-<label>Charges mensuelles (€)</label>
-<input type="number" id="charges" value="150">
+            <div class="input-group">
+                <label>Type de bien</label>
+                <div class="toggle-buttons mini">
+                    <button class="btn-toggle active">Ancien</button>
+                    <button class="btn-toggle">Neuf</button>
+                </div>
+            </div>
 
-<label>Durée (années)</label>
-<select id="duree">
-  <option value="20">20 ans</option>
-  <option value="25" selected>25 ans</option>
-</select>
+            <div class="input-group">
+                <label>Prix du bien</label>
+                <div class="select-wrapper">
+                    <span class="currency">€</span>
+                    <select>
+                        <option>250 000 € ~</option>
+                        <option>300 000 € ~</option>
+                    </select>
+                </div>
+                <small>Ex: 250 000 €, 300 000 €, etc.</small>
+            </div>
 
-<button class="btn" onclick="calculer()">Calculer</button>
+            <button class="btn-next">ÉTAPE SUIVANTE <i class="fa-solid fa-chevron-right"></i></button>
+        </section>
 
-  </div>  <div class="summary">
-    <h2>Résumé</h2>
-    <p class="small">Montant finançable</p>
-    <div class="result" id="montant">-</div><p class="small">Mensualité estimée</p>
-<div class="result" id="mensualite">-</div>
+        <aside class="summary-card">
+            <h3>Résumé</h3>
+            <div class="summary-item">
+                <span class="label">Montant finançable environ</span>
+                <span class="value main-price">230 000 €</span>
+            </div>
+            <div class="summary-item highlight">
+                <span class="label">Mensualité estimée</span>
+                <span class="value mensualite">+ 950 € / mois</span>
+            </div>
+            <hr>
+            <ul class="details">
+                <li><i class="fa-solid fa-chevron-right"></i> Durée : <strong>25 ans</strong></li>
+                <li><i class="fa-solid fa-chevron-right"></i> Taux estimé : <strong>1,20 %</strong></li>
+                <li><i class="fa-solid fa-chevron-right"></i> Crédits : <strong>25 000 €</strong></li>
+            </ul>
+            <button class="btn-offer">OBTENIR UNE OFFRE !</button>
+            <div class="callback">
+                <i class="fa-solid fa-phone"></i> Rappel rapide par un conseiller
+            </div>
+        </aside>
+    </div>
+</div>
 
-<button class="btn">Obtenir une offre</button>
-
-  </div></div><script>
-function calculer() {
-  const prix = parseFloat(document.getElementById('prix').value);
-  const apport = parseFloat(document.getElementById('apport').value);
-  const revenu = parseFloat(document.getElementById('revenu').value);
-  const charges = parseFloat(document.getElementById('charges').value);
-  const duree = parseInt(document.getElementById('duree').value);
-
-  const montant = prix - apport;
-  const taux = 0.02 / 12;
-  const n = duree * 12;
-
-  const mensualite = (montant * taux) / (1 - Math.pow(1 + taux, -n));
-
-  document.getElementById('montant').innerText = montant.toLocaleString() + ' €';
-  document.getElementById('mensualite').innerText = Math.round(mensualite) + ' € / mois';
-}
-</script></body>
+</body>
 </html>
-:root {
-    --primary-blue: #2c5a94;
-    --dark-blue: #1a3a5f;
-    --light-blue: #e8f1f8;
-    --orange: #f58220;
-    --text-grey: #666;
-    --bg-color: #f0f4f8;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
-    color: #333;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-}
-
-.container {
-    width: 100%;
-    max-width: 900px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-/* Header */
-.header {
-    background: linear-gradient(135deg, #ffffff, #d7e6f3);
-    padding: 20px 40px;
-    text-align: left;
-}
-
-.header h1 {
-    color: var(--dark-blue);
-    font-size: 28px;
-    margin: 0;
-}
-
-.header h1 span {
-    display: block;
-    font-weight: 300;
-}
-
-/* Stepper */
-.stepper {
-    display: flex;
-    background: #dde6f0;
-}
-
-.step {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    font-size: 13px;
-    color: #555;
-    position: relative;
-    clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%);
-}
-
-.step.active {
-    background: var(--dark-blue);
-    color: white;
-}
-
-/* Main Layout */
-.main-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 20px;
-    padding: 30px;
-}
-
-.form-card h2 {
-    color: var(--primary-blue);
-    margin-top: 0;
-}
-
-.input-group {
-    margin-bottom: 25px;
-}
-
-.input-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-/* Buttons & Toggles */
-.toggle-buttons {
-    display: flex;
-    gap: 5px;
-}
-
-.btn-toggle {
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    background: white;
-    cursor: pointer;
-    border-radius: 4px;
-    flex: 1;
-}
-
-.btn-toggle.active {
-    background: var(--primary-blue);
-    color: white;
-    border-color: var(--primary-blue);
-}
-
-.select-wrapper {
-    position: relative;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    padding: 5px 10px;
-    background: #f9f9f9;
-}
-
-select {
-    border: none;
-    background: transparent;
-    width: 100%;
-    padding: 8px;
-    font-size: 16px;
-}
-
-.btn-next {
-    background: linear-gradient(to bottom, #ff9d47, var(--orange));
-    color: white;
-    border: none;
-    padding: 15px 40px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    box-shadow: 0 4px 0 #d46d14;
-}
-
-/* Summary Sidebar */
-.summary-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 20px;
-    background: #fcfcfc;
-}
-
-.summary-card h3 {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-top: 0;
-}
-
-.main-price {
-    font-size: 24px;
-    font-weight: 800;
-    display: block;
-    color: var(--dark-blue);
-}
-
-.mensualite {
-    color: var(--primary-blue);
-    font-weight: bold;
-    font-size: 20px;
-}
-
-.details {
-    list-style: none;
-    padding: 0;
-    font-size: 14px;
-    line-height: 2;
-}
-
-.btn-offer {
-    background: var(--orange);
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 5px;
-    font-weight: bold;
-    margin-top: 15px;
-    cursor: pointer;
-}
-
-.callback {
-    text-align: center;
-    font-size: 12px;
-    margin-top: 10px;
-    color: #666;
-}
