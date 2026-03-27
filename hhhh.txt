@@ -156,3 +156,195 @@ function calculer() {
 }
 </script></body>
 </html>
+:root {
+    --primary-blue: #2c5a94;
+    --dark-blue: #1a3a5f;
+    --light-blue: #e8f1f8;
+    --orange: #f58220;
+    --text-grey: #666;
+    --bg-color: #f0f4f8;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #ffffff, #d7e6f3);
+    padding: 20px 40px;
+    text-align: left;
+}
+
+.header h1 {
+    color: var(--dark-blue);
+    font-size: 28px;
+    margin: 0;
+}
+
+.header h1 span {
+    display: block;
+    font-weight: 300;
+}
+
+/* Stepper */
+.stepper {
+    display: flex;
+    background: #dde6f0;
+}
+
+.step {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #555;
+    position: relative;
+    clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%);
+}
+
+.step.active {
+    background: var(--dark-blue);
+    color: white;
+}
+
+/* Main Layout */
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    padding: 30px;
+}
+
+.form-card h2 {
+    color: var(--primary-blue);
+    margin-top: 0;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* Buttons & Toggles */
+.toggle-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-toggle {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+    flex: 1;
+}
+
+.btn-toggle.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+.select-wrapper {
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    background: #f9f9f9;
+}
+
+select {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.btn-next {
+    background: linear-gradient(to bottom, #ff9d47, var(--orange));
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 4px 0 #d46d14;
+}
+
+/* Summary Sidebar */
+.summary-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    background: #fcfcfc;
+}
+
+.summary-card h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.main-price {
+    font-size: 24px;
+    font-weight: 800;
+    display: block;
+    color: var(--dark-blue);
+}
+
+.mensualite {
+    color: var(--primary-blue);
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.details {
+    list-style: none;
+    padding: 0;
+    font-size: 14px;
+    line-height: 2;
+}
+
+.btn-offer {
+    background: var(--orange);
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+.callback {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 10px;
+    color: #666;
+}
